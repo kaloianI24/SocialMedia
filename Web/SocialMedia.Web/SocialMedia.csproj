@@ -18,5 +18,9 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0-preview.2.efcore.9.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Data\SocialMedia.Data\SocialMedia.Data.csproj" />
+  </ItemGroup>
+
 </Project>
  
