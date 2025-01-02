@@ -21,7 +21,7 @@ namespace SocialMedia
 
             // Configure Identity
             builder.Services.AddDefaultIdentity<SocialMediaUser>(options => 
-                options.SignIn.RequireConfirmedAccount = true)
+                options.SignIn.RequireConfirmedAccount = false)
                 .AddEntityFrameworkStores<SocialMediaDbContext>();
 
             // Add services to the container

@@ -96,7 +96,7 @@ namespace SocialMedia.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
-                // Populate the user with first and last name
+                
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
 
