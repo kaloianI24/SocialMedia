@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialMedia.Data;
 
@@ -11,9 +12,11 @@ using SocialMedia.Data;
 namespace SocialMedia.Migrations
 {
     [DbContext(typeof(SocialMediaDbContext))]
-    partial class SocialMediaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250103154038_FixUserModel")]
+    partial class FixUserModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -242,6 +245,7 @@ namespace SocialMedia.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("RoleId")
+                        .IsRequired()
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("SecurityStamp")
@@ -626,7 +630,9 @@ namespace SocialMedia.Migrations
 
                     b.HasOne("SocialMedia.Data.Models.SocialMediaRole", "Role")
                         .WithMany()
-                        .HasForeignKey("RoleId");
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("ProfilePicture");
 
