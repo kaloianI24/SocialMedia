@@ -5,24 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - SocialMedia</title>
     <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SocialMedia.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+  @*   <link rel="stylesheet" href="Views/Shared/_Layout.cshtml/_Layout.cshtml.css" asp-append-version="true" /> *@
+
 </head>
+
+@{
+    var hideLayout = ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("Account") == true;
+}
+
+
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SocialMedia</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex flex-row-reverse">
-                    <partial name="_LoginPartial.cshtml" />
-                </div>
+
+        @if (!hideLayout)
+        {
+
+            <div class="navbar">
+                <input placeholder="Search..." type="text" name="text" class="input">
             </div>
-        </nav>
+
+            <div class="sidebar-navigation">
+                <h1 id="logo">
+                    <a asp-area="" asp-controller="Home" asp-action="Index">Logo</a>
+                </h1>
+
+
+                <a class="btn-sidebar" id="first-button" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img class="sidebar-images" src="/images/home.svg">Home
+                </a>
+
+                <a class="btn-sidebar">
+                    <img class="sidebar-images" src="/images/notification.svg">Notifications
+                </a>
+
+                <a class="btn-sidebar">
+                    <img class="sidebar-images" src="~/images/add.svg">Create post
+                </a>
+
+                <a class="btn-sidebar sidebar-links" asp-area="Identity" asp-page="/Account/Manage/Index">
+                        <img class="sidebar-images" src="~/images/profile.svg">Profile
+                </a>
+
+                <a class="btn-sidebar">
+                    <img class="sidebar-images" src="~/images/settings.svg">Settings
+                </a>
+
+                <a class="btn-sidebar sidebar-links" id = "logout-button" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                    <img class="sidebar-images" width="24px" src="~/images/logout.svg" />Log out
+                </a>
+            </div>
+        }
     </header>
     <div class="container">
         <main role="main" class="pb-3">
@@ -30,7 +64,7 @@
         </main>
     </div>
 
-   
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

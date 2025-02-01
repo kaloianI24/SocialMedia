@@ -1,8 +1,301 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Identity
+@using SocialMedia.Areas.Identity.Data
+
+@inject SignInManager<SocialMediaUser> SignInManager
+@inject UserManager<SocialMediaUser> UserManager
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="~/SocialMedia.styles.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+        <title>Document</title>
+    </head>
+    <body>
+
+        <div class="sidebar-right">
+            <div class="friend-requests-heading">Friend requests</div>
+
+            <div class="all-requests">
+                <div class="friend-requests">
+                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
+                    <div class="request-info">
+                        <span class="username-request">username</span>
+                        <button class="btn-confirm">Confirm</button>
+                        <button class="btn-delete">Delete</button>
+                    </div>
+                </div>
+                <div class="friend-requests">
+                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
+                    <div class="request-info">
+                        <span class="username-request">username</span>
+                        <button class="btn-confirm">Confirm</button>
+                        <button class="btn-delete">Delete</button>
+                    </div>
+                </div>
+                <div class="friend-requests">
+                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
+                    <div class="request-info">
+                        <span class="username-request">username</span>
+                        <button class="btn-confirm">Confirm</button>
+                        <button class="btn-delete">Delete</button>
+                    </div>
+                </div>
+                <div class="friend-requests">
+                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
+                    <div class="request-info">
+                        <span class="username-request">username</span>
+                        <button class="btn-confirm">Confirm</button>
+                        <button class="btn-delete">Delete</button>
+                    </div>
+                </div>
+                <div class="friend-requests">
+                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
+                    <div class="request-info">
+                        <span class="username-request">username</span>
+                        <button class="btn-confirm">Confirm</button>
+                        <button class="btn-delete">Delete</button>
+                    </div>
+                </div>
+                <div class="friend-requests">
+                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
+                    <div class="request-info">
+                        <span class="username-request">username</span>
+                        <button class="btn-confirm">Confirm</button>
+                        <button class="btn-delete">Delete</button>
+                    </div>
+                </div>
+                <div class="friend-requests">
+                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
+                    <div class="request-info">
+                        <span class="username-request">username</span>
+                        <button class="btn-confirm">Confirm</button>
+                        <button class="btn-delete">Delete</button>
+                    </div>
+                </div>
+                <div class="friend-requests">
+                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
+                    <div class="request-info">
+                        <span class="username-request">username</span>
+                        <button class="btn-confirm">Confirm</button>
+                        <button class="btn-delete">Delete</button>
+                    </div>
+                </div>
+                <div class="friend-requests">
+                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
+                    <div class="request-info">
+                        <span class="username-request">username</span>
+                        <button class="btn-confirm">Confirm</button>
+                        <button class="btn-delete">Delete</button>
+                    </div>
+                </div>
+                <div class="friend-requests">
+                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
+                    <div class="request-info">
+                        <span class="username-request">username</span>
+                        <button class="btn-confirm">Confirm</button>
+                        <button class="btn-delete">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="main-content">
+            <div class="post">
+                <div class="post-header">
+                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
+                    <div class="post-info">
+                        <span class="username">username</span>
+                        <span class="location">Sofia, Bulgaria</span> <span class="location"></span>
+                    </div>
+                </div>
+                <div class="carousel">
+                    <div class="carousel-images">
+                        <img src="~/images/d336a6c5-4918-4333-bf59-1a20d4a2d328.jpg" alt="Post Image 1" class="post-image">
+                        <img src="~/images/🌊.jpg" alt="Post Image 2" class="post-image">
+                        <img src="~/images/d336a6c5-4918-4333-bf59-1a20d4a2d328.jpg" alt="Post Image 3" class="post-image">
+                        <img src="~/images/🌊.jpg" alt="Post Image 4" class="post-image">
+                    </div>
+                    <button class="carousel-arrow left-arrow">&lt;</button>
+                    <button class="carousel-arrow right-arrow">&gt;</button>
+                    <div class="carousel-indicators">
+                        <span class="dot active"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                    <div class="image-counter">1 / 4</div>
+                </div>
+
+
+                <div class="post-actions">
+                    <div class="post-likes">
+                        <div class="likes-count">
+                            <img src="~/images/heart.svg" class="reaction-heart">
+                            <div class="count-likes-number">123</div>
+                            <img src="~/images/comment.svg" class="comment-image">
+                            <div class="count-likes-number">123</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-caption">
+                    <span class="username">username</span>
+                    <p class="post-description">
+                        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Rem, earum quibusdam cumque quod sit nisi ab
+                        <span class="post-description-hidden-text">
+                            exercitationem voluptas consequuntur enim, unde tempore? Dolor dignissimos maxime optio minus tempore
+                            quaerat molestias.
+                        </span>
+                        <button class="toggle-btn">Read more</button>
+                    </p>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="post-header">
+                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
+                    <div class="post-info">
+                        <span class="username">username</span>
+                        <span class="location">Sofia, Bulgaria</span> <span class="location"></span>
+                    </div>
+                </div>
+
+                <div class="carousel">
+                    <div class="carousel-images">
+                        <img src="~/images/images.jpeg" alt="Post Image 1" class="post-image">
+                        <img src="24-12-01_-_НПМГ_-_12А_-_138 (1).jpg" alt="Post Image 2" class="post-image">
+                        <img src="24-12-01_-_НПМГ_-_12А_-_139 (1).jpg" alt="Post Image 3" class="post-image">
+                    </div>
+                    <button class="carousel-arrow left-arrow">&lt;</button>
+                    <button class="carousel-arrow right-arrow">&gt;</button>
+                    <div class="carousel-indicators">
+                        <span class="dot active"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                    <div class="image-counter">1 / 3</div>
+                </div>
+
+                <div class="post-actions">
+                    <div class="post-likes">
+                        <div class="likes-count">
+                            <img src="~/images/heart.svg" class="reaction-heart">
+                            <div class="count-likes-number">123</div>
+                            <img src="~/images/comment.svg" class="comment-image">
+                            <div class="count-likes-number">123</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-caption">
+                    <span class="username">username</span>
+                    <p class="post-description">
+                        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Rem, earum quibusdam cumque quod sit nisi ab
+                        <span class="post-description-hidden-text">
+                            exercitationem voluptas consequuntur enim, unde tempore? Dolor dignissimos maxime optio minus tempore
+                            quaerat molestias.
+                        </span>
+                        <button class="toggle-btn">Read more</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </body>
+    </html>
+
+    <script>
+        const posts = document.querySelectorAll('.post');
+        document.querySelectorAll('.post-image').forEach(image => {
+        image.onload = () => {
+        const containerAspect = 1;
+        const imageAspect = image.naturalWidth / image.naturalHeight;
+
+        if (imageAspect > containerAspect) {
+        image.style.width = 'auto';
+        image.style.height = '100%';
+        image.style.objectFit = 'cover'
+        } else {
+        image.style.width = '100%';
+        image.style.height = 'auto';
+        image.style.objectFit = 'cover';
+        }
+        };
+        if (image.complete) {
+            image.onload();
+        }
+        });
+
+        posts.forEach(post => {
+        const toggleBtn = post.querySelector('.toggle-btn');
+        const hiddenText = post.querySelector('.post-description-hidden-text');
+        const carouselImages = post.querySelector('.carousel-images');
+        const dots = post.querySelectorAll('.dot');
+        const leftArrow = post.querySelector('.left-arrow');
+        const rightArrow = post.querySelector('.right-arrow');
+        const imageCounter = post.querySelector('.image-counter');
+
+        let currentIndex = 0;
+        const totalImages = dots.length;
+
+        function updateCarousel() {
+        carouselImages.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+        dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentIndex);
+        });
+
+        imageCounter.textContent = `${currentIndex + 1} / ${totalImages}`;
+        }
+
+        rightArrow.addEventListener('click', () => {
+        if (currentIndex < totalImages - 1) {
+        currentIndex++;
+        } else {
+        currentIndex = 0;
+        }
+        updateCarousel();
+        });
+
+        leftArrow.addEventListener('click', () => {
+        if (currentIndex > 0) {
+        currentIndex--;
+        } else {
+        currentIndex = totalImages - 1;
+        }
+        updateCarousel();
+        });
+
+        dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+        currentIndex = index;
+        updateCarousel();
+        });
+        });
+
+        updateCarousel();
+
+        toggleBtn.addEventListener('click', () => {
+        if (hiddenText.style.display === 'none' || hiddenText.style.display === '') {
+        hiddenText.style.display = 'inline';
+        toggleBtn.textContent = 'Read less';
+        } else {
+        hiddenText.style.display = 'none';
+        toggleBtn.textContent = 'Read more';
+        }
+        });
+        });
+
+    </script>
+
+}
