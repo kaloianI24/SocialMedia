@@ -26,7 +26,7 @@ namespace SocialMedia
 
             // Add services to the container
             builder.Services.AddControllersWithViews();
-            builder.Services.AddRazorPages();
+            builder.Services.AddRazorPages();           
 
             var app = builder.Build();
 
@@ -42,7 +42,7 @@ namespace SocialMedia
             app.UseRouting();
             app.UseAuthentication();  // Ensure Identity authentication is used
             app.UseAuthorization();
-
+            
             // Map static assets and routes
             app.MapControllerRoute(
                 name: "default",
