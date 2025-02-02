@@ -13,33 +13,33 @@ namespace SocialMedia.Data.Repositories
            this._context = context;
         }
 
-        public async Task<TEntity> CreateAsync(TEntity entity)
+        public  virtual async Task<TEntity> CreateAsync(TEntity entity)
         {
             await this._context.AddAsync(entity);
             await this._context.SaveChangesAsync();
             return entity;
         }
 
-        public async Task<TEntity> DeleteAsync(TEntity entity)
+        public virtual async Task<TEntity> DeleteAsync(TEntity entity)
         {
             this._context.Remove(entity);
             await this._context.SaveChangesAsync();
             return entity;
         }
 
-        public async Task<TEntity> EditAsync(TEntity entity)
+        public virtual async Task<TEntity> EditAsync(TEntity entity)
         {
             this._context.Update(entity);
             await this._context.SaveChangesAsync();
             return entity;
         }
 
-        public IQueryable<TEntity> GetAll()
+        public virtual IQueryable<TEntity> GetAll()
         {
             return this._context.Set<TEntity>().AsQueryable<TEntity>();
         }
 
-        public IQueryable<TEntity> GetAllAsNoTracking()
+        public virtual IQueryable<TEntity> GetAllAsNoTracking()
         {
             return this._context.Set<TEntity>().AsNoTracking();
         }
