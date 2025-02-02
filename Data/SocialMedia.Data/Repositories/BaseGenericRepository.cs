@@ -1,0 +1,47 @@
+﻿using Microsoft.EntityFrameworkCore;
+using SocialMedia.Data;
+using SocialMedia.Data.Models;
+
+namespace SocialMedia.Data.Repositories
+{
+    public abstract class BaseGenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEntity
+    {
+        protected readonly SocialMediaDbContext _context;
+
+        protected BaseGenericRepository(SocialMediaDbContext context)
+        {
+           this._context = context;
+        }
+
+        public async Task<TEntity> CreateAsync(TEntity entity)
+        {
+            await this._context.AddAsync(entity);
+            await this._context.SaveChangesAsync();
+            return entity;
+        }
+
+        public async Task<TEntity> DeleteAsync(TEntity entity)
+        {
+            this._context.Remove(entity);
+            await this._context.SaveChangesAsync();
+            return entity;
+        }
+
+        public async Task<TEntity> EditAsync(TEntity entity)
+        {
+            this._context.Update(entity);
+            await this._context.SaveChangesAsync();
+            return entity;
+        }
+
+        public IQueryable<TEntity> GetAll()
+        {
+            return this._context.Set<TEntity>().AsQueryable<TEntity>();
+        }
+
+        public IQueryable<TEntity> GetAllAsNoTracking()
+        {
+            return this._context.Set<TEntity>().AsNoTracking();
+        }
+    }
+}
