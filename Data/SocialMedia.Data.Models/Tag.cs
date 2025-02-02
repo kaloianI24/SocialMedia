@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SocialMedia.Data.Models
 {
-    public class Tag : BaseEntity
+    public class Tag : MetadataBaseEntity
     {
         public string Name { get; set; }
         public List<Post> Posts { get; } = [];

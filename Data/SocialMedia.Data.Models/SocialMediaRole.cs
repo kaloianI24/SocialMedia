@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SocialMedia.Data.Models
 {
-    public class SocialMediaRole : BaseEntity
+    public class SocialMediaRole : MetadataBaseEntity
     {
         public const string defaultRole = "User";
 
