@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Data\SocialMedia.Data.Models\SocialMedia.Data.Models.csproj" />
+    <ProjectReference Include="..\SocialMedia.Service.Models\SocialMedia.Service.Models.csproj" />
+  </ItemGroup>
+
 </Project>

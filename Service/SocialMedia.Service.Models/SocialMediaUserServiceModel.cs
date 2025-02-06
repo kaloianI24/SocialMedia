@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
+using SocialMedia.Data.Models;
 using SocialMedia.Service.Models;
 
 namespace SocialMedia.Areas.Identity.Data;
@@ -23,6 +24,6 @@ public class SocialMediaUserServiceModel : IdentityUser
 
     public List<SocialMediaUserServiceModel>? Followers { get; set; } = new List<SocialMediaUserServiceModel>();
 
-    public List<Post>? Posts { get; set; } = new List<Post>();
+    public List<SocialMediaPost>? Posts { get; set; } = new List<SocialMediaPost>();
 }
 

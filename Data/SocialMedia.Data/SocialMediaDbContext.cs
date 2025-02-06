@@ -15,7 +15,7 @@ namespace SocialMedia.Data
         public DbSet<Post> Posts { get; set; }
         public DbSet<Reaction> Reactions { get; set; }
         public DbSet<SocialMediaRole> SocialMediaRoles { get; set; }
-        public DbSet<Tag> Tags { get; set; }
+        public DbSet<SocialMediaTag> Tags { get; set; }
 
 
         public SocialMediaDbContext(DbContextOptions<SocialMediaDbContext> options)
