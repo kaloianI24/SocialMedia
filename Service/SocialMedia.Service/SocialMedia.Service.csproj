@@ -25,8 +25,4 @@
     <ProjectReference Include="..\SocialMedia.Service.Models\SocialMedia.Service.Models.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Post\" />
-  </ItemGroup>
-
 </Project>
