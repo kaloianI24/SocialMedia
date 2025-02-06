@@ -27,7 +27,7 @@ namespace SocialMedia.Data.Repositories
             return entity;
         }
 
-        public virtual async Task<TEntity> EditAsync(TEntity entity)
+        public virtual async Task<TEntity> UpdateAsync(TEntity entity)
         {
             this._context.Update(entity);
             await this._context.SaveChangesAsync();

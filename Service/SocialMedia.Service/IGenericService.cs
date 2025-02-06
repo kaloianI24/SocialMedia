@@ -4,12 +4,12 @@
     {
         IQueryable<TModel> GetAll();
 
-        TModel GetByIdAsync(string id);
+        Task<TModel> GetByIdAsync(string id);
 
-        TModel CreateAsync(TModel model);
+        Task<TModel> CreateAsync(TModel model);
         
-        TModel UpdateAsync(TModel model);
+        Task<TModel> UpdateAsync(TModel model);
 
-        TModel DeleteAsync(string id);
+        Task<TModel> DeleteAsync(string id);
     }
 }
