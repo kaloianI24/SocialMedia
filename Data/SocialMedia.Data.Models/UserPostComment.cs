@@ -11,7 +11,7 @@ namespace SocialMedia.Data.Models
     {
         public SocialMediaUser User { get; set; }
 
-        public Post Post { get; set; }
+        public SocialMediaPost Post { get; set; }
 
         public Comment Comment { get; set; }
     }

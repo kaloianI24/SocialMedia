@@ -7,6 +7,8 @@
         Task<TModel> GetByIdAsync(string id);
 
         Task<TModel> CreateAsync(TModel model);
+
+        Task<TEntity> InternalCreateAsync(TEntity model);
         
         Task<TModel> UpdateAsync(TModel model);
 

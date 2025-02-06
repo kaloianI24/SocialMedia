@@ -19,7 +19,7 @@ namespace SocialMedia.Service.Mappings
             return new SocialMediaUserServiceModel
             {
                 Id = entity.Id,
-                Role = entity.Role.ToModel(),
+                Role = entity.Role?.ToModel(),
                 FirstName = entity.FirstName,
                 LastName = entity.LastName,
                 UserName = entity.UserName,

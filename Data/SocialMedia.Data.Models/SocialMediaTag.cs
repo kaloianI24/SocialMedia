@@ -10,6 +10,6 @@ namespace SocialMedia.Data.Models
     public class SocialMediaTag : MetadataBaseEntity
     {
         public string Name { get; set; }
-        public List<Post> Posts { get; } = [];
+        public List<SocialMediaPost> Posts { get; } = [];
     }
 }

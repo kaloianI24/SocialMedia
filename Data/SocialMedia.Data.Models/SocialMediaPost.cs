@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SocialMedia.Data.Models
 {
-    public class Post : MetadataBaseEntity
+    public class SocialMediaPost : MetadataBaseEntity
     {
         public string Description { get; set; }
 
