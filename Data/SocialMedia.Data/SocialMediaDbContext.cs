@@ -24,6 +24,33 @@ namespace SocialMedia.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.Entity<SocialMediaUser>()
+               .HasMany(u => u.Posts)
+               .WithOne()
+               .HasForeignKey("SocialMediaUserId");
+
+            builder.Entity<SocialMediaPost>()
+               .HasMany(p => p.TaggedUsers)
+               .WithMany(u => u.TaggedPosts)
+               .UsingEntity(j => j.ToTable("PostTaggedUsers"));
+
+            builder.Entity<SocialMediaPost>()
+             .HasOne(p => p.CreatedBy)
+             .WithMany()
+             .HasForeignKey(p => p.CreatedById)
+             .OnDelete(DeleteBehavior.Restrict); 
+            
+            builder.Entity<SocialMediaPost>()
+                .HasOne(p => p.UpdatedBy)
+                .WithMany()
+                .HasForeignKey(p => p.UpdatedById)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<SocialMediaPost>()
+                .HasOne(p => p.DeletedBy)
+                .WithMany()
+                .HasForeignKey(p => p.DeletedById)
+                .OnDelete(DeleteBehavior.Restrict);
             base.OnModelCreating(builder);
             // Customize the ASP.NET Identity model and override the defaults if needed.
             // For example, you can rename the ASP.NET Identity table names and more.

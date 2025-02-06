@@ -39,6 +39,11 @@ namespace SocialMedia.Service.Tag
             throw new NotImplementedException();
         }
 
+        public Task<SocialMediaTag> InternalCreateAsync(SocialMediaTag model)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<TagServiceModel> UpdateAsync(TagServiceModel model)
         {
             throw new NotImplementedException();
