@@ -9,13 +9,16 @@ namespace SocialMedia.Data.Models
 {
     public abstract class MetadataBaseEntity : BaseEntity
     {
+        public string CreatedById { get; set; }
         public SocialMediaUser CreatedBy { get; set; }
 
         public DateTime CreatedOn { get; set; }
 
+        public string UpdatedById { get; set; }
         public SocialMediaUser UpdatedBy { get; set; }
         public DateTime UpdatedOn { get; set; }
 
+        public string DeletedById { get; set; }
         public SocialMediaUser DeletedBy { get; set; }
         public DateTime DeletedOn { get; set; }
     }

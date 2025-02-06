@@ -22,11 +22,13 @@ namespace SocialMedia.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<SocialMediaUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly UserManager<SocialMediaUser> _userManager;
 
-        public LoginModel(SignInManager<SocialMediaUser> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<SocialMediaUser> signInManager, ILogger<LoginModel> logger, UserManager<SocialMediaUser> userManager)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _userManager = userManager;
         }
 
         /// <summary>
@@ -65,9 +67,9 @@ namespace SocialMedia.Areas.Identity.Pages.Account
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
+
             [Required]
-            [EmailAddress]
-            public string Email { get; set; }
+            public string UsernameOrEmail { get; set; }
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -112,15 +114,26 @@ namespace SocialMedia.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+
+                var result = await _signInManager.PasswordSignInAsync(Input.UsernameOrEmail, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+                    return Redirect("/");
                 }
-                if (result.RequiresTwoFactor)
+
+                if (!result.Succeeded)
                 {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
+                    var user = await _userManager.FindByEmailAsync(Input.UsernameOrEmail);
+
+                    if (user != null)
+                    {
+                        var secondAttemptResult = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+
+                        if (secondAttemptResult.Succeeded)
+                        {
+                            return Redirect("/");
+                        }
+                    }
                 }
                 if (result.IsLockedOut)
                 {

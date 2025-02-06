@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SocialMedia.Data.Models
 {
-    public class CloudResource : MetadataBaseEntity
+    public class CloudResource : BaseEntity
     {
         public string CloudUrl { get; set; }
     }

@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace SocialMedia.Data.Repositories
 {
-    public class SocialMediaRoleRepository : MetadataBaseGenericRepository<SocialMediaRole>
+    public class SocialMediaRoleRepository : BaseGenericRepository<SocialMediaRole>
     {
-        public SocialMediaRoleRepository(SocialMediaDbContext context, IHttpContextAccessor httpContextAccessor) : base(context, httpContextAccessor)
+        public SocialMediaRoleRepository(SocialMediaDbContext context) : base(context)
         {
         }
     }

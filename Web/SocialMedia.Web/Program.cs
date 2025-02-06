@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Data;
+using SocialMedia.Seed;
 
 namespace SocialMedia
 {
@@ -22,7 +23,9 @@ namespace SocialMedia
             // Configure Identity
             builder.Services.AddDefaultIdentity<SocialMediaUser>(options => 
                 options.SignIn.RequireConfirmedAccount = false)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<SocialMediaDbContext>();
+
 
             // Add services to the container
             builder.Services.AddControllersWithViews();
@@ -37,6 +40,7 @@ namespace SocialMedia
                 app.UseHsts();
             }
 
+            app.UseDatabaseSeed();
             app.UseHttpsRedirection();
             app.UseStaticFiles();  // Ensures static files are served properly
             app.UseRouting();

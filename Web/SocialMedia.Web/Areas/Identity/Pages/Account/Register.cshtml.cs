@@ -25,6 +25,10 @@ namespace SocialMedia.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
+        private const string AdministratorRole = "Administrator";
+
+        private const string UserRole = "User";
+
         private readonly SignInManager<SocialMediaUser> _signInManager;
         private readonly UserManager<SocialMediaUser> _userManager;
         private readonly IUserStore<SocialMediaUser> _userStore;
@@ -65,6 +69,10 @@ namespace SocialMedia.Areas.Identity.Pages.Account
             public string LastName { get; set; }
 
             [Required]
+            [Display(Name = "Username")]
+            public string Username { get; set; }
+
+            [Required]
             [EmailAddress]
             [Display(Name = "Email")]
             public string Email { get; set; }
@@ -100,7 +108,7 @@ namespace SocialMedia.Areas.Identity.Pages.Account
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                await _userStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
                 try
@@ -109,6 +117,15 @@ namespace SocialMedia.Areas.Identity.Pages.Account
 
                     if (result.Succeeded)
                     {
+                        if (_userManager.Users.Count() == 1)
+                        {
+                            await _userManager.AddToRoleAsync(user, AdministratorRole);
+                        }
+                        else
+                        {
+                            await _userManager.AddToRoleAsync(user, UserRole);
+                        }
+
                         _logger.LogInformation("User created a new account with password.");
 
                         var userId = await _userManager.GetUserIdAsync(user);
