@@ -1,12 +1,13 @@
-﻿using System;
+﻿using SocialMedia.Service.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SocialMedia.Data.Models
+namespace SocialMedia.Service.Models
 {
-    public class SocialMediaRole : BaseEntity
+    public class SocialMediaRoleServiceModel : MetadataBaseServiceModel
     {
         public const string defaultRole = "User";
 

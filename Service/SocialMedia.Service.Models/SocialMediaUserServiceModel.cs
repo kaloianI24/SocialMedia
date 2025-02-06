@@ -1,0 +1,28 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
+using SocialMedia.Service.Models;
+
+namespace SocialMedia.Areas.Identity.Data;
+
+// Add profile data for application users by adding properties to the SocialMediaUser class
+public class SocialMediaUserServiceModel : IdentityUser
+{
+    [PersonalData]
+    [Column(TypeName="nvarchar(100)")]
+     public string FirstName { get; set; }
+
+    [PersonalData]
+    [Column(TypeName = "nvarchar(100)")]
+    public string LastName { get; set; }
+
+    public SocialMediaRoleServiceModel? Role { get; set; }
+
+    public CloudResourceServiceModel? ProfilePicture { get; set; }
+
+    public List<SocialMediaUserServiceModel>? Friends { get; set; } = new List<SocialMediaUserServiceModel>();
+
+    public List<SocialMediaUserServiceModel>? Followers { get; set; } = new List<SocialMediaUserServiceModel>();
+
+    public List<Post>? Posts { get; set; } = new List<Post>();
+}
+
