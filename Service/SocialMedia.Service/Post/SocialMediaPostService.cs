@@ -1,4 +1,5 @@
-﻿using SocialMedia.Service.Models;
+﻿using SocialMedia.Data.Models;
+using SocialMedia.Service.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,12 @@ namespace SocialMedia.Service.Post
             throw new NotImplementedException();
         }
 
-        public Task<SocialMediaPostService> InternalCreateAsync(SocialMediaPostService model)
+        public Task<PostServiceModel> InternalCreateAsync(PostServiceModel model)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<SocialMediaPost> InternalCreateAsync(SocialMediaPost model)
         {
             throw new NotImplementedException();
         }
