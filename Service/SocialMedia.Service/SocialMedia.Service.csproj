@@ -14,13 +14,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Data\SocialMedia.Data.Models\SocialMedia.Data.Models.csproj" />
     <ProjectReference Include="..\..\Data\SocialMedia.Data\SocialMedia.Data.csproj" />
     <ProjectReference Include="..\..\Web\SocialMedia.Web.Models\SocialMedia.Web.Models.csproj" />
-    <ProjectReference Include="..\..\Web\SocialMedia.Web\SocialMedia.csproj" />
     <ProjectReference Include="..\SocialMedia.Service.Mappings\SocialMedia.Service.Mappings.csproj" />
     <ProjectReference Include="..\SocialMedia.Service.Models\SocialMedia.Service.Models.csproj" />
   </ItemGroup>

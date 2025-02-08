@@ -2,24 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using SocialMedia.Areas.Identity.Data;
+using SocialMedia.Service.Cloud;
+using SocialMedia.Service.Mappings;
+using SocialMedia.Service.Models;
 
 namespace SocialMedia.Areas.Identity.Pages.Account
 {
@@ -35,13 +31,15 @@ namespace SocialMedia.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<SocialMediaUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly ICloudinaryService _cloudinaryService;
 
         public RegisterModel(
             UserManager<SocialMediaUser> userManager,
             IUserStore<SocialMediaUser> userStore,
             SignInManager<SocialMediaUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            ICloudinaryService cloudinaryService)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -49,6 +47,7 @@ namespace SocialMedia.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _cloudinaryService = cloudinaryService;
         }
 
         [BindProperty]
@@ -77,6 +76,9 @@ namespace SocialMedia.Areas.Identity.Pages.Account
             [Display(Name = "Email")]
             public string Email { get; set; }
 
+            [DataType(DataType.Upload)]
+            public IFormFile ProfilePicture { get; set; }
+
             [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
@@ -103,10 +105,11 @@ namespace SocialMedia.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
-
                 
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
+                string profilePhotoUrl = await this.UploadPhoto(Input.ProfilePicture);
+                user.ProfilePicture = new CloudResourceServiceModel { CloudUrl = profilePhotoUrl }.ToEntity();
 
                 await _userStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -187,6 +190,18 @@ namespace SocialMedia.Areas.Identity.Pages.Account
                 throw new NotSupportedException("The default UI requires a user store with email support.");
             }
             return (IUserEmailStore<SocialMediaUser>)_userStore;
+        }
+
+        private async Task<string> UploadPhoto(IFormFile photo)
+        {
+            var uploadResponse = await this._cloudinaryService.UploadFile(photo);
+
+            if (uploadResponse == null)
+            {
+                return null;
+            }
+
+            return uploadResponse["url"].ToString();
         }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Data;
 using SocialMedia.Seed;
+using SocialMedia.Service.Cloud;
 
 namespace SocialMedia
 {
@@ -25,6 +26,8 @@ namespace SocialMedia
                 options.SignIn.RequireConfirmedAccount = false)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<SocialMediaDbContext>();
+
+            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
 
             // Add services to the container

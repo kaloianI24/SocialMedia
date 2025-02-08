@@ -51,6 +51,18 @@ namespace SocialMedia.Data
                 .WithMany()
                 .HasForeignKey(p => p.DeletedById)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Comment>()
+                .HasMany(c => c.Attachments)
+                .WithMany();
+
+            builder.Entity<SocialMediaUser>()
+                .HasOne(u => u.ProfilePicture);
+
+            builder.Entity<SocialMediaPost>()
+                .HasMany(p => p.Attachments)
+                .WithMany();
+
             base.OnModelCreating(builder);
             // Customize the ASP.NET Identity model and override the defaults if needed.
             // For example, you can rename the ASP.NET Identity table names and more.

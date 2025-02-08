@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using SocialMedia.Areas.Identity.Data
+
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -44,12 +47,12 @@
                     <img class="sidebar-images" src="~/images/add.svg">Create post
                 </a>
 
-                <a class="btn-sidebar sidebar-links" asp-area="Identity" asp-page="/Account/Manage/Index">
-                        <img class="sidebar-images" src="~/images/profile.svg">Profile
-                </a>
-
                 <a class="btn-sidebar">
                     <img class="sidebar-images" src="~/images/settings.svg">Settings
+                </a>
+
+                 <a class="btn-sidebar sidebar-links" asp-area="Identity" asp-page="/Account/Manage/Index">
+                    <img class="profile-pic" id="profile-picture" src="@ViewData["ProfilePictureUrl"]">Profile
                 </a>
 
                 <a class="btn-sidebar sidebar-links" id = "logout-button" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">

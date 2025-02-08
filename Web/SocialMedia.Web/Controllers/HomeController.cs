@@ -1,6 +1,9 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Models;
 
 namespace SocialMedia.Controllers
@@ -9,15 +12,23 @@ namespace SocialMedia.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly UserManager<SocialMediaUser> _userManager;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, UserManager<SocialMediaUser> userManager)
         {
             _logger = logger;
+            _userManager = userManager;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var user = await _userManager.Users
+        .Include(u => u.ProfilePicture)
+        .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
+
+            ViewData["ProfilePictureUrl"] = user?.ProfilePicture?.CloudUrl;
+
+            return View(user);
         }
 
         public IActionResult Privacy()
