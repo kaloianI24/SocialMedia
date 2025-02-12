@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static SocialMedia.Service.Mappings.SocialMediaPostMappings;
 
 namespace SocialMedia.Service.Mappings
 {
@@ -14,8 +15,12 @@ namespace SocialMedia.Service.Mappings
             return new SocialMediaUser();
         }
 
-        public static SocialMediaUserServiceModel ToModel(this SocialMediaUser entity)
+        public static SocialMediaUserServiceModel ToModel(this SocialMediaUser entity, UserPostMappingsContext context)
         {
+            if(entity is null)
+            {
+                return null;
+            }
             return new SocialMediaUserServiceModel
             {
                 Id = entity.Id,
@@ -23,7 +28,10 @@ namespace SocialMedia.Service.Mappings
                 FirstName = entity.FirstName,
                 LastName = entity.LastName,
                 UserName = entity.UserName,
-                Email = entity.Email
+                Email = entity.Email,
+                ProfilePicture = entity.ProfilePicture.ToModel(),
+                Posts = ShouldMapPost(context) ? entity.Posts?.Select(post => post.ToModel(UserPostMappingsContext.User)).ToList() : null,
+                
             };
         }
     }

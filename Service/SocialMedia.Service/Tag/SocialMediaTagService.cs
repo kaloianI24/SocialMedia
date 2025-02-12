@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static SocialMedia.Service.Mappings.SocialMediaPostMappings;
 
 namespace SocialMedia.Service.Tag
 {
@@ -21,7 +22,7 @@ namespace SocialMedia.Service.Tag
 
         public async Task<TagServiceModel> CreateAsync(TagServiceModel model)
         {
-            return (await this.tagRepository.CreateAsync(model.ToEntity())).ToModel();
+            return (await this.tagRepository.CreateAsync(model.ToEntity())).ToModel(UserPostMappingsContext.Tag);
         }
 
         public Task<TagServiceModel> DeleteAsync(string id)

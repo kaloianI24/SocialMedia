@@ -10,6 +10,7 @@
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/SocialMedia.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @RenderSection("Styles", required: false)
   @*   <link rel="stylesheet" href="Views/Shared/_Layout.cshtml/_Layout.cshtml.css" asp-append-version="true" /> *@
 
 </head>
@@ -25,10 +26,6 @@
         @if (!hideLayout)
         {
 
-            <div class="navbar">
-                <input placeholder="Search..." type="text" name="text" class="input">
-            </div>
-
             <div class="sidebar-navigation">
                 <h1 id="logo">
                     <a asp-area="" asp-controller="Home" asp-action="Index">Logo</a>
@@ -43,15 +40,17 @@
                     <img class="sidebar-images" src="/images/notification.svg">Notifications
                 </a>
 
-                <a class="btn-sidebar">
+                <a class="btn-sidebar sidebar-links" asp-area="" asp-controller="Post" asp-action="Create">
                     <img class="sidebar-images" src="~/images/add.svg">Create post
                 </a>
 
-                <a class="btn-sidebar">
+                @* <a class="btn-sidebar">
+                    <img class="sidebar-images" src="~/images/settings.svg">Settings
+                </a> *@
+                <a class="btn-sidebar sidebar-links" asp-area="Identity" asp-page="/Account/Manage/Index">
                     <img class="sidebar-images" src="~/images/settings.svg">Settings
                 </a>
-
-                 <a class="btn-sidebar sidebar-links" asp-area="Identity" asp-page="/Account/Manage/Index">
+                <a class="btn-sidebar sidebar-links" asp-area="" asp-controller="Home" asp-action="MyPage">
                     <img class="profile-pic" id="profile-picture" src="@ViewData["ProfilePictureUrl"]">Profile
                 </a>
 

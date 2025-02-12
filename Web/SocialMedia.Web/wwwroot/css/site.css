@@ -33,6 +33,7 @@ body {
 
 body {
     margin-left: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .sidebar-navigation {
@@ -43,7 +44,7 @@ body {
     left: 0;
     padding: auto;
     border-right: 1px solid lightgrey;
-    flex-direction: column; /* Подрежда елементите вертикално */
+    flex-direction: column;
     justify-content: flex-start;
 }
 
@@ -78,6 +79,14 @@ body {
     margin-left: 250px;
     margin-right: 350px;
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+}
+.main-content2 {
+    display: flex;
+    margin-left: 250px;
     flex-direction: column;
     align-items: center;
     gap: 20px;
@@ -410,7 +419,195 @@ body {
 
 #logout-button {
     position: absolute;
-    bottom: 20px; /* Разстояние от долния край */
+    bottom: 20px;
     left: 0;
     width: 100%;
 }
+
+.create-post-page {
+    margin-top: 20px;
+    margin-left: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.create-post-container h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+.post-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 500px;
+}
+
+    .form-group label {
+        font-size: 16px;
+        color: #555;
+        font-weight: bold;
+    }
+
+    .form-group textarea {
+        width: 100%;
+        height: 20px;
+        padding: 10px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        resize: vertical;
+        transition: border-color 0.3s ease;
+    }
+
+        .form-group textarea:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+.submit-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+    .submit-btn:hover {
+        background-color: #0056b3;
+    }
+
+.image-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+    .image-previews img {
+        max-width: 100px;
+        max-height: 100px;
+        border-radius: 5px;
+        object-fit: cover;
+        border: 1px solid #ccc;
+    }
+
+#addImageBtn {
+    background-color: #28a745;
+    margin-top: 10px;
+}
+
+    #addImageBtn:hover {
+        background-color: #218838;
+    }
+
+.image-container button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(255, 0, 0, 0.7);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    padding: 0;
+}
+
+    .image-container button:hover {
+        background-color: rgba(255, 0, 0, 0.9);
+    }
+
+.image-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.image-container {
+    position: relative;
+    display: inline-block;
+    margin: 5px;
+}
+
+    .image-container img {
+        max-width: 100px;
+        max-height: 100px;
+        border-radius: 5px;
+        object-fit: cover;
+        border: 1px solid #ccc;
+    }
+
+    .image-container button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: rgba(255, 0, 0, 0.7);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        padding: 0;
+    }
+
+.tags-input-wrapper {
+    background: transparent;
+    padding: 10px;
+    border-radius: 4px;
+    max-width: 400px;
+    border: 1px solid #ccc
+}
+
+    .tags-input-wrapper input {
+        border: none;
+        background: transparent;
+        outline: none;
+        width: 140px;
+        margin-left: 8px;
+    }
+
+    .tags-input-wrapper .tag {
+        display: inline-block;
+        background-color: #1f5e90;
+        color: white;
+        border-radius: 40px;
+        padding: 0px 3px 0px 7px;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        box-shadow: 0 5px 15px -2px #dbdbdb
+    }
+
+        .tags-input-wrapper .tag a {
+            margin: 0 7px 3px;
+            display: inline-block;
+            cursor: pointer;
+        }

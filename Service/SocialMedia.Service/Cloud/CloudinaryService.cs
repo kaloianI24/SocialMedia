@@ -2,9 +2,14 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using SocialMedia.Data.Models;
+using SocialMedia.Data.Repositories;
+using SocialMedia.Service.Mappings;
+using SocialMedia.Service.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,12 +23,15 @@ namespace SocialMedia.Service.Cloud
 
         private readonly ILogger<CloudinaryService> _logger;
 
+        private readonly CloudResourceRepository cloudResourceRepository;
+
         private const string CloudinaryUrl = "https://api.cloudinary.com/v1_1/{0}/auto/upload";
 
-        public CloudinaryService(IConfiguration configuration, ILogger<CloudinaryService> logger)
+        public CloudinaryService(IConfiguration configuration, ILogger<CloudinaryService> logger, CloudResourceRepository cloudResourceRepository)
         {
             this.configuration = configuration;
             _logger = logger;
+            this.cloudResourceRepository = cloudResourceRepository;
         }
 
         private string GetUnixTimestamp()
@@ -120,6 +128,38 @@ namespace SocialMedia.Service.Cloud
                 .Replace(".gif", "")
                 .Replace(".mp4", "")
                 .Replace(".mkv", "");
+        }
+
+        public IQueryable<CloudResourceServiceModel> GetAll()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CloudResourceServiceModel> GetByIdAsync(string id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<CloudResourceServiceModel> CreateAsync(CloudResourceServiceModel model)
+        {
+            CloudResource attachment = model.ToEntity();
+
+            return (await cloudResourceRepository.CreateAsync(attachment)).ToModel();
+        }
+
+        public Task<CloudResource> InternalCreateAsync(CloudResource model)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CloudResourceServiceModel> UpdateAsync(CloudResourceServiceModel model)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CloudResourceServiceModel> DeleteAsync(string id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

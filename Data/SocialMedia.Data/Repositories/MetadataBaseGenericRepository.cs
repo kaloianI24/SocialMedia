@@ -40,7 +40,9 @@ namespace SocialMedia.Data.Repositories
         {
             string? userId = this._httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            return await this._context.Users.SingleOrDefaultAsync(user => user.Id == userId);
+            return await this._context.Users
+                .Include(u => u.ProfilePicture)
+                .SingleOrDefaultAsync(user => user.Id == userId);
         }
     }
 }

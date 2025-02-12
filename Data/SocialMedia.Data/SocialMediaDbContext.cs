@@ -23,23 +23,18 @@ namespace SocialMedia.Data
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
-        {
+        {        
             builder.Entity<SocialMediaUser>()
-               .HasMany(u => u.Posts)
-               .WithOne()
-               .HasForeignKey("SocialMediaUserId");
+                .HasMany(u => u.Posts)
+                .WithOne(p => p.CreatedBy)
+                .HasForeignKey(p => p.CreatedById)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<SocialMediaPost>()
                .HasMany(p => p.TaggedUsers)
                .WithMany(u => u.TaggedPosts)
                .UsingEntity(j => j.ToTable("PostTaggedUsers"));
-
-            builder.Entity<SocialMediaPost>()
-             .HasOne(p => p.CreatedBy)
-             .WithMany()
-             .HasForeignKey(p => p.CreatedById)
-             .OnDelete(DeleteBehavior.Restrict); 
-            
+                        
             builder.Entity<SocialMediaPost>()
                 .HasOne(p => p.UpdatedBy)
                 .WithMany()

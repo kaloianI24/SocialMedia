@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Data;
+using SocialMedia.Data.Repositories;
 using SocialMedia.Seed;
 using SocialMedia.Service.Cloud;
+using SocialMedia.Service.Post;
 
 namespace SocialMedia
 {
@@ -27,7 +29,12 @@ namespace SocialMedia
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<SocialMediaDbContext>();
 
-            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+            builder.Services.AddTransient<PostRepository>();
+            builder.Services.AddTransient<CloudResourceRepository>();
+            builder.Services.AddTransient<TagRepository>();
+
+            builder.Services.AddTransient<ICloudinaryService, CloudinaryService>();
+            builder.Services.AddTransient<ISocialMediaPostService, SocialMediaPostService>();
 
 
             // Add services to the container

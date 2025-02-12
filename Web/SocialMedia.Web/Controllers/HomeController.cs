@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Models;
+using SocialMedia.Service.Mappings;
+using static SocialMedia.Service.Mappings.SocialMediaPostMappings;
 
 namespace SocialMedia.Controllers
 {
@@ -22,24 +24,39 @@ namespace SocialMedia.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var user = await _userManager.Users
-        .Include(u => u.ProfilePicture)
-        .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
+            var user = await GetUser();
 
             ViewData["ProfilePictureUrl"] = user?.ProfilePicture?.CloudUrl;
 
             return View(user);
         }
 
-        public IActionResult Privacy()
+        public async Task<IActionResult> MyPage()
         {
-            return View();
+            var user = await GetUser();
+            ViewData["ProfilePictureUrl"] = user?.ProfilePicture?.CloudUrl;
+            return View(user.ToModel(UserPostMappingsContext.User));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        private Task<SocialMediaUser> GetUser()
+        {
+            return _userManager.Users
+            .Include(u => u.ProfilePicture)
+            .Include(u => u.Posts)
+                .ThenInclude(p => p.Attachments)
+             .Include(u => u.Posts)
+                .ThenInclude(p=> p.Tags)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(p => p.Attachments)
+            .Include(u => u.Followers)
+            .Include(u => u.Friends)
+            .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
         }
     }
 }

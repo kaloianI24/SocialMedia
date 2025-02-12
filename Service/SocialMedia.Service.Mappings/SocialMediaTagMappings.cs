@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static SocialMedia.Service.Mappings.SocialMediaPostMappings;
 
 namespace SocialMedia.Service.Mappings
 {
@@ -18,7 +19,7 @@ namespace SocialMedia.Service.Mappings
             };
         }
 
-        public static TagServiceModel ToModel(this SocialMediaTag entity)
+        public static TagServiceModel ToModel(this SocialMediaTag entity, UserPostMappingsContext context)
         {
             return new TagServiceModel
             {
@@ -27,9 +28,9 @@ namespace SocialMedia.Service.Mappings
                 CreatedOn = entity.CreatedOn,
                 UpdatedOn = entity.UpdatedOn,
                 DeletedOn = entity.DeletedOn,
-                CreatedBy = entity.CreatedBy.ToModel(),
-                UpdatedBy = entity.UpdatedBy?.ToModel(),
-                DeletedBy = entity.DeletedBy?.ToModel()
+                CreatedBy = ShouldMapUser(context) ? entity.CreatedBy.ToModel(UserPostMappingsContext.Tag) : null,
+                UpdatedBy = ShouldMapUser(context) ? entity.UpdatedBy?.ToModel(UserPostMappingsContext.Tag) : null,
+                DeletedBy = ShouldMapUser(context) ? entity.DeletedBy?.ToModel(UserPostMappingsContext.Tag) : null,
             };
         }
     }

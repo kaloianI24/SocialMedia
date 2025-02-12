@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialMedia.Data;
 
@@ -11,9 +12,11 @@ using SocialMedia.Data;
 namespace SocialMedia.Migrations
 {
     [DbContext(typeof(SocialMediaDbContext))]
-    partial class SocialMediaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250211081533_NullableMetadatabase")]
+    partial class NullableMetadatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -439,6 +442,9 @@ namespace SocialMedia.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("SocialMediaUserId")
+                        .HasColumnType("varchar(255)");
+
                     b.Property<string>("UpdatedById")
                         .HasColumnType("varchar(255)");
 
@@ -450,6 +456,8 @@ namespace SocialMedia.Migrations
                     b.HasIndex("CreatedById");
 
                     b.HasIndex("DeletedById");
+
+                    b.HasIndex("SocialMediaUserId");
 
                     b.HasIndex("UpdatedById");
 
@@ -901,7 +909,7 @@ namespace SocialMedia.Migrations
             modelBuilder.Entity("SocialMedia.Data.Models.SocialMediaPost", b =>
                 {
                     b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "CreatedBy")
-                        .WithMany("Posts")
+                        .WithMany()
                         .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -910,6 +918,10 @@ namespace SocialMedia.Migrations
                         .WithMany()
                         .HasForeignKey("DeletedById")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", null)
+                        .WithMany("Posts")
+                        .HasForeignKey("SocialMediaUserId");
 
                     b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "UpdatedBy")
                         .WithMany()

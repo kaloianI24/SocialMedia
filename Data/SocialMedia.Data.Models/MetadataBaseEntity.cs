@@ -14,12 +14,12 @@ namespace SocialMedia.Data.Models
 
         public DateTime CreatedOn { get; set; }
 
-        public string UpdatedById { get; set; }
-        public SocialMediaUser UpdatedBy { get; set; }
-        public DateTime UpdatedOn { get; set; }
+        public string? UpdatedById { get; set; }
+        public SocialMediaUser? UpdatedBy { get; set; }
+        public DateTime? UpdatedOn { get; set; }
 
-        public string DeletedById { get; set; }
-        public SocialMediaUser DeletedBy { get; set; }
-        public DateTime DeletedOn { get; set; }
+        public string? DeletedById { get; set; }
+        public SocialMediaUser? DeletedBy { get; set; }
+        public DateTime? DeletedOn { get; set; }
     }
 }

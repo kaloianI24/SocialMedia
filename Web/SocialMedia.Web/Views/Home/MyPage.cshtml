@@ -1,0 +1,313 @@
+﻿@using SocialMedia.Areas.Identity.Data
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model SocialMediaUserServiceModel
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="~/SocialMedia.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body {
+            margin-left: 250px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+        }
+
+        profile-page-user-information {
+            margin-left: 250px;
+            margin-top: 50px;
+            flex: 1;
+            padding: 20px;
+            align-items: center;
+        }
+
+        .profile-header {
+            margin-left: 250px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 50px;
+            margin-top: 50px;
+        }
+
+        .profile-header .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #ddd;
+            margin-right: 20px;
+            border: solid #ddd 1px;
+        }
+
+        .profile-header .profile-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-header .profile-info h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .profile-header .profile-info .stats {
+            margin: 10px 0;
+            display: flex;
+            gap: 20px;
+        }
+
+        .profile-header .profile-info .stats span {
+            font-size: 18px;
+        }
+
+        .profile-header .profile-info button {
+            padding: 10px 20px;
+            background-color: #0095f6;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .tabs {
+            margin-left: 250px;
+            display: flex;
+            gap: 20px;
+            border-bottom: 1px solid #ddd;
+            align-items: center;
+        }
+
+        .tabs button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tabs button.active {
+        border-bottom: 2px solid #000;
+        }
+
+        .content-placeholder {
+        text-align: center;
+        margin-top: 50px;
+        }
+
+        .content-placeholder img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+        }
+
+        .tags {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            margin-left: 2px;
+        }
+
+        .tags > * {
+            color: #0000ff;
+        }
+    </style>
+</head>
+<body>
+    <form asp-controller="Home" asp-action="MyPage" method="post">
+        <div class="profile-page-user-information">
+            <div class="profile-header">
+                <img class="profile-pic" src="@Model.ProfilePicture.CloudUrl"></img>
+                <div class="profile-info">
+                    <h1>@Model.UserName</h1>
+                    <div class="stats">
+                        <span>@Model.Posts.Count posts</span>
+                        <span>123 Followers</span>
+                        <span>123 Following</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="active">Publications</button>
+                <button>Tagged</button>
+                <button>Deleted posts</button>
+            </div>
+            <div class="main-content2">
+                @if (Model.Posts.Count == 0)
+                {
+                    <h1>You don't have posts</h1>
+                }
+                else
+                {
+                    @foreach(var post in @Model.Posts.OrderByDescending(p => p.CreatedOn))
+                    {
+                        <div class="post">
+                            <div class="post-header">
+                                <img src="@Model.ProfilePicture.CloudUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
+                                <div class="post-info">
+                                    <span class="username">@Model.UserName</span>
+                                    <span class="location">@post.CreatedOn</span> <span class="location"></span>
+                                </div>
+                            </div>
+                            <div class="carousel">
+                                <div class="carousel-images">
+                                    @foreach (var photo in post.Attachments)
+                                    {
+                                        <img src=@photo.CloudUrl.Replace("http://", "https://") alt="Post Image" class="post-image">
+                                    }
+                                </div>
+                                <button type="button" button class="carousel-arrow left-arrow">&lt;</button>
+                                <button type="button" button class="carousel-arrow right-arrow">&gt;</button>
+                                <div class="carousel-indicators">
+                                    <span class="dot active"></span>
+                                    @for (int i = 0; i < post.Attachments.Count - 1; i++)
+                                    {
+                                        <span class="dot"></span>
+                                    }
+                                </div>
+                                <div class="image-counter">1 / @post.Attachments.Count</div>
+                            </div>
+
+
+                            <div class="post-actions">
+                                <div class="post-likes">
+                                    <div class="likes-count">
+                                        <img src="~/images/heart.svg" class="reaction-heart">
+                                        <div class="count-likes-number">Reactions.Count</div>
+                                        <img src="~/images/comment.svg" class="comment-image">
+                                        <div class="count-likes-number">Comments.Count</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="post-caption">
+                                <span class="username">@Model.UserName</span>
+                                <p class="post-description">
+                                    @string.Join(" ", @post.Description.Split(" ").Take(10))
+                                    <span class="post-description-hidden-text">
+                                        @string.Join(" ", @post.Description.Split(" ").Skip(10))
+                                    </span>
+                                    @if (post.Description.Split(" ").Length > 10)
+                                    {
+                                        <button type="button" class="toggle-btn">Read more</button>
+                                    }
+                                </p>
+                                <div class="tags">
+                                    @foreach(var tag in @post.Tags)
+                                    {
+                                        <span>#@tag.Name</span>                                        
+                                    }
+                                 </div>
+                        </div>
+                    </div>
+
+                } 
+            }
+            </div>
+    </div>
+    </form>
+    </body>
+    </html>
+
+
+ <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const posts = document.querySelectorAll('.post');
+
+        document.querySelectorAll('.post-image').forEach(image => {
+            image.onload = () => {
+                const containerAspect = 1;
+                const imageAspect = image.naturalWidth / image.naturalHeight;
+
+                if (imageAspect > containerAspect) {
+                    image.style.width = 'auto';
+                    image.style.height = '100%';
+                    image.style.objectFit = 'cover';
+                } else {
+                    image.style.width = '100%';
+                    image.style.height = 'auto';
+                    image.style.objectFit = 'cover';
+                }
+            };
+            if (image.complete) {
+                image.onload();
+            }
+        });
+
+        posts.forEach(post => {
+            const carouselImages = post.querySelector('.carousel-images');
+            const dots = post.querySelectorAll('.dot');
+            const leftArrow = post.querySelector('.left-arrow');
+            const rightArrow = post.querySelector('.right-arrow');
+            const imageCounter = post.querySelector('.image-counter');
+
+            if (carouselImages && dots.length > 0 && leftArrow && rightArrow && imageCounter) {
+                let currentIndex = 0;
+                const totalImages = dots.length;
+
+                function updateCarousel() {
+                    carouselImages.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+                    dots.forEach((dot, index) => {
+                        dot.classList.toggle('active', index === currentIndex);
+                    });
+
+                    imageCounter.textContent = `${currentIndex + 1} / ${totalImages}`;
+                }
+
+                rightArrow.addEventListener('click', () => {
+                    if (currentIndex < totalImages - 1) {
+                        currentIndex++;
+                    } else {
+                        currentIndex = 0;
+                    }
+                    updateCarousel();
+                });
+
+                leftArrow.addEventListener('click', () => {
+                    if (currentIndex > 0) {
+                        currentIndex--;
+                    } else {
+                        currentIndex = totalImages - 1;
+                    }
+                    updateCarousel();
+                });
+
+                dots.forEach((dot, index) => {
+                    dot.addEventListener('click', () => {
+                        currentIndex = index;
+                        updateCarousel();
+                    });
+                });
+
+                updateCarousel();
+            }
+        });
+
+        posts.forEach(post => {
+            const toggleBtn = post.querySelector('.toggle-btn');
+            const hiddenText = post.querySelector('.post-description-hidden-text');
+
+            if (toggleBtn && hiddenText) {
+                toggleBtn.addEventListener('click', () => {
+                    if (hiddenText.style.display === 'none' || hiddenText.style.display === '') {
+                        hiddenText.style.display = 'inline';
+                        toggleBtn.textContent = 'Read less';
+                    } else {
+                        hiddenText.style.display = 'none';
+                        toggleBtn.textContent = 'Read more';
+                    }
+                });
+            }
+        });
+    });
+</script>

@@ -12,11 +12,11 @@ namespace SocialMedia.Service.Models
     {
         public string Description { get; set; }
 
-        public List<CloudResource> Attachments { get; set; }
+        public List<CloudResourceServiceModel> Attachments { get; set; }
 
-        public List<SocialMediaUser> TaggedUsers { get; set; }
+        public List<SocialMediaUserServiceModel>? TaggedUsers { get; set; }
 
-        public List<SocialMediaTag> Tags { get; set; }
+        public List<TagServiceModel>? Tags { get; set; }
         
         //public List<UserPostComment> Comments { get; set; }
 
