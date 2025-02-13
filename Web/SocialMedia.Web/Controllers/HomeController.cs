@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Models;
 using SocialMedia.Service.Mappings;
+using SocialMedia.Web.Models.Post;
 using static SocialMedia.Service.Mappings.SocialMediaPostMappings;
 
 namespace SocialMedia.Controllers
@@ -31,13 +32,6 @@ namespace SocialMedia.Controllers
             return View(user);
         }
 
-        public async Task<IActionResult> MyPage()
-        {
-            var user = await GetUser();
-            ViewData["ProfilePictureUrl"] = user?.ProfilePicture?.CloudUrl;
-            return View(user.ToModel(UserPostMappingsContext.User));
-        }
-
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
@@ -54,6 +48,8 @@ namespace SocialMedia.Controllers
                 .ThenInclude(p=> p.Tags)
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.Attachments)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(p => p.TaggedUsers)
             .Include(u => u.Followers)
             .Include(u => u.Friends)
             .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));

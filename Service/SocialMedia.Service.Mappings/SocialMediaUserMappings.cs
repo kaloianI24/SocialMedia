@@ -31,7 +31,6 @@ namespace SocialMedia.Service.Mappings
                 Email = entity.Email,
                 ProfilePicture = entity.ProfilePicture.ToModel(),
                 Posts = ShouldMapPost(context) ? entity.Posts?.Select(post => post.ToModel(UserPostMappingsContext.User)).ToList() : null,
-                
             };
         }
     }

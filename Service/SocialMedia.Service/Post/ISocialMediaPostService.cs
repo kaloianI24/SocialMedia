@@ -10,5 +10,7 @@ namespace SocialMedia.Service.Post
 {
     public interface ISocialMediaPostService : IGenericService<SocialMediaPost, PostServiceModel>
     {
+        public IQueryable<PostServiceModel> GetAllTaggedPosts(string id);
     }
+
 }

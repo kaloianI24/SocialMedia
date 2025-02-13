@@ -14,7 +14,9 @@ namespace SocialMedia.Service.Models
 
         public List<CloudResourceServiceModel> Attachments { get; set; }
 
-        public List<SocialMediaUserServiceModel>? TaggedUsers { get; set; }
+        public List<string>? TaggedUsersId { get; set; }
+
+        public List<SocialMediaUser> TaggedUsers { get; set; }
 
         public List<TagServiceModel>? Tags { get; set; }
         

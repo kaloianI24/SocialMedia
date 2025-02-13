@@ -23,7 +23,6 @@ namespace SocialMedia.Service.Mappings
                 Description = model.Description,
                 Attachments = model.Attachments.Select(attachment => attachment.ToEntity()).ToList(),
                 Tags = model.Tags?.Select(tag => tag.ToEntity()).ToList(),
-                TaggedUsers = model.TaggedUsers?.Select(user => user.ToEntity()).ToList(),
             };
         }
 
@@ -36,8 +35,8 @@ namespace SocialMedia.Service.Mappings
                 Attachments = entity.Attachments
                 .Select(attachment => attachment.ToModel())
                 .ToList(),
-                Tags = entity.Tags?.Select(tag => tag.ToModel(UserPostMappingsContext.Post)).ToList(),
-                TaggedUsers = entity.TaggedUsers?.Select(user => user.ToModel(UserPostMappingsContext.User)).ToList(),
+                Tags = entity.Tags?.Select(tag => tag.ToModel(UserPostMappingsContext.Tag)).ToList(),
+                TaggedUsersId = entity.TaggedUsers?.Select(u => u.Id).ToList(),
                 CreatedOn = entity.CreatedOn,
                 UpdatedOn = entity.UpdatedOn,
                 DeletedOn = entity.DeletedOn,

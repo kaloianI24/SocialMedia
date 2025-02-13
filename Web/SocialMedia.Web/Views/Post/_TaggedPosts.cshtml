@@ -1,0 +1,82 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@model List<SocialMedia.Web.Models.Post.TaggedPostWebModel>
+
+@{
+    ViewData["Title"] = "Tagged Posts";
+}
+<div class="main-content2">
+    @if (Model.Count == 0)
+    {
+        <h1>You are not tagged in any posts</h1>
+    }
+    else
+    {
+        @foreach (var post in @Model.OrderByDescending(p => p.CreatedOn))
+        {
+            <div class="post">
+                <div class="post-header">
+                    <img src="@post.ProfilePictureUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
+                    <div class="post-info">
+                        <span class="username">@post.UserName</span>
+                        <span class="location">@post.CreatedOn</span> <span class="location"></span>
+                    </div>
+                </div>
+                <div class="carousel">
+                    <div class="carousel-images">
+                        @foreach (var attachmentUrl in post.AttachmentUrls)
+                        {
+                            <img src=@attachmentUrl.Replace("http://", "https://") alt="Post Image" class="post-image">
+                        }
+                    </div>
+                    <button type="button" button class="carousel-arrow left-arrow">&lt;</button>
+                    <button type="button" button class="carousel-arrow right-arrow">&gt;</button>
+                    <div class="carousel-indicators">
+                        <span class="dot active"></span>
+                        @for (int i = 0; i < post.AttachmentUrls.Count - 1; i++)
+                        {
+                            <span class="dot"></span>
+                        }
+                    </div>
+                    <div class="image-counter">1 / @post.AttachmentUrls.Count</div>
+                </div>
+
+
+                <div class="post-actions">
+                    <div class="post-likes">
+                        <div class="likes-count">
+                            <img src="~/images/heart.svg" class="reaction-heart">
+                            <div class="count-likes-number">Reactions.Count</div>
+                            <img src="~/images/comment.svg" class="comment-image">
+                            <div class="count-likes-number">Comments.Count</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-caption">
+                    <span class="username">@post.UserName</span>
+                    <p class="post-description">
+                        @string.Join(" ", @post.Description.Split(" ").Take(10))
+                        <span class="post-description-hidden-text">
+                            @string.Join(" ", @post.Description.Split(" ").Skip(10))
+                        </span>
+                        @if (post.Description.Split(" ").Length > 10)
+                        {
+                            <button type="button" class="toggle-btn">Read more</button>
+                        }
+                    </p>
+                    <div class="tags">
+                        @foreach (var tag in @post.Tags)
+                        {
+                            <span>#@tag</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+        }
+    }
+</div>

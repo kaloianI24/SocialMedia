@@ -1,0 +1,173 @@
+﻿@using SocialMedia.Areas.Identity.Data
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model SocialMediaUserServiceModel
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="~/SocialMedia.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body {
+            margin-left: 250px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+        }
+
+        profile-page-user-information {
+            margin-left: 250px;
+            margin-top: 50px;
+            flex: 1;
+            padding: 20px;
+            align-items: center;
+        }
+
+        .profile-header {
+            margin-left: 250px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 50px;
+            margin-top: 50px;
+        }
+
+        .profile-header .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #ddd;
+            margin-right: 20px;
+            border: solid #ddd 1px;
+        }
+
+        .profile-header .profile-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-header .profile-info h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .profile-header .profile-info .stats {
+            margin: 10px 0;
+            display: flex;
+            gap: 20px;
+        }
+
+        .profile-header .profile-info .stats span {
+            font-size: 18px;
+        }
+
+        .profile-header .profile-info button {
+            padding: 10px 20px;
+            background-color: #0095f6;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .tabs {
+            margin-left: 250px;
+            display: flex;
+            gap: 20px;
+            border-bottom: 1px solid #ddd;
+            align-items: center;
+        }
+
+        .tabs button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tabs button.active {
+        border-bottom: 2px solid #000;
+        }
+
+        .content-placeholder {
+        text-align: center;
+        margin-top: 50px;
+        }
+
+        .content-placeholder img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+        }
+
+        .tags {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            margin-left: 2px;
+        }
+
+        .tags > * {
+            color: #0000ff;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+        <div class="profile-page-user-information">
+            <div class="profile-header">
+                <img class="profile-pic" src="@Model.ProfilePicture.CloudUrl"></img>
+                <div class="profile-info">
+                    <h1>@Model.UserName</h1>
+                    <div class="stats">
+                        <span>@Model.Posts.Count posts</span>
+                        <span>123 Followers</span>
+                        <span>123 Following</span>
+                    </div>
+                </div>
+            </div>
+
+        <div class="tabs">
+            <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "MyPosts" })">My posts</button>
+            <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "TaggedPosts" })">Tagged posts</button>
+        </div>
+
+        <div id="partialContainer">
+        </div>
+    </div>
+    </body>
+    </html>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".load-content").click(function (event) {
+                event.preventDefault();
+
+                var url = $(this).data("url");
+
+                $.get(url, function (data) {
+                    $("#partialContainer").html(data);
+
+                    document.querySelectorAll('.post').forEach(post => {
+                        initializePostFeatures(post);
+                        initializeImages();
+                    });
+                });
+            });
+        });
+    </script>
+
+}
+

@@ -13,5 +13,7 @@ namespace SocialMedia.Web.Models.Post
         [BindProperty(BinderType = typeof(TagsModelBinder))]
         public List<string> Tags { get; set; }
 
+        public string TaggedUsersId { get; set; }
+
     }
 }

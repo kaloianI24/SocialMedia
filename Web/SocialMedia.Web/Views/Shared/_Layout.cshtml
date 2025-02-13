@@ -44,13 +44,10 @@
                     <img class="sidebar-images" src="~/images/add.svg">Create post
                 </a>
 
-                @* <a class="btn-sidebar">
-                    <img class="sidebar-images" src="~/images/settings.svg">Settings
-                </a> *@
                 <a class="btn-sidebar sidebar-links" asp-area="Identity" asp-page="/Account/Manage/Index">
                     <img class="sidebar-images" src="~/images/settings.svg">Settings
                 </a>
-                <a class="btn-sidebar sidebar-links" asp-area="" asp-controller="Home" asp-action="MyPage">
+                <a class="btn-sidebar sidebar-links" asp-area="" asp-controller="Post" asp-action="MyPage">
                     <img class="profile-pic" id="profile-picture" src="@ViewData["ProfilePictureUrl"]">Profile
                 </a>
 
@@ -71,5 +68,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>
+<script src="~/js/imagesFunctions.js" defer></script>

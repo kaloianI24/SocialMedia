@@ -1,4 +1,5 @@
-﻿using SocialMedia.Data.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using SocialMedia.Data.Models;
 using SocialMedia.Data.Repositories;
 using SocialMedia.Service.Mappings;
 using SocialMedia.Service.Models;
@@ -16,14 +17,17 @@ namespace SocialMedia.Service.Post
         private readonly PostRepository postRepository;
         private readonly CloudResourceRepository cloudResourceRepository;
         private readonly TagRepository tagRepository;
+        private readonly SocialMediaUserRepository userRepository;
 
         public SocialMediaPostService(PostRepository postRepository,
             CloudResourceRepository cloudResourceRepository,
-            TagRepository tagRepository)
+            TagRepository tagRepository,
+            SocialMediaUserRepository userRepository)
         {
             this.postRepository = postRepository;
             this.cloudResourceRepository = cloudResourceRepository;
             this.tagRepository = tagRepository;
+            this.userRepository = userRepository;
         }
 
         public async Task<PostServiceModel> CreateAsync(PostServiceModel model)
@@ -64,11 +68,22 @@ namespace SocialMedia.Service.Post
 
             post.Tags = tags;            
 
+            post.TaggedUsers = await userRepository.GetUsersByIdsAsync(model.TaggedUsersId);
+
             await postRepository.CreateAsync(post);
 
             return post.ToModel(UserPostMappingsContext.Post);
         }
 
+        public IQueryable<PostServiceModel> GetAllTaggedPosts(string id)
+        {
+            return postRepository.GetAll().Where(p => p.TaggedUsers.Any(u => u.Id == id))
+                .Include(p => p.Attachments)
+                .Include(p => p.CreatedBy)
+                .ThenInclude(c => c.ProfilePicture)
+                .Include(p => p.Tags)
+                .Select(p => p.ToModel(UserPostMappingsContext.Post));
+        }
         public Task<PostServiceModel> DeleteAsync(string id)
         {
             throw new NotImplementedException();

@@ -1,9 +1,11 @@
-﻿@using SocialMedia.Web.Models.Post
+﻿@using SocialMedia.Areas.Identity.Data
+@using SocialMedia.Web.Models.Post
 @model CreatePostModel
 
 
 @{
     ViewData["Title"] = "Create a new post";
+    var users = (List<SocialMediaUser>)this.ViewData["Users"];
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -163,40 +165,75 @@
             color: #555;
         }
 
-
-        /* .tags-input-wrapper {
-            background: transparent;
-            padding: 10px;
-            border-radius: 4px;
-            max-width: 400px;
-            border: 1px solid #ccc
+      
+        .user-tags-input-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 5px;
+            border-radius: 5px;
         }
 
-            .tags-input-wrapper input {
-                border: none;
-                background: transparent;
-                outline: none;
-                width: 140px;
-                margin-left: 8px;
+        .user-tag {
+            background-color: #0056b3;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+        }
+
+            .user-tag .remove-tag {
+                margin-left: 5px;
+                cursor: pointer;
+                font-weight: bold;
             }
 
-            .tags-input-wrapper .tag {
-                display: inline-block;
-                background-color: #fa0e7e;
-                color: white;
-                border-radius: 40px;
-                padding: 0px 3px 0px 7px;
-                margin-right: 5px;
-                margin-bottom: 5px;
-                box-shadow: 0 5px 15px -2px rgba(250, 14, 126, .7)
+        .users-search-bar {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 5px;
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            width: 100%;
+            max-height: 120px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: none;
+            z-index: 10;
+        }
+
+            .dropdown-menu.visible {
+                display: block;
             }
 
-                .tags-input-wrapper .tag a {
-                    margin: 0 7px 3px;
-                    display: inline-block;
-                    cursor: pointer;
-                } 
-                */
+        .dropdown-item {
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+            .dropdown-item:hover {
+                background-color: #f0f0f0;
+            }
+
+            .dropdown-item img {
+                width: 30px;
+                height: 30px;
+                margin-right: 10px;
+                border-radius: 50%;
+            }
+    </style>
     </style>
 </head>
 <body>
@@ -212,6 +249,18 @@
                 <label asp-for="@Model.Tags">Tags</label>
                 <input asp-for="@Model.Tags" id="tag-input"></input>
             </div>
+
+            <div class="form-group">
+                <label asp-for="@Model.TaggedUsersId">Tag users</label>
+                <div class="user-tags-input-container" id="userTagsInputContainer">
+                    <input type="text" id="user-searchBar" class="users-search-bar" placeholder="Search users...">
+                    <input type="hidden" id="taggedUsers" name="TaggedUsersId" value="">
+                </div>
+                <div class="dropdown">
+                    <div id="dropdownMenu" class="dropdown-menu"></div>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="imageUpload">Add Images (up to 10)</label>
                 <input type="file" id="imageUpload" name="Attachments" accept="image/*" multiple style="display: none;">
@@ -238,21 +287,18 @@
         const imagePreviews = document.getElementById('imagePreviews');
 
         if (selectedFiles.length + files.length > 10) {
-            alert('Можете да качите максимум 10 изображения.');
+            alert('You can upload up to 10 images.');
             return;
         }
 
-        // Добавяне на новите файлове към масива
         files.forEach(file => {
             if (file.type.startsWith('image/')) {
                 selectedFiles.push(file);
             }
         });
 
-        // Обновяване на файловия вход
         updateFileInput();
 
-        // Генериране на визуализации
         files.forEach((file, index) => {
             if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
@@ -266,14 +312,11 @@
                     const removeBtn = document.createElement('button');
                     removeBtn.innerHTML = '&times;';
                     removeBtn.addEventListener('click', function () {
-                        // Премахване на файла от масива
                         const fileIndex = selectedFiles.findIndex(f => f.name === file.name);
                         if (fileIndex !== -1) {
                             selectedFiles.splice(fileIndex, 1);
                         }
-                        // Премахване на визуализацията
                         container.remove();
-                        // Обновяване на файловия вход и брояча
                         updateFileInput();
                         updateImageCounter();
                     });
@@ -288,14 +331,12 @@
         });
     });
 
-    // Функция за обновяване на файловия вход с всички избрани файлове
     function updateFileInput() {
         const dataTransfer = new DataTransfer();
         selectedFiles.forEach(file => dataTransfer.items.add(file));
         document.getElementById('imageUpload').files = dataTransfer.files;
     }
 
-    // Останалия код (updateImageCounter) остава непроменен
 
     function updateImageCounter() {
         const imagePreviews = document.getElementById('imagePreviews');
@@ -308,13 +349,11 @@
         "use strict"
 
 
-        // Plugin Constructor
         var TagsInput = function(opts){
             this.options = Object.assign(TagsInput.defaults , opts);
             this.init();
         }
 
-        // Initialize the plugin
         TagsInput.prototype.init = function(opts){
             this.options = opts ? Object.assign(this.options, opts) : this.options;
 
@@ -336,7 +375,6 @@
             return this;
         }
 
-        // Add Tags
         TagsInput.prototype.addTag = function(string){
 
             if(this.anyErrors(string))
@@ -352,7 +390,6 @@
             var closeIcon = document.createElement('a');
             closeIcon.innerHTML = '&times;';
 
-            // delete the tag when icon is clicked
             closeIcon.addEventListener('click' , function(e){
                 e.preventDefault();
                 var tag = this.parentNode;
@@ -371,7 +408,6 @@
             return this;
         }
 
-        // Delete Tags
         TagsInput.prototype.deleteTag = function(tag , i){
             tag.remove();
             this.arr.splice( i , 1);
@@ -379,7 +415,6 @@
             return this;
         }
 
-        // Make sure input string have no error with the plugin
         TagsInput.prototype.anyErrors = function(string){
             if( this.options.max != null && this.arr.length >= this.options.max ){
                 console.log('max tags limit reached');
@@ -394,7 +429,6 @@
             return false;
         }
 
-        // Add tags programmatically
         TagsInput.prototype.addData = function(array){
             var plugin = this;
 
@@ -404,13 +438,10 @@
             return this;
         }
 
-        // Get the Input String
         TagsInput.prototype.getInputString = function(){
             return this.arr.join(',');
         }
 
-
-        // destroy the plugin
         TagsInput.prototype.destroy = function(){
             this.orignal_input.removeAttribute('hidden');
 
@@ -428,7 +459,6 @@
             this.initialized = false;
         }
 
-        // Private function to initialize the tag input plugin
         function init(tags){
             tags.wrapper.append(tags.input);
             tags.wrapper.classList.add(tags.options.wrapperClass);
@@ -436,7 +466,6 @@
             tags.orignal_input.parentNode.insertBefore(tags.wrapper , tags.orignal_input);
         }
 
-        // initialize the Events
         function initEvents(tags){
             tags.wrapper.addEventListener('click' ,function(){
                 tags.input.focus();
@@ -458,7 +487,6 @@
         }
 
 
-        // Set All the Default Values
         TagsInput.defaults = {
             selector : '',
             wrapperClass : 'tags-input-wrapper',
@@ -474,5 +502,85 @@
      var tagInput1 = new TagsInput({
                 selector: 'tag-input',
                 duplicate : false,
+     });
+
+    const users = @Html.Raw(Json.Serialize(users));
+    const searchBar = document.getElementById("user-searchBar");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    const tagsInputContainer = document.getElementById("userTagsInputContainer");
+    const hiddenInput = document.getElementById("taggedUsers");
+    const selectedUsers = new Set();
+
+    function renderDropdownItems(filteredUsers) {
+        dropdownMenu.innerHTML = "";
+        filteredUsers.slice(0, 3).forEach(user => {
+            const item = document.createElement("div");
+            item.classList.add("dropdown-item");
+            item.innerHTML = `<img src="${user.profilePicture.cloudUrl}" alt="profile-picture"> ${user.userName}`;
+            item.addEventListener("click", () => {
+                addUserTag(user);
             });
+            dropdownMenu.appendChild(item);
+        });
+    }
+
+    function addUserTag(user) {
+        if (selectedUsers.has(user.id)) return;
+        selectedUsers.add(user.id);
+
+        const tag = document.createElement("div");
+        tag.classList.add("user-tag");
+        tag.innerHTML = `${user.userName} <span class="remove-tag">&times;</span>`;
+        tag.querySelector(".remove-tag").addEventListener("click", () => {
+            selectedUsers.delete(user.id);
+            tagsInputContainer.removeChild(tag);
+            updateHiddenField();
+        });
+
+        tagsInputContainer.insertBefore(tag, searchBar);
+        searchBar.value = "";
+        dropdownMenu.classList.remove("visible");
+
+        updateHiddenField();
+    }
+
+    searchBar.addEventListener("input", () => {
+        const query = searchBar.value.toLowerCase();
+        if (query === "") {
+            dropdownMenu.classList.remove("visible");
+            return;
+        }
+
+        const filteredUsers = users.filter(user =>
+            user.userName.toLowerCase().startsWith(query)
+        );
+
+        if (filteredUsers.length > 0) {
+            renderDropdownItems(filteredUsers);
+            dropdownMenu.classList.add("visible");
+        } else {
+            dropdownMenu.classList.remove("visible");
+        }
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!tagsInputContainer.contains(event.target)) {
+            dropdownMenu.classList.remove("visible");
+        }
+    });
+
+    searchBar.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") e.preventDefault();
+    });
+
+    function updateHiddenField() {
+        hiddenInput.value = Array.from(selectedUsers).join(",");
+        console.log("Updated TaggedUsersId value:", hiddenInput.value);
+    }
+
+
+        document.querySelector('form').addEventListener('submit', function (e) {
+        updateHiddenField(); // Уверяваме се, че скритото поле има правилните данни
+        console.log("Form submitted with TaggedUsersId:", hiddenInput.value); // Дебъг: стойност при submit
+    });
 </script>

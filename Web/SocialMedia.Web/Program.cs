@@ -32,6 +32,7 @@ namespace SocialMedia
             builder.Services.AddTransient<PostRepository>();
             builder.Services.AddTransient<CloudResourceRepository>();
             builder.Services.AddTransient<TagRepository>();
+            builder.Services.AddTransient<SocialMediaUserRepository>();
 
             builder.Services.AddTransient<ICloudinaryService, CloudinaryService>();
             builder.Services.AddTransient<ISocialMediaPostService, SocialMediaPostService>();
