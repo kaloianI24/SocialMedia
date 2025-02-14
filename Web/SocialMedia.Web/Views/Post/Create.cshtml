@@ -1,11 +1,12 @@
-﻿@using SocialMedia.Areas.Identity.Data
-@using SocialMedia.Web.Models.Post
+﻿@using SocialMedia.Web.Models.Post
+@using SocialMedia.Web.Models.User
+
 @model CreatePostModel
 
 
 @{
     ViewData["Title"] = "Create a new post";
-    var users = (List<SocialMediaUser>)this.ViewData["Users"];
+    var users = (List<UserWebModel>)this.ViewData["Users"];
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -348,7 +349,6 @@
 
         "use strict"
 
-
         var TagsInput = function(opts){
             this.options = Object.assign(TagsInput.defaults , opts);
             this.init();
@@ -505,6 +505,7 @@
      });
 
     const users = @Html.Raw(Json.Serialize(users));
+            console.log(users);
     const searchBar = document.getElementById("user-searchBar");
     const dropdownMenu = document.getElementById("dropdownMenu");
     const tagsInputContainer = document.getElementById("userTagsInputContainer");
@@ -516,7 +517,7 @@
         filteredUsers.slice(0, 3).forEach(user => {
             const item = document.createElement("div");
             item.classList.add("dropdown-item");
-            item.innerHTML = `<img src="${user.profilePicture.cloudUrl}" alt="profile-picture"> ${user.userName}`;
+            item.innerHTML = `<img src="${user.profilePictureUrl}" alt="profile-picture"> ${user.userName}`;
             item.addEventListener("click", () => {
                 addUserTag(user);
             });
@@ -580,7 +581,6 @@
 
 
         document.querySelector('form').addEventListener('submit', function (e) {
-        updateHiddenField(); // Уверяваме се, че скритото поле има правилните данни
-        console.log("Form submitted with TaggedUsersId:", hiddenInput.value); // Дебъг: стойност при submit
+        updateHiddenField();
     });
 </script>

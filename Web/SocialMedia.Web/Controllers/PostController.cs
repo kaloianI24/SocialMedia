@@ -9,6 +9,9 @@ using SocialMedia.Web.Models.Post;
 using System.Net.Mail;
 using SocialMedia.Service.Mappings;
 using static SocialMedia.Service.Mappings.SocialMediaPostMappings;
+using System.Globalization;
+using SocialMedia.Web.Models;
+using SocialMedia.Web.Models.User;
 
 namespace SocialMedia.Controllers
 {
@@ -34,7 +37,15 @@ namespace SocialMedia.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            this.ViewData["Users"] = _userManager.Users.Include(u => u.ProfilePicture).ToList();
+            var currentUser = await GetUser();
+            this.ViewData["Users"] = _userManager.Users.Include(u => u.ProfilePicture).Where(u => u.Id != currentUser.Id).Select(u => new UserWebModel
+            {
+                Id = u.Id,
+                UserName = u.UserName,
+                ProfilePictureUrl = u.ProfilePicture.CloudUrl
+            })
+            .ToList();
+            ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
             return View();
         }
 
@@ -55,7 +66,7 @@ namespace SocialMedia.Controllers
                 CloudUrl = photo.Value
             }).ToList();
 
-            var taggedUsersIds = createPostModel.TaggedUsersId.Split(",").Where(id => id != null).ToList();
+            var taggedUsersIds = createPostModel.TaggedUsersId?.Split(",").Where(id => id != null).ToList();
 
             await _socialMediaPostService.CreateAsync(new PostServiceModel
             {
@@ -68,25 +79,38 @@ namespace SocialMedia.Controllers
             return Redirect("MyPage");
         }
 
-        public async Task<IActionResult> MyPage()
+        public async Task<IActionResult> MyPage(string? userId)
         {
-            var user = await GetUser();
-            ViewData["ProfilePictureUrl"] = user?.ProfilePicture?.CloudUrl;
-            return View(user.ToModel(UserPostMappingsContext.User));
+            var currentUser = await GetUser();
+            var currentUserId = currentUser.Id;
+            var targetUserId = userId ?? currentUserId;
+            var targetUser = await GetUserById(targetUserId);
+            if(currentUserId == targetUserId)
+            {
+                ViewData["IsOwner"] = true;
+            }
+            else
+            {
+                ViewData["IsOwner"] = false;
+            }
+            ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
+            return View(targetUser.ToModel(UserPostMappingsContext.User));
         }
 
-        public async Task<IActionResult> LoadPartial(string type)
+        public async Task<IActionResult> LoadPartial(string type, string id)
         {
-            var user = await GetUser();
+            var user = await GetUserById(id);
+            var currentUser = await GetUser();
 
             switch (type)
             {
                 case "MyPosts":
+                    ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
                     return PartialView("_MyPosts", user.ToModel(UserPostMappingsContext.User));
 
                 case "TaggedPosts":
                     var webModels = await TaggedPosts(user.Id);
-                    ViewData["ProfilePictureUrl"] = user?.ProfilePicture?.CloudUrl;
+                    ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
                     return PartialView("_TaggedPosts", webModels);
 
                 default:
@@ -105,7 +129,8 @@ namespace SocialMedia.Controllers
                 Tags = p.Tags.Select(t => t.Name).ToList(),
                 UserName = p.CreatedBy.UserName,
                 ProfilePictureUrl = p.CreatedBy.ProfilePicture?.CloudUrl,
-                CreatedOn = p.CreatedOn
+                CreatedOn = p.CreatedOn,
+                CreatedById = p.CreatedBy.Id
             }).ToList();
 
             return webModels;
@@ -137,6 +162,23 @@ namespace SocialMedia.Controllers
             .Include(u => u.Followers)
             .Include(u => u.Friends)
             .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
+        }
+
+        private Task<SocialMediaUser> GetUserById(string id)
+        {
+            return _userManager.Users
+            .Include(u => u.ProfilePicture)
+            .Include(u => u.Posts)
+                .ThenInclude(p => p.Attachments)
+             .Include(u => u.Posts)
+                .ThenInclude(p => p.Tags)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(p => p.Attachments)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(p => p.TaggedUsers)
+            .Include(u => u.Followers)
+            .Include(u => u.Friends)
+            .FirstOrDefaultAsync(u => u.Id == id);
         }
     }
 }

@@ -6,6 +6,7 @@ using SocialMedia.Data.Repositories;
 using SocialMedia.Seed;
 using SocialMedia.Service.Cloud;
 using SocialMedia.Service.Post;
+using System;
 
 namespace SocialMedia
 {
@@ -62,7 +63,11 @@ namespace SocialMedia
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
-            
+
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Post}/{action=MyPage}/{userId?}");
+
             app.MapRazorPages();
             app.Run();
         }

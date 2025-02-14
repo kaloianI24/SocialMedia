@@ -22,7 +22,7 @@ namespace SocialMedia.Service.Tag
 
         public async Task<TagServiceModel> CreateAsync(TagServiceModel model)
         {
-            return (await this.tagRepository.CreateAsync(model.ToEntity())).ToModel(UserPostMappingsContext.Tag);
+            return (await this.tagRepository.CreateAsync(model.ToEntity())).ToModel();
         }
 
         public Task<TagServiceModel> DeleteAsync(string id)

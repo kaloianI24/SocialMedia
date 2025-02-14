@@ -1,10 +1,5 @@
 ﻿using SocialMedia.Data.Models;
 using SocialMedia.Service.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SocialMedia.Service.Mappings
 {
@@ -13,8 +8,7 @@ namespace SocialMedia.Service.Mappings
         public enum UserPostMappingsContext
         {
             Post,
-            User,
-            Tag
+            User
         }
         public static SocialMediaPost ToEntity(this PostServiceModel model)
         {
@@ -35,7 +29,7 @@ namespace SocialMedia.Service.Mappings
                 Attachments = entity.Attachments
                 .Select(attachment => attachment.ToModel())
                 .ToList(),
-                Tags = entity.Tags?.Select(tag => tag.ToModel(UserPostMappingsContext.Tag)).ToList(),
+                Tags = entity.Tags?.Select(tag => tag.ToModel()).ToList(),
                 TaggedUsersId = entity.TaggedUsers?.Select(u => u.Id).ToList(),
                 CreatedOn = entity.CreatedOn,
                 UpdatedOn = entity.UpdatedOn,

@@ -138,8 +138,8 @@
             </div>
 
         <div class="tabs">
-            <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "MyPosts" })">My posts</button>
-            <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "TaggedPosts" })">Tagged posts</button>
+            <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "MyPosts", id = Model.Id })">My posts</button>
+            <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "TaggedPosts", id = Model.Id })">Tagged posts</button>
         </div>
 
         <div id="partialContainer">

@@ -4,9 +4,9 @@ using System.Diagnostics;
 
 namespace SocialMedia.Data.Repositories
 {
-    public class TagRepository : MetadataBaseGenericRepository<SocialMediaTag>
+    public class TagRepository : BaseGenericRepository<SocialMediaTag>
     {
-        public TagRepository(SocialMediaDbContext context, IHttpContextAccessor httpContextAccessor) : base(context, httpContextAccessor)
+        public TagRepository(SocialMediaDbContext context) : base(context)
         {
         }
 

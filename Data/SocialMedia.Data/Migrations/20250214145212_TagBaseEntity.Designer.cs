@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialMedia.Data;
 
@@ -11,9 +12,11 @@ using SocialMedia.Data;
 namespace SocialMedia.Migrations
 {
     [DbContext(typeof(SocialMediaDbContext))]
-    partial class SocialMediaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250214145212_TagBaseEntity")]
+    partial class TagBaseEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,7 +37,7 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("CommentId");
 
-                    b.ToTable("CloudResourceComment", (string)null);
+                    b.ToTable("CloudResourceComment");
                 });
 
             modelBuilder.Entity("CloudResourceSocialMediaPost", b =>
@@ -49,7 +52,7 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("SocialMediaPostId");
 
-                    b.ToTable("CloudResourceSocialMediaPost", (string)null);
+                    b.ToTable("CloudResourceSocialMediaPost");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -281,7 +284,7 @@ namespace SocialMedia.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Attachments", (string)null);
+                    b.ToTable("Attachments");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.Comment", b =>
@@ -325,7 +328,7 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("UpdatedById");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.FriendRequest", b =>
@@ -369,7 +372,7 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("UpdatedById");
 
-                    b.ToTable("FriendRequests", (string)null);
+                    b.ToTable("FriendRequests");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.Reaction", b =>
@@ -414,7 +417,7 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("UpdatedById");
 
-                    b.ToTable("Reactions", (string)null);
+                    b.ToTable("Reactions");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.SocialMediaPost", b =>
@@ -453,7 +456,7 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("UpdatedById");
 
-                    b.ToTable("Posts", (string)null);
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.SocialMediaRole", b =>
@@ -471,7 +474,7 @@ namespace SocialMedia.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SocialMediaRoles", (string)null);
+                    b.ToTable("SocialMediaRoles");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.SocialMediaTag", b =>
@@ -485,7 +488,7 @@ namespace SocialMedia.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tags", (string)null);
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.UserCommentReaction", b =>
@@ -537,7 +540,7 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserCommentReaction", (string)null);
+                    b.ToTable("UserCommentReaction");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.UserPostComment", b =>
@@ -590,7 +593,7 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserPostComment", (string)null);
+                    b.ToTable("UserPostComment");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.UserPostReaction", b =>
@@ -642,7 +645,7 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserPostReaction", (string)null);
+                    b.ToTable("UserPostReaction");
                 });
 
             modelBuilder.Entity("SocialMediaPostSocialMediaTag", b =>
@@ -657,7 +660,7 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("TagsId");
 
-                    b.ToTable("SocialMediaPostSocialMediaTag", (string)null);
+                    b.ToTable("SocialMediaPostSocialMediaTag");
                 });
 
             modelBuilder.Entity("SocialMediaPostSocialMediaUser", b =>
@@ -687,7 +690,7 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("FriendsId");
 
-                    b.ToTable("SocialMediaUserSocialMediaUser", (string)null);
+                    b.ToTable("SocialMediaUserSocialMediaUser");
                 });
 
             modelBuilder.Entity("CloudResourceComment", b =>

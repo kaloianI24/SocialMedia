@@ -19,18 +19,12 @@ namespace SocialMedia.Service.Mappings
             };
         }
 
-        public static TagServiceModel ToModel(this SocialMediaTag entity, UserPostMappingsContext context)
+        public static TagServiceModel ToModel(this SocialMediaTag entity)
         {
             return new TagServiceModel
             {
                 Id = entity.Id,
-                Name = entity.Name,
-                CreatedOn = entity.CreatedOn,
-                UpdatedOn = entity.UpdatedOn,
-                DeletedOn = entity.DeletedOn,
-                CreatedBy = ShouldMapUser(context) ? entity.CreatedBy.ToModel(UserPostMappingsContext.Tag) : null,
-                UpdatedBy = ShouldMapUser(context) ? entity.UpdatedBy?.ToModel(UserPostMappingsContext.Tag) : null,
-                DeletedBy = ShouldMapUser(context) ? entity.DeletedBy?.ToModel(UserPostMappingsContext.Tag) : null,
+                Name = entity.Name
             };
         }
     }

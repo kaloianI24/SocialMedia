@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Service.Cloud;
 using SocialMedia.Service.Mappings;
@@ -108,8 +109,16 @@ namespace SocialMedia.Areas.Identity.Pages.Account
                 
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
-                string profilePhotoUrl = await this.UploadPhoto(Input.ProfilePicture);
-                user.ProfilePicture = new CloudResourceServiceModel { CloudUrl = profilePhotoUrl }.ToEntity();
+
+                if (user.ProfilePicture is not null)
+                {
+                    string profilePhotoUrl = await UploadPhoto(Input.ProfilePicture);
+                    user.ProfilePicture = new CloudResourceServiceModel { CloudUrl = profilePhotoUrl }.ToEntity();
+                }
+                else
+                {
+                    user.ProfilePicture = new CloudResourceServiceModel { CloudUrl = "https://res.cloudinary.com/socialmedia-itcareer/image/upload/v1739556301/User_pfp_simple_qggx4n.jpg" }.ToEntity();
+                }
 
                 await _userStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);

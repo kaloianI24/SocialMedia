@@ -68,8 +68,11 @@ namespace SocialMedia.Service.Post
 
             post.Tags = tags;            
 
-            post.TaggedUsers = await userRepository.GetUsersByIdsAsync(model.TaggedUsersId);
-
+            if(model.TaggedUsersId != null)
+            {
+                post.TaggedUsers = await userRepository.GetUsersByIdsAsync(model.TaggedUsersId);
+            }
+            
             await postRepository.CreateAsync(post);
 
             return post.ToModel(UserPostMappingsContext.Post);

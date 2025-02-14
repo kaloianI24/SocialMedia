@@ -17,7 +17,9 @@
         {
             <div class="post">
                 <div class="post-header">
-                    <img src="@Model.ProfilePicture.CloudUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
+                    <a href="/Post/MyPage?userId=@Model.Id">
+                        <img src="@Model.ProfilePicture.CloudUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
+                    </a>
                     <div class="post-info">
                         <span class="username">@Model.UserName</span>
                         <span class="location">@post.CreatedOn</span> <span class="location"></span>
