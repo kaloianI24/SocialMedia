@@ -6,7 +6,10 @@ using SocialMedia.Data.Repositories;
 using SocialMedia.Seed;
 using SocialMedia.Service.Cloud;
 using SocialMedia.Service.Post;
+using SocialMedia;
 using System;
+using SocialMedia.Service;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SocialMedia
 {
@@ -15,21 +18,25 @@ namespace SocialMedia
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            
+
             // Fetch the MySQL connection string from appsettings.json
-            var connectionString = builder.Configuration.GetConnectionString("SocialMediaDbContextConnection") 
+            var connectionString = builder.Configuration.GetConnectionString("SocialMediaDbContextConnection")
                 ?? throw new InvalidOperationException("Connection string 'SocialMediaDbContextConnection' not found.");
-            
+
             // Register DbContext for MySQL - REMOVE the SQL Server registration
             builder.Services.AddDbContext<SocialMediaDbContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
             // Configure Identity
-            builder.Services.AddDefaultIdentity<SocialMediaUser>(options => 
+            builder.Services.AddDefaultIdentity<SocialMediaUser>(options =>
                 options.SignIn.RequireConfirmedAccount = false)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<SocialMediaDbContext>();
 
+            // Register Email Sender
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+            // Register other services
             builder.Services.AddTransient<PostRepository>();
             builder.Services.AddTransient<CloudResourceRepository>();
             builder.Services.AddTransient<TagRepository>();
@@ -38,10 +45,9 @@ namespace SocialMedia
             builder.Services.AddTransient<ICloudinaryService, CloudinaryService>();
             builder.Services.AddTransient<ISocialMediaPostService, SocialMediaPostService>();
 
-
             // Add services to the container
             builder.Services.AddControllersWithViews();
-            builder.Services.AddRazorPages();           
+            builder.Services.AddRazorPages();
 
             var app = builder.Build();
 
@@ -58,7 +64,7 @@ namespace SocialMedia
             app.UseRouting();
             app.UseAuthentication();  // Ensure Identity authentication is used
             app.UseAuthorization();
-            
+
             // Map static assets and routes
             app.MapControllerRoute(
                 name: "default",

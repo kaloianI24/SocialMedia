@@ -7,7 +7,8 @@ using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Models;
 using SocialMedia.Service.Mappings;
 using SocialMedia.Web.Models.Post;
-using static SocialMedia.Service.Mappings.SocialMediaPostMappings;
+using System.Threading.Tasks;
+using System;
 
 namespace SocialMedia.Controllers
 {
@@ -16,11 +17,13 @@ namespace SocialMedia.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly UserManager<SocialMediaUser> _userManager;
+        private readonly IEmailSender _emailSender;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<SocialMediaUser> userManager)
+        public HomeController(ILogger<HomeController> logger, UserManager<SocialMediaUser> userManager, IEmailSender emailSender)
         {
             _logger = logger;
             _userManager = userManager;
+            _emailSender = emailSender;
         }
 
         public async Task<IActionResult> Index()
@@ -45,7 +48,7 @@ namespace SocialMedia.Controllers
             .Include(u => u.Posts)
                 .ThenInclude(p => p.Attachments)
              .Include(u => u.Posts)
-                .ThenInclude(p=> p.Tags)
+                .ThenInclude(p => p.Tags)
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.Attachments)
             .Include(u => u.TaggedPosts)
@@ -53,6 +56,46 @@ namespace SocialMedia.Controllers
             .Include(u => u.Followers)
             .Include(u => u.Friends)
             .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
+        }
+
+        public async Task<IActionResult> Register()
+        {
+            var user = new SocialMediaUser { UserName = "newUser", Email = "user@example.com" }; // Assume registration happened here
+           
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            var confirmationLink = Url.Action("ConfirmEmail", "Home", new { userId = user.Id, token = token }, protocol: Request.Scheme);
+
+           
+            string subject = "Email Confirmation";
+            string message = $"Please confirm your email by clicking the link below: <a href='{confirmationLink}'>Confirm Email</a>";
+
+            await _emailSender.SendEmailAsync(user.Email, subject, message);
+
+            return View();
+        }
+
+       
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (userId == null || token == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }
