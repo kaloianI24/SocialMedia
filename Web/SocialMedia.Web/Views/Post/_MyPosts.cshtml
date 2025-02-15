@@ -7,15 +7,15 @@
 
 @model SocialMediaUserServiceModel
 <div class="main-content2">
-    @if (Model.Posts.Count == 0)
+    @if (!Model.Posts.Any(p => p.DeletedOn == null))
     {
         <h1>You don't have posts</h1>
     }
     else
     {
-        @foreach (var post in @Model.Posts.OrderByDescending(p => p.CreatedOn))
+        @foreach (var post in @Model.Posts.Where(p => p.DeletedOn == null).OrderByDescending(p => p.CreatedOn))
         {
-            <div class="post">
+            <div class="post" data-post-id="@post.Id">
                 <div class="post-header">
                     <a href="/Post/MyPage?userId=@Model.Id">
                         <img src="@Model.ProfilePicture.CloudUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
@@ -24,6 +24,10 @@
                         <span class="username">@Model.UserName</span>
                         <span class="location">@post.CreatedOn</span> <span class="location"></span>
                     </div>
+                    @if ((bool)ViewData["IsOwner"])
+                    {
+                        <button type="button" class="btn-delete-post">Delete post</button>
+                    }
                 </div>
                 <div class="carousel">
                     <div class="carousel-images">
@@ -80,3 +84,25 @@
     }
 </div>
 
+<script>
+    document.querySelectorAll('.btn-delete-post').forEach(b => b.addEventListener('click', (e) => {
+        const postId = e.target.closest('.post').dataset.postId;
+        console.log(postId);
+
+        fetch('/Post/DeletePost?postId=' + postId, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then((res) => {
+            if (res.ok) {
+                document.querySelector(`.post[data-post-id="${postId}"]`).remove();
+                alert('Post deleted successfully!');
+            } else {
+                alert('Failed to delete the post.');
+            }
+        })
+        .catch((error) => console.error(error));
+    }));
+</script>

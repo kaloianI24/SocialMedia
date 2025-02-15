@@ -18,7 +18,7 @@
     {
         @foreach (var post in @Model.OrderByDescending(p => p.CreatedOn))
         {
-            <div class="post">
+            <div class="post" data-post-id="@post.Id">
                 <div class="post-header">
                     <a href="/Post/MyPage?userId=@post.CreatedById">
                         <img src="@post.ProfilePictureUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
@@ -27,6 +27,10 @@
                         <span class="username">@post.UserName</span>
                         <span class="location">@post.CreatedOn</span> <span class="location"></span>
                     </div>
+                    @if ((bool)ViewData["IsOwner"])
+                    {
+                        <button type="button" class="btn-untagging-post">Remove me from post</button>
+                    }
                 </div>
                 <div class="carousel">
                     <div class="carousel-images">
@@ -82,3 +86,25 @@
         }
     }
 </div>
+<script>
+    document.querySelectorAll('.btn-untagging-post').forEach(b => b.addEventListener('click', (e) => {
+        const postId = e.target.closest('.post').dataset.postId;
+        console.log(postId);
+
+        fetch('/Post/RemoveTaggedUser?postId=' + postId, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then((res) => {
+            if (res.ok) {
+                document.querySelector(`.post[data-post-id="${postId}"]`).remove();
+                alert('You are successfully removed from the post!');
+            } else {
+                alert('Failed to remove you from the post.');
+            }
+        })
+        .catch((error) => console.error(error));
+    }));
+</script>

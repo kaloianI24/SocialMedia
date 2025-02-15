@@ -1,4 +1,5 @@
-﻿using SocialMedia.Data.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using SocialMedia.Data.Models;
 using SocialMedia.Service.Models;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,10 @@ namespace SocialMedia.Service.Post
     public interface ISocialMediaPostService : IGenericService<SocialMediaPost, PostServiceModel>
     {
         public IQueryable<PostServiceModel> GetAllTaggedPosts(string id);
+
+        public Task<PostServiceModel> RecoverAsync(string id);
+
+        public Task<PostServiceModel> RemoveTaggedUser(string userId, string postId);
     }
 
 }

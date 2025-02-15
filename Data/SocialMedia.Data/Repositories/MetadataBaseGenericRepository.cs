@@ -36,7 +36,7 @@ namespace SocialMedia.Data.Repositories
             return await base.DeleteAsync(entity);
         }
 
-        private async Task<SocialMediaUser> GetUser()
+        protected async Task<SocialMediaUser> GetUser()
         {
             string? userId = this._httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 

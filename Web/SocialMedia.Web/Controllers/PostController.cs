@@ -85,14 +85,7 @@ namespace SocialMedia.Controllers
             var currentUserId = currentUser.Id;
             var targetUserId = userId ?? currentUserId;
             var targetUser = await GetUserById(targetUserId);
-            if(currentUserId == targetUserId)
-            {
-                ViewData["IsOwner"] = true;
-            }
-            else
-            {
-                ViewData["IsOwner"] = false;
-            }
+            ViewData["IsOwner"] = (currentUserId == targetUserId);
             ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
             return View(targetUser.ToModel(UserPostMappingsContext.User));
         }
@@ -101,21 +94,56 @@ namespace SocialMedia.Controllers
         {
             var user = await GetUserById(id);
             var currentUser = await GetUser();
+            var currentUserId = currentUser.Id;
+            var targetUserId = id ?? currentUserId;
+            var targetUser = await GetUserById(targetUserId);
 
             switch (type)
             {
                 case "MyPosts":
-                    ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
+                    ViewData["IsOwner"] = (currentUserId == targetUserId);
                     return PartialView("_MyPosts", user.ToModel(UserPostMappingsContext.User));
 
                 case "TaggedPosts":
+                    ViewData["IsOwner"] = (currentUserId == targetUserId);
                     var webModels = await TaggedPosts(user.Id);
-                    ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
                     return PartialView("_TaggedPosts", webModels);
+
+                case "DeletedPosts":
+                    ViewData["IsOwner"] = (currentUserId == targetUserId);
+                    return PartialView("_DeletedPosts", user.ToModel(UserPostMappingsContext.User));
 
                 default:
                     return BadRequest();
             }
+        }
+
+
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> DeletePost([FromQuery] string postId)
+        {
+            var post = await _socialMediaPostService.DeleteAsync(postId);
+
+            return NoContent();
+        }
+
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> Recover([FromQuery] string postId)
+        {
+            var post = await _socialMediaPostService.RecoverAsync(postId);
+
+            return NoContent();
+        }
+
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> RemoveTaggedUser([FromQuery] string postId)
+        {
+            var currentUser = await GetUser();
+            await _socialMediaPostService.RemoveTaggedUser(currentUser.Id, postId);
+            return NoContent();
         }
 
         private async Task<List<TaggedPostWebModel>> TaggedPosts(string userId)
@@ -155,6 +183,8 @@ namespace SocialMedia.Controllers
                 .ThenInclude(p => p.Attachments)
              .Include(u => u.Posts)
                 .ThenInclude(p => p.Tags)
+             .Include(u => u.Posts)
+                .ThenInclude(p => p.DeletedBy)
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.Attachments)
             .Include(u => u.TaggedPosts)
@@ -172,6 +202,8 @@ namespace SocialMedia.Controllers
                 .ThenInclude(p => p.Attachments)
              .Include(u => u.Posts)
                 .ThenInclude(p => p.Tags)
+             .Include(u => u.Posts)
+                .ThenInclude(p => p.DeletedBy)
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.Attachments)
             .Include(u => u.TaggedPosts)

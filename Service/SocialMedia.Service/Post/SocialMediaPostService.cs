@@ -3,11 +3,6 @@ using SocialMedia.Data.Models;
 using SocialMedia.Data.Repositories;
 using SocialMedia.Service.Mappings;
 using SocialMedia.Service.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static SocialMedia.Service.Mappings.SocialMediaPostMappings;
 
 namespace SocialMedia.Service.Post
@@ -80,26 +75,55 @@ namespace SocialMedia.Service.Post
 
         public IQueryable<PostServiceModel> GetAllTaggedPosts(string id)
         {
-            return postRepository.GetAll().Where(p => p.TaggedUsers.Any(u => u.Id == id))
+            return postRepository.GetAll().Where(p => p.TaggedUsers.Any(u => u.Id == id) && p.DeletedBy == null)
                 .Include(p => p.Attachments)
                 .Include(p => p.CreatedBy)
                 .ThenInclude(c => c.ProfilePicture)
                 .Include(p => p.Tags)
                 .Select(p => p.ToModel(UserPostMappingsContext.Post));
         }
-        public Task<PostServiceModel> DeleteAsync(string id)
+        public async Task<PostServiceModel> DeleteAsync(string id)
         {
-            throw new NotImplementedException();
+            var targetPost = await postRepository.GetAll().FirstOrDefaultAsync(p => p.Id == id);
+            await postRepository.SoftDeletePost(targetPost);
+            return targetPost.ToModel(UserPostMappingsContext.Post);
         }
 
+        public async Task<PostServiceModel> RecoverAsync(string id)
+        {
+            var targetPost = await postRepository.GetAll().FirstOrDefaultAsync(p => p.Id == id);
+            await postRepository.Recover(targetPost);
+            return targetPost.ToModel(UserPostMappingsContext.Post);
+        }
+
+        public async Task<PostServiceModel> RemoveTaggedUser(string userId, string postId)
+        {
+            var targetPost = await postRepository.GetAll()
+                .Include(p => p.TaggedUsers)
+                .ThenInclude(u => u.ProfilePicture)
+                .Include(p => p.Tags)
+                .Include(p => p.Attachments)
+                .Include(p => p.CreatedBy)
+                .ThenInclude(u => u.ProfilePicture)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            var targetUser = targetPost.TaggedUsers.FirstOrDefault(u => u.Id == userId);
+            if (targetUser != null)
+            {
+                await postRepository.RemoveTaggedUser(targetUser, targetPost);
+            }
+            return targetPost.ToModel(UserPostMappingsContext.Post);
+        }
         public IQueryable<PostServiceModel> GetAll()
         {
             throw new NotImplementedException();
         }
 
-        public Task<PostServiceModel> GetByIdAsync(string id)
+        public async Task<PostServiceModel> GetByIdAsync(string id)
         {
-            throw new NotImplementedException();
+            var targetPost = await postRepository.GetAll().FirstOrDefaultAsync(p => p.Id == id);
+            var targetPostServiceModel = targetPost.ToModel(UserPostMappingsContext.Post);
+            return targetPostServiceModel;
         }
 
         public Task<PostServiceModel> InternalCreateAsync(PostServiceModel model)

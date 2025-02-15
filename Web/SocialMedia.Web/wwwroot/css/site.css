@@ -611,3 +611,26 @@ body {
             display: inline-block;
             cursor: pointer;
         }
+
+.btn-delete-post{
+    margin-left: 180px;
+    margin-right: 0px;
+    background-color: indianred;
+    border-radius: 20px;
+    height: 30px;
+}
+
+.btn-recover-post {
+    margin-left: 170px;
+    margin-right: 0px;
+    background-color: yellowgreen;
+    border-radius: 20px;
+    height: 30px;
+}
+
+.btn-untagging-post {
+    margin-left: 120px;
+    background-color: indianred;
+    border-radius: 20px;
+    height: 30px;
+}

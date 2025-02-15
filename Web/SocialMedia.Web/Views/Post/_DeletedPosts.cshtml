@@ -1,0 +1,107 @@
+﻿@using SocialMedia.Areas.Identity.Data
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@model SocialMediaUserServiceModel
+@if ((bool)ViewData["IsOwner"])
+{    <div class="main-content2">
+        @if (!Model.Posts.Any(p => p.DeletedOn != null))
+        {
+            <h1>You don't have posts</h1>
+        }
+        else
+        {
+            @foreach (var post in @Model.Posts.Where(p => p.DeletedOn is not null).OrderByDescending(p => p.CreatedOn))
+            {
+                <div class="post" data-post-id="@post.Id">
+                    <div class="post-header">
+                        <a href="/Post/MyPage?userId=@Model.Id">
+                            <img src="@Model.ProfilePicture.CloudUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
+                        </a>
+                        <div class="post-info">
+                            <span class="username">@Model.UserName</span>
+                            <span class="location">@post.CreatedOn</span> <span class="location"></span>
+                        </div>
+                        <button type="button" class="btn-recover-post">Recover post</button>
+                    </div>
+                    <div class="carousel">
+                        <div class="carousel-images">
+                            @foreach (var photo in post.Attachments)
+                            {
+                                <img src=@photo.CloudUrl.Replace("http://", "https://") alt="Post Image" class="post-image">
+                            }
+                        </div>
+                        <button type="button" button class="carousel-arrow left-arrow">&lt;</button>
+                        <button type="button" button class="carousel-arrow right-arrow">&gt;</button>
+                        <div class="carousel-indicators">
+                            <span class="dot active"></span>
+                            @for (int i = 0; i < post.Attachments.Count - 1; i++)
+                            {
+                                <span class="dot"></span>
+                            }
+                        </div>
+                        <div class="image-counter">1 / @post.Attachments.Count</div>
+                    </div>
+
+
+                    <div class="post-actions">
+                        <div class="post-likes">
+                            <div class="likes-count">
+                                <img src="~/images/heart.svg" class="reaction-heart">
+                                <div class="count-likes-number">Reactions.Count</div>
+                                <img src="~/images/comment.svg" class="comment-image">
+                                <div class="count-likes-number">Comments.Count</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="post-caption">
+                        <span class="username">@Model.UserName</span>
+                        <p class="post-description">
+                            @string.Join(" ", @post.Description.Split(" ").Take(10))
+                            <span class="post-description-hidden-text">
+                                @string.Join(" ", @post.Description.Split(" ").Skip(10))
+                            </span>
+                            @if (post.Description.Split(" ").Length > 10)
+                            {
+                                <button type="button" class="toggle-btn">Read more</button>
+                            }
+                        </p>
+                        <div class="tags">
+                            @foreach (var tag in @post.Tags)
+                            {
+                                <span>#@tag.Name</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+            }
+        }
+    </div>
+}
+
+
+<script>
+        document.querySelectorAll('.btn-recover-post').forEach(b => b.addEventListener('click', (e) => {
+        const postId = e.target.closest('.post').dataset.postId;
+        console.log(postId);
+            fetch('/Post/Recover?postId=' + postId, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then((res) => {
+            if (res.ok) {
+                document.querySelector(`.post[data-post-id="${postId}"]`).remove();
+                alert('Post recovered successfully!');
+            } else {
+                alert('Failed to recover the post.');
+            }
+        })
+        .catch((error) => console.error(error));
+    }));
+</script>
