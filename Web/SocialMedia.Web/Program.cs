@@ -29,7 +29,7 @@ namespace SocialMedia
 
             // Configure Identity
             builder.Services.AddDefaultIdentity<SocialMediaUser>(options =>
-                options.SignIn.RequireConfirmedAccount = true)
+                options.SignIn.RequireConfirmedAccount = false)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<SocialMediaDbContext>();
 
