@@ -1,0 +1,20 @@
+﻿@page
+@model SocialMedia.Areas.Identity.Pages.Account.RegisterConfModel
+@{
+    ViewData["Title"] = "Registration Confirmation";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>Thank you for registering! A confirmation email has been sent to your email address.</p>
+
+@if (Model.Email != null)
+{
+    <p>Please check your email (<strong>@Model.Email</strong>) and follow the instructions to confirm your account.</p>
+}
+else
+{
+    <p>If you did not receive an email, please check your spam folder or try again later.</p>
+}
+
+<a href="/">Return to homepage</a>
