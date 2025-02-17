@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SocialMedia.Service.Post
+namespace SocialMedia.Service.SocialMediaPost
 {
-    public interface ISocialMediaPostService : IGenericService<SocialMediaPost, PostServiceModel>
+    public interface ISocialMediaPostService : IGenericService<Data.Models.SocialMediaPost, PostServiceModel>
     {
         public IQueryable<PostServiceModel> GetAllTaggedPosts(string id);
 

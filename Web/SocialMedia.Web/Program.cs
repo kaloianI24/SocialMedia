@@ -5,7 +5,7 @@ using SocialMedia.Data;
 using SocialMedia.Data.Repositories;
 using SocialMedia.Seed;
 using SocialMedia.Service.Cloud;
-using SocialMedia.Service.Post;
+using SocialMedia.Service.SocialMediaPost;
 using SocialMedia;
 using System;
 using SocialMedia.Service;

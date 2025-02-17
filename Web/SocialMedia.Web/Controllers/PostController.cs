@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Service.Cloud;
 using SocialMedia.Service.Models;
-using SocialMedia.Service.Post;
+using SocialMedia.Service.SocialMediaPost;
 using SocialMedia.Web.Models.Post;
 using System.Net.Mail;
 using SocialMedia.Service.Mappings;
@@ -12,6 +12,7 @@ using static SocialMedia.Service.Mappings.SocialMediaPostMappings;
 using System.Globalization;
 using SocialMedia.Web.Models;
 using SocialMedia.Web.Models.User;
+using SocialMedia.Service.SocialMediaPost;
 
 namespace SocialMedia.Controllers
 {

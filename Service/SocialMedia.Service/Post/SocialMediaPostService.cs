@@ -5,7 +5,7 @@ using SocialMedia.Service.Mappings;
 using SocialMedia.Service.Models;
 using static SocialMedia.Service.Mappings.SocialMediaPostMappings;
 
-namespace SocialMedia.Service.Post
+namespace SocialMedia.Service.SocialMediaPost
 {
     public class SocialMediaPostService : ISocialMediaPostService
     {
@@ -27,7 +27,7 @@ namespace SocialMedia.Service.Post
 
         public async Task<PostServiceModel> CreateAsync(PostServiceModel model)
         {
-            SocialMediaPost post = model.ToEntity();
+            Data.Models.SocialMediaPost post = model.ToEntity();
 
             //post.Attachments = post.Attachments.Select(async attachment =>
             //{
@@ -131,7 +131,7 @@ namespace SocialMedia.Service.Post
             throw new NotImplementedException();
         }
 
-        public Task<SocialMediaPost> InternalCreateAsync(SocialMediaPost model)
+        public Task<Data.Models.SocialMediaPost> InternalCreateAsync(Data.Models.SocialMediaPost model)
         {
             throw new NotImplementedException();
         }
