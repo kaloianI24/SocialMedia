@@ -11,8 +11,8 @@ namespace SocialMedia.Data.Models
     {
         public SocialMediaUser User { get; set; }
 
-        public Comment Comment { get; set; }
+        public SocialMediaComment Comment { get; set; }
 
-        public Reaction Reaction { get; set; }
+        public SocialMediaReaction Reaction { get; set; }
     }
 }

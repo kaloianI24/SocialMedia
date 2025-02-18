@@ -13,6 +13,6 @@ namespace SocialMedia.Data.Models
 
         public SocialMediaPost Post { get; set; }
 
-        public Comment Comment { get; set; }
+        public SocialMediaComment Comment { get; set; }
     }
 }

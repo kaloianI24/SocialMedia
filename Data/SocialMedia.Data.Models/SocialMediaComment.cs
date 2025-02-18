@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SocialMedia.Data.Models
 {
-    public class Comment : MetadataBaseEntity
+    public class SocialMediaComment : MetadataBaseEntity
     {
         public string Content { get; set; }
 
@@ -15,6 +15,6 @@ namespace SocialMedia.Data.Models
 
         public List<UserCommentReaction> Reactions { get; set; }
 
-        public List<Comment> Replies { get; set; }
+        public List<SocialMediaComment> Replies { get; set; }
     }
 }

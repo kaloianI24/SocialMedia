@@ -9,10 +9,10 @@ namespace SocialMedia.Data
     {
 
         public DbSet<CloudResource> Attachments { get; set; }
-        public DbSet<Comment> Comments { get; set; }
+        public DbSet<SocialMediaComment> Comments { get; set; }
         public DbSet<FriendRequest> FriendRequests { get; set; }
         public DbSet<SocialMediaPost> Posts { get; set; }
-        public DbSet<Reaction> Reactions { get; set; }
+        public DbSet<SocialMediaReaction> Reactions { get; set; }
         public DbSet<SocialMediaRole> SocialMediaRoles { get; set; }
         public DbSet<SocialMediaTag> Tags { get; set; }
 
@@ -47,7 +47,7 @@ namespace SocialMedia.Data
                 .HasForeignKey(p => p.DeletedById)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<Comment>()
+            builder.Entity<SocialMediaComment>()
                 .HasMany(c => c.Attachments)
                 .WithMany();
 

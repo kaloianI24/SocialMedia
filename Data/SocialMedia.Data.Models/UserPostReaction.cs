@@ -13,7 +13,7 @@ namespace SocialMedia.Data.Models
 
         public SocialMediaPost Post { get; set; }
 
-        public Reaction Reaction { get; set; }
+        public SocialMediaReaction Reaction { get; set; }
     }
 }
 

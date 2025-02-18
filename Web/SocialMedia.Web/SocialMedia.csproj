@@ -29,5 +29,10 @@
     <ProjectReference Include="..\SocialMedia.Web.Models\SocialMedia.Web.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Areas\Administration\Data\" />
+    <Folder Include="Areas\Administration\Models\" />
+  </ItemGroup>
+
 </Project>
  
