@@ -8,7 +8,8 @@ namespace SocialMedia.Service.Mappings
         public enum UserPostMappingsContext
         {
             Post,
-            User
+            User,
+            Reaction
         }
         public static SocialMediaPost ToEntity(this PostServiceModel model)
         {
@@ -34,7 +35,7 @@ namespace SocialMedia.Service.Mappings
                 CreatedOn = entity.CreatedOn,
                 UpdatedOn = entity.UpdatedOn,
                 DeletedOn = entity.DeletedOn,
-                CreatedBy = ShouldMapUser (context)? entity.CreatedBy.ToModel(UserPostMappingsContext.Post) : null,
+                CreatedBy = ShouldMapUser(context) ? entity.CreatedBy.ToModel(UserPostMappingsContext.Post) : null,
                 UpdatedBy = ShouldMapUser(context) ? entity.UpdatedBy?.ToModel(UserPostMappingsContext.Post) : null,
                 DeletedBy = ShouldMapUser(context) ? entity.DeletedBy?.ToModel(UserPostMappingsContext.Post) : null,
             };
@@ -47,7 +48,7 @@ namespace SocialMedia.Service.Mappings
 
         public static bool ShouldMapUser(UserPostMappingsContext context)
         {
-            return context == UserPostMappingsContext.Post;
+            return context == UserPostMappingsContext.Post || context == UserPostMappingsContext.Reaction;
         }
     }
 }

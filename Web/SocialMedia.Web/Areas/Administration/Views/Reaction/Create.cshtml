@@ -1,8 +1,20 @@
 ﻿@using SocialMedia.Web.Models.Reaction
 @model CreateReactionModel
-<h1>Create a Reaction</h1>
+<h1>Reactions</h1>
 <hr class="hr-2 bg-black"/>
 
 <form>
-
+    <hr class="hr-2 mb-5 hr-white" />
+    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+    <div class="mb-3">
+        <label asp-for="@Model.Label" class="form-label fw-bold">Label</label>
+        <input asp-for="@Model.Label" class="form-control" aria-required="true" placeholder="Reaction label..." />
+        <span asp-validation-for="@Model.Label" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="@Model.Emote" class="form-label fw-bold">Reaction</label>
+        <input asp-for="@Model.Emote" aria-required="true" class="form-control form-control-lg" type="file">
+        <span asp-validation-for="@Model.Emote" class="text-danger"></span>
+    </div>
+    <button class="btn btn-secondary mt-4" type="submit">Create</button>
 </form>
