@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Data.Models;
+using System;
 
 namespace SocialMedia.Data.Repositories
 {
@@ -31,5 +33,19 @@ namespace SocialMedia.Data.Repositories
             _context.SaveChanges();
             return post;
         }
+
+        public async Task<List<SocialMediaPost>> UserTaggedPosts(string userId)
+        {
+            return await _context.Posts
+                .Include(p => p.TaggedUsers)
+                .Where(p => p.TaggedUsers.Any(u => u.Id == userId))
+                .ToListAsync();
+        }
+        public async Task HardDeleteAsync(SocialMediaPost post)
+        {
+            _context.Remove(post);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

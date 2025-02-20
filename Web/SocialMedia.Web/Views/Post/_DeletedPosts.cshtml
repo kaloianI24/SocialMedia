@@ -23,9 +23,10 @@
                         </a>
                         <div class="post-info">
                             <span class="username">@Model.UserName</span>
-                            <span class="location">@post.CreatedOn</span> <span class="location"></span>
+                            <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
                         </div>
                         <button type="button" class="btn-recover-post">Recover post</button>
+                        <button type="button" class="btn-deletePermanently-post">Delete Permanently</button>
                     </div>
                     <div class="carousel">
                         <div class="carousel-images">
@@ -75,6 +76,14 @@
                                 <span>#@tag.Name</span>
                             }
                         </div>
+                        <div class="taggedUsers">
+                            @for (int i = 0; i < post.TaggedUsersId.Count; i++)
+                            {
+                                <a class="links" href="/Post/MyPage?userId=@post.TaggedUsersId.ElementAt(i)">
+                                    <span class="taggedUsers-text">@('@')@post.TaggedUsersUserName.ElementAt(i)</span>
+                                </a>
+                            }
+                        </div>
                     </div>
                 </div>
 
@@ -85,7 +94,7 @@
 
 
 <script>
-        document.querySelectorAll('.btn-recover-post').forEach(b => b.addEventListener('click', (e) => {
+    document.querySelectorAll('.btn-recover-post').forEach(b => b.addEventListener('click', (e) => {
         const postId = e.target.closest('.post').dataset.postId;
         console.log(postId);
             fetch('/Post/Recover?postId=' + postId, {
@@ -100,6 +109,26 @@
                 alert('Post recovered successfully!');
             } else {
                 alert('Failed to recover the post.');
+            }
+        })
+        .catch((error) => console.error(error));
+    }));
+
+     document.querySelectorAll('.btn-deletePermanently-post').forEach(b => b.addEventListener('click', (e) => {
+        const postId = e.target.closest('.post').dataset.postId;
+        console.log(postId);
+            fetch('/Post/DeletePermanently?postId=' + postId, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then((res) => {
+            if (res.ok) {
+                document.querySelector(`.post[data-post-id="${postId}"]`).remove();
+                alert('Post deleted successfully!');
+            } else {
+                alert('Failed to delete the post.');
             }
         })
         .catch((error) => console.error(error));

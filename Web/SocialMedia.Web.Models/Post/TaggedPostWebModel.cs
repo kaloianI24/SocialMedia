@@ -19,5 +19,8 @@ namespace SocialMedia.Web.Models.Post
         public string ProfilePictureUrl { get; set; }
         public DateTime CreatedOn { get; set; }
         public string CreatedById { get; set; }
+
+        public List<string> TaggedUsersUserNames { get; set; } = new List<string>();
+        public List<string> TaggedUsersId { get; set; } = new List<string>();
     }
 }

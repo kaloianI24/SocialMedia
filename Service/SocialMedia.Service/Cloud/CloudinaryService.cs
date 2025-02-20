@@ -119,6 +119,55 @@ namespace SocialMedia.Service.Cloud
             return null;
         }
 
+        public async Task<bool> DeleteFileAsync(string cloudUrl)
+        {
+            try
+            {
+                Uri uri = new Uri(cloudUrl);
+                string publicId = uri.AbsolutePath.Split(new[] { "/upload/" }, StringSplitOptions.None).Last();
+                publicId = Path.GetFileNameWithoutExtension(publicId);
+
+                if (string.IsNullOrEmpty(publicId))
+                {
+                    _logger.LogError("Invalid Cloudinary URL: {0}", cloudUrl);
+                    return false;
+                }
+
+                var currentTimestamp = GetUnixTimestamp();
+                var signature = GetSignature(currentTimestamp, publicId);
+
+                var requestData = new Dictionary<string, string>
+                {
+                    { "public_id", publicId },
+                    { "timestamp", currentTimestamp },
+                    { "api_key", GetApiKey() },
+                    { "signature", signature }
+                };
+
+                var requestContent = new FormUrlEncodedContent(requestData);
+                var httpClient = new HttpClient();
+                var cloudinaryDeleteUrl = $"https://api.cloudinary.com/v1_1/{configuration["Cloudinary:CloudName"]}/image/destroy";
+
+                var httpResponse = await httpClient.PostAsync(cloudinaryDeleteUrl, requestContent);
+                var responseJson = await httpResponse.Content.ReadAsStringAsync();
+
+                var responseDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(responseJson);
+                if (httpResponse.IsSuccessStatusCode && responseDict.ContainsKey("result") && responseDict["result"].ToString() == "ok")
+                {
+                    return true;
+                }
+
+                _logger.LogError("Cloudinary deletion failed: {0}", responseJson);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception while deleting file from Cloudinary");
+                return false;
+            }
+        }
+
+
         private string StripExtension(string fileName)
         {
             return fileName

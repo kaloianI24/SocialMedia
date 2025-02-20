@@ -1,4 +1,6 @@
-﻿using SocialMedia.Areas.Identity.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SocialMedia.Areas.Identity.Data;
+using SocialMedia.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +27,19 @@ namespace SocialMedia.Data.Repositories
                 users.Add(user);
             }
             return users;
+        }
+
+        public async Task<SocialMediaUser> GetUserById(string id)
+        {
+            return _context.Users.FirstOrDefault(u => u.Id == id);
+        }
+
+        public async Task<SocialMediaUser> GetUserFullInformation(string id)
+        {
+            return  _context.Users
+                .Include(u => u.Posts)
+                    .ThenInclude(p => p.Attachments)
+                .FirstOrDefault(u => u.Id == id);
         }
     }
 }

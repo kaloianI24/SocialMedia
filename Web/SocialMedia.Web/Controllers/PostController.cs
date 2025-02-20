@@ -147,6 +147,48 @@ namespace SocialMedia.Controllers
             return NoContent();
         }
 
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> DeletePermanently([FromQuery] string postId)
+        {
+            var post = await _socialMediaPostService.DeletePermanentlyAsync(postId);
+
+            return NoContent();
+        }
+
+        [HttpGet]
+        [Consumes("application/json")]
+        public async Task<IActionResult> Update([FromQuery] string postId)
+        {
+            var post = await _socialMediaPostService.GetByIdAsync(postId);
+            var postWebModel = new UpdatePostWebModel
+            {
+                Id = post.Id,
+                Description = post.Description,
+                Attachments = post.Attachments,
+                TaggedUsersId = post.TaggedUsersId,
+                TaggedUsersUserName = post.TaggedUsersUserName,
+                Tags = string.Join(",",post.Tags.Select(t => t.Name)),
+                RemovedAttachmentIds = null,
+            };
+            var currentUser = await GetUser();
+            ViewData["Users"] = _userManager.Users.Include(u => u.ProfilePicture).Where(u => u.Id != currentUser.Id).Select(u => new UserWebModel
+            {
+                Id = u.Id,
+                UserName = u.UserName,
+                ProfilePictureUrl = u.ProfilePicture.CloudUrl
+            })
+           .ToList();
+            return View(postWebModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateConfirm(UpdatePostWebModel post)
+        {
+            await _socialMediaPostService.UpdateAsync(post);
+            return Redirect("MyPage");
+        }
+
         private async Task<List<TaggedPostWebModel>> TaggedPosts(string userId)
         {
             var posts = _socialMediaPostService.GetAllTaggedPosts(userId).ToList();
@@ -159,7 +201,9 @@ namespace SocialMedia.Controllers
                 UserName = p.CreatedBy.UserName,
                 ProfilePictureUrl = p.CreatedBy.ProfilePicture?.CloudUrl,
                 CreatedOn = p.CreatedOn,
-                CreatedById = p.CreatedBy.Id
+                CreatedById = p.CreatedBy.Id,
+                TaggedUsersId = p.TaggedUsersId.ToList(),
+                TaggedUsersUserNames = p.TaggedUsersUserName.ToList(),
             }).ToList();
 
             return webModels;
@@ -185,6 +229,8 @@ namespace SocialMedia.Controllers
              .Include(u => u.Posts)
                 .ThenInclude(p => p.Tags)
              .Include(u => u.Posts)
+                .ThenInclude(p => p.TaggedUsers)
+             .Include(u => u.Posts)
                 .ThenInclude(p => p.DeletedBy)
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.Attachments)
@@ -205,6 +251,8 @@ namespace SocialMedia.Controllers
                 .ThenInclude(p => p.Tags)
              .Include(u => u.Posts)
                 .ThenInclude(p => p.DeletedBy)
+            .Include(u => u.Posts)
+                .ThenInclude(p => p.TaggedUsers)
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.Attachments)
             .Include(u => u.TaggedPosts)

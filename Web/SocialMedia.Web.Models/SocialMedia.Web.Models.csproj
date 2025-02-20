@@ -17,4 +17,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Service\SocialMedia.Service.Models\SocialMedia.Service.Models.csproj" />
+  </ItemGroup>
+
 </Project>

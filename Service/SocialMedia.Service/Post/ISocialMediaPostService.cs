@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SocialMedia.Data.Models;
 using SocialMedia.Service.Models;
+using SocialMedia.Web.Models.Post;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace SocialMedia.Service.SocialMediaPost
         public Task<PostServiceModel> RecoverAsync(string id);
 
         public Task<PostServiceModel> RemoveTaggedUser(string userId, string postId);
+        public Task<bool> DeletePermanentlyAsync(string id);
+        public Task<PostServiceModel> UpdateAsync(UpdatePostWebModel model);
     }
 
 }

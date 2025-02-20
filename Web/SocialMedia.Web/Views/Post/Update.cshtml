@@ -1,19 +1,19 @@
 ﻿@using SocialMedia.Web.Models.Post
 @using SocialMedia.Web.Models.User
+@using SocialMedia.Service.Models
 
-@model CreatePostModel
-
+@model UpdatePostWebModel
 
 @{
-    ViewData["Title"] = "Create a new post";
-    var users = (List<UserWebModel>)this.ViewData["Users"];
+    ViewData["Title"] = "Update Post";
+    var users = (List<UserWebModel>)ViewData["Users"];
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create a new post</title>
+    <title>Update Post</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -64,40 +64,37 @@
                 border-color: #0056b3;
                 outline: none;
             }
-
-        #tag-input {
-         }   
-
-         .tags-input-wrapper { 
+        /* Tags Input */
+        .tags-input-wrapper {
             width: 100%;
-              flex-wrap: wrap;   
-              align-items: center;   
-              padding: 5px;   
-              border: 1px solid #ccc;   
-              border-radius: 8px;   
-              gap: 5px;   
-              background: #f8f9fa;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            gap: 5px;
+            background: #f8f9fa;
             box-sizing: border-box;
             display: flex;
-          }   
+        }
 
-          .tag {   
-              background: #0056b3;   
-              color: #fff;   
-              padding: 5px 10px;   
-              border-radius: 12px;   
-              font-size: 14px;   
-              display: inline-flex;   
-              align-items: center;   
-          } 
+        .tag {
+            background: #0056b3;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+        }
 
-             .tag a { 
-                 margin-left: 5px; 
-                 color: #fff; 
-                 text-decoration: none; 
-                 font-weight: bold; 
-                 cursor: pointer; 
-             }
+            .tag a {
+                margin-left: 5px;
+                color: #fff;
+                text-decoration: none;
+                font-weight: bold;
+                cursor: pointer;
+            }
 
         .form-group {
             display: flex;
@@ -105,7 +102,7 @@
             width: 100%;
         }
 
-        #imagePreviews {
+        .image-previews {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
@@ -165,19 +162,18 @@
             color: #e74c3c;
         }
 
-        #imageCounter {
+        #newImageCounter {
             font-size: 14px;
             color: #555;
         }
-
-      
+        /* Tagged Users */
         .user-tags-input-container {
             display: flex;
             flex-wrap: wrap;
             gap: 5px;
             padding: 5px;
             border-radius: 5px;
-            width:100%;
+            width: 100%;
         }
 
         .user-tag {
@@ -243,23 +239,36 @@
 </head>
 <body>
     <div class="create-post-page">
-        <h1>Create a New Post</h1>
-        <form asp-controller="Post" asp-action="CreateConfirm" method="post" enctype="multipart/form-data" class="post-form">
+        <h1>Update Post</h1>
+        <form asp-controller="Post" asp-action="UpdateConfirm" method="post" enctype="multipart/form-data" class="post-form">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Attachments" />
             <div class="form-group">
-                <label asp-for="@Model.Description">Description</label>
-                <textarea asp-for="@Model.Description" placeholder="Write your description here..."></textarea>
-                <span asp-validation-for="@Model.Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="@Model.Tags">Tags</label>
-                <input asp-for="@Model.Tags" id="tag-input"></input>
+                <label asp-for="Description">Description</label>
+                <textarea asp-for="Description" placeholder="Edit your description here..."></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
             </div>
 
             <div class="form-group">
-                <label asp-for="@Model.TaggedUsersId">Tag users</label>
+                <label for="tag-input">Tags</label>
+                <input type="text" id="tag-input" name="Tags" value="@Model.Tags" />
+            </div>
+
+            <div class="form-group">
+                <label>Tagged Users</label>
                 <div class="user-tags-input-container" id="userTagsInputContainer">
+                    @if (Model.TaggedUsersId != null && Model.TaggedUsersUserName != null)
+                    {
+                        for (int i = 0; i < Model.TaggedUsersId.Count; i++)
+                        {
+                            <div class="user-tag" data-id="@Model.TaggedUsersId[i]">
+                                @Model.TaggedUsersUserName[i]
+                                <span class="remove-tag">&times;</span>
+                            </div>
+                        }
+                    }
                     <input type="text" id="user-searchBar" class="users-search-bar" placeholder="Search users...">
-                    <input type="hidden" id="taggedUsers" name="TaggedUsersId" value="">
+                    <input type="hidden" id="taggedUsers" name="TaggedUsersId" value="@((Model.TaggedUsersId != null) ? string.Join(",", Model.TaggedUsersId) : "")">
                 </div>
                 <div class="dropdown">
                     <div id="dropdownMenu" class="dropdown-menu"></div>
@@ -267,178 +276,112 @@
             </div>
 
             <div class="form-group">
-                <label for="imageUpload">Add Images (up to 10)</label>
-                <input type="file" id="imageUpload" name="Attachments" accept="image/*" multiple style="display: none;">
-                <div id="imagePreviews" class="image-previews"></div>
-                <button type="button" id="addImageBtn" class="submit-btn" style="margin-top: 10px;">Add Image</button>
-                <div id="imageCounter">0/10 images added</div>
+                <label>Existing Images</label>
+                <div id="existingImagePreviews" class="image-previews">
+                    @if (Model.Attachments != null)
+                    {
+                        foreach (var attachment in Model.Attachments)
+                        {
+                            <div class="image-container" data-id="@attachment.Id">
+                                <img src="@attachment.CloudUrl" alt="attachment image">
+                                <button type="button" class="remove-existing-image">&times;</button>
+                            </div>
+                        }
+                    }
+                </div>
+                <input type="hidden" id="removedAttachments" name="RemovedAttachmentIds" value="">
             </div>
-            <button type="submit" class="submit-btn">Create Post</button>
+
+            <button type="submit" class="submit-btn">Update Post</button>
+            <div id="error-message" class="text-danger" style="display: none;">
+                Please keep at least one image.
+            </div>
         </form>
     </div>
-    </body>
+</body>
 </html>
 
 <script>
-           
-       let selectedFiles = [];
-
-    document.getElementById('addImageBtn').addEventListener('click', function () {
-        document.getElementById('imageUpload').click();
-    });
-
-    document.getElementById('imageUpload').addEventListener('change', function (event) {
-        const files = Array.from(event.target.files);
-        const imagePreviews = document.getElementById('imagePreviews');
-
-        if (selectedFiles.length + files.length > 10) {
-            alert('You can upload up to 10 images.');
-            return;
-        }
-
-        files.forEach(file => {
-            if (file.type.startsWith('image/')) {
-                selectedFiles.push(file);
-            }
-        });
-
-        updateFileInput();
-
-        files.forEach((file, index) => {
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const container = document.createElement('div');
-                    container.classList.add('image-container');
-
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-
-                    const removeBtn = document.createElement('button');
-                    removeBtn.innerHTML = '&times;';
-                    removeBtn.addEventListener('click', function () {
-                        const fileIndex = selectedFiles.findIndex(f => f.name === file.name);
-                        if (fileIndex !== -1) {
-                            selectedFiles.splice(fileIndex, 1);
-                        }
-                        container.remove();
-                        updateFileInput();
-                        updateImageCounter();
-                    });
-
-                    container.appendChild(img);
-                    container.appendChild(removeBtn);
-                    imagePreviews.appendChild(container);
-                    updateImageCounter();
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    });
-
-    function updateFileInput() {
-        const dataTransfer = new DataTransfer();
-        selectedFiles.forEach(file => dataTransfer.items.add(file));
-        document.getElementById('imageUpload').files = dataTransfer.files;
-    }
-
-
-    function updateImageCounter() {
-        const imagePreviews = document.getElementById('imagePreviews');
-        const imageCounter = document.getElementById('imageCounter');
-        imageCounter.textContent = `${imagePreviews.querySelectorAll('img').length}/10 images added`;
-    }
-
-          (function(){
-
-        "use strict"
+    (function(){
+        "use strict";
 
         var TagsInput = function(opts){
-            this.options = Object.assign(TagsInput.defaults , opts);
+            this.options = Object.assign(TagsInput.defaults, opts);
             this.init();
         }
 
         TagsInput.prototype.init = function(opts){
             this.options = opts ? Object.assign(this.options, opts) : this.options;
 
-            if(this.initialized)
-                this.destroy();
+            if(this.initialized) this.destroy();
 
-            if(!(this.orignal_input = document.getElementById(this.options.selector)) ){
-                console.error("tags-input couldn't find an element with the specified ID");
+            this.orignal_input = document.getElementById(this.options.selector);
+            if(!this.orignal_input){
+                console.error("TagsInput couldn't find an element with ID: " + this.options.selector);
                 return this;
             }
 
             this.arr = [];
             this.wrapper = document.createElement('div');
             this.input = document.createElement('input');
+
             init(this);
             initEvents(this);
 
-            this.initialized =  true;
+            this.initialized = true;
             return this;
         }
 
         TagsInput.prototype.addTag = function(string){
-
-            if(this.anyErrors(string))
-                return ;
+            if(!string || this.anyErrors(string)) return;
 
             this.arr.push(string);
-            var tagInput = this;
 
             var tag = document.createElement('span');
             tag.className = this.options.tagClass;
-            tag.innerText = string;
+            tag.appendChild(document.createTextNode(string));
 
             var closeIcon = document.createElement('a');
             closeIcon.innerHTML = '&times;';
-
-            closeIcon.addEventListener('click' , function(e){
+            closeIcon.addEventListener('click', (e) => {
                 e.preventDefault();
-                var tag = this.parentNode;
-
-                for(var i =0 ;i < tagInput.wrapper.childNodes.length ; i++){
-                    if(tagInput.wrapper.childNodes[i] == tag)
-                        tagInput.deleteTag(tag , i);
+                var index = this.arr.indexOf(string);
+                if(index !== -1){
+                    this.deleteTag(tag, index);
                 }
-            })
-
+            });
 
             tag.appendChild(closeIcon);
-            this.wrapper.insertBefore(tag , this.input);
-            this.orignal_input.value = this.arr.join(',');
 
+            this.wrapper.insertBefore(tag, this.input);
+
+            refreshOriginalInput(this);
             return this;
         }
 
-        TagsInput.prototype.deleteTag = function(tag , i){
-            tag.remove();
-            this.arr.splice( i , 1);
-            this.orignal_input.value =  this.arr.join(',');
+        TagsInput.prototype.deleteTag = function(tagElem, i){
+            tagElem.remove();
+            this.arr.splice(i, 1);
+            refreshOriginalInput(this);
             return this;
         }
 
         TagsInput.prototype.anyErrors = function(string){
-            if( this.options.max != null && this.arr.length >= this.options.max ){
-                console.log('max tags limit reached');
+            if(this.options.max != null && this.arr.length >= this.options.max){
+                console.log('Max tags limit reached');
                 return true;
             }
-
-            if(!this.options.duplicate && this.arr.indexOf(string) != -1 ){
-                console.log('duplicate found " '+string+' " ')
+            if(!this.options.duplicate && this.arr.indexOf(string) !== -1){
+                console.log('Duplicate tag: "' + string + '"');
                 return true;
             }
-
             return false;
         }
 
         TagsInput.prototype.addData = function(array){
-            var plugin = this;
-
-            array.forEach(function(string){
-                plugin.addTag(string);
-            })
+            array.forEach((str) => {
+                this.addTag(str.trim());
+            });
             return this;
         }
 
@@ -448,16 +391,12 @@
 
         TagsInput.prototype.destroy = function(){
             this.orignal_input.removeAttribute('hidden');
-
             delete this.orignal_input;
-            var self = this;
 
-            Object.keys(this).forEach(function(key){
-                if(self[key] instanceof HTMLElement)
-                    self[key].remove();
-
-                if(key != 'options')
-                    delete self[key];
+            let self = this;
+            Object.keys(this).forEach((key) => {
+                if(self[key] instanceof HTMLElement) self[key].remove();
+                if(key !== 'options') delete self[key];
             });
 
             this.initialized = false;
@@ -466,36 +405,38 @@
         function init(tags){
             tags.wrapper.append(tags.input);
             tags.wrapper.classList.add(tags.options.wrapperClass);
-            tags.orignal_input.setAttribute('hidden' , 'true');
-            tags.orignal_input.parentNode.insertBefore(tags.wrapper , tags.orignal_input);
+
+            tags.orignal_input.setAttribute('hidden', 'true');
+            tags.orignal_input.parentNode.insertBefore(tags.wrapper, tags.orignal_input);
         }
 
         function initEvents(tags){
-            tags.wrapper.addEventListener('click' ,function(){
+            tags.wrapper.addEventListener('click', function(){
                 tags.input.focus();
             });
 
-
-            tags.input.addEventListener('keydown' , function(e){
-                var str = tags.input.value.trim();
-
-                if( !!(~[9 , 13 , 188].indexOf( e.keyCode ))  )
-                {
+            tags.input.addEventListener('keydown', function(e){
+                if([9, 13, 188, 32].indexOf(e.keyCode) !== -1){
                     e.preventDefault();
+                    let str = tags.input.value.trim();
                     tags.input.value = "";
-                    if(str != "")
-                        tags.addTag(str);
+                    let splitted = str.split(/\s+/);
+                    splitted.forEach(word => {
+                        if(word) tags.addTag(word);
+                    });
                 }
-
             });
         }
 
+        function refreshOriginalInput(tags){
+            tags.orignal_input.value = tags.arr.join(',');
+        }
 
         TagsInput.defaults = {
-            selector : '',
-            wrapperClass : 'tags-input-wrapper',
-            tagClass : 'tag',
-            max : null,
+            selector: '',
+            wrapperClass: 'tags-input-wrapper',
+            tagClass: 'tag',
+            max: null,
             duplicate: false
         }
 
@@ -503,19 +444,36 @@
 
     })();
 
-     var tagInput1 = new TagsInput({
-                selector: 'tag-input',
-                duplicate : false,
-     });
 
-    const users = @Html.Raw(Json.Serialize(users));
-            console.log(users);
+    let removedAttachments = [];
+    document.querySelectorAll('.remove-existing-image').forEach(button => {
+        button.addEventListener('click', function () {
+            const container = this.parentElement;
+            const attachmentId = container.getAttribute('data-id');
+            removedAttachments.push(attachmentId);
+            container.remove();
+            updateRemovedAttachmentsField();
+        });
+    });
+    function updateRemovedAttachmentsField() {
+        document.getElementById('removedAttachments').value = removedAttachments.join(',');
+    }
+
+    const allUsers = @Html.Raw(Json.Serialize(users));
     const searchBar = document.getElementById("user-searchBar");
     const dropdownMenu = document.getElementById("dropdownMenu");
     const tagsInputContainer = document.getElementById("userTagsInputContainer");
     const hiddenInput = document.getElementById("taggedUsers");
     const selectedUsers = new Set();
-
+    document.querySelectorAll('.user-tag').forEach(tag => {
+        const id = tag.getAttribute('data-id');
+        selectedUsers.add(id);
+        tag.querySelector('.remove-tag').addEventListener('click', () => {
+            selectedUsers.delete(id);
+            tag.remove();
+            updateTaggedUsersField();
+        });
+    });
     function renderDropdownItems(filteredUsers) {
         dropdownMenu.innerHTML = "";
         filteredUsers.slice(0, 3).forEach(user => {
@@ -528,38 +486,32 @@
             dropdownMenu.appendChild(item);
         });
     }
-
     function addUserTag(user) {
         if (selectedUsers.has(user.id)) return;
         selectedUsers.add(user.id);
-
         const tag = document.createElement("div");
         tag.classList.add("user-tag");
+        tag.setAttribute("data-id", user.id);
         tag.innerHTML = `${user.userName} <span class="remove-tag">&times;</span>`;
         tag.querySelector(".remove-tag").addEventListener("click", () => {
             selectedUsers.delete(user.id);
-            tagsInputContainer.removeChild(tag);
-            updateHiddenField();
+            tag.remove();
+            updateTaggedUsersField();
         });
-
         tagsInputContainer.insertBefore(tag, searchBar);
         searchBar.value = "";
         dropdownMenu.classList.remove("visible");
-
-        updateHiddenField();
+        updateTaggedUsersField();
     }
-
     searchBar.addEventListener("input", () => {
         const query = searchBar.value.toLowerCase();
         if (query === "") {
             dropdownMenu.classList.remove("visible");
             return;
         }
-
-        const filteredUsers = users.filter(user =>
+        const filteredUsers = allUsers.filter(user =>
             user.userName.toLowerCase().startsWith(query)
         );
-
         if (filteredUsers.length > 0) {
             renderDropdownItems(filteredUsers);
             dropdownMenu.classList.add("visible");
@@ -567,36 +519,45 @@
             dropdownMenu.classList.remove("visible");
         }
     });
-
     document.addEventListener("click", (event) => {
         if (!tagsInputContainer.contains(event.target)) {
             dropdownMenu.classList.remove("visible");
         }
     });
-
     searchBar.addEventListener("keypress", (e) => {
         if (e.key === "Enter") e.preventDefault();
     });
-
-    function updateHiddenField() {
+    function updateTaggedUsersField() {
         hiddenInput.value = Array.from(selectedUsers).join(",");
         console.log("Updated TaggedUsersId value:", hiddenInput.value);
     }
-
-
-        document.querySelector('form').addEventListener('submit', function (e) {
-        updateHiddenField();
+    document.querySelector('form').addEventListener('submit', function (e) {
+        updateTaggedUsersField();
+        updateRemovedAttachmentsField();
     });
 
-        document.querySelector('form').addEventListener('submit', function (e) {
-        const imageUpload = document.getElementById('imageUpload');
-        const imagePreviews = document.getElementById('imagePreviews');
+    document.querySelector('form').addEventListener('submit', function (e) {
+    const existingImages = document.querySelectorAll('#existingImagePreviews .image-container');
+    const errorMessage = document.getElementById('error-message');
 
-        if (imageUpload.files.length === 0 && imagePreviews.querySelectorAll('img').length === 0) {
-            e.preventDefault();
-            alert('Please upload at least one image.');
-        } else {
-            updateHiddenField();
-        }
+    if (existingImages.length === 0) {
+        e.preventDefault();
+        errorMessage.style.display = 'block';
+    } else {
+        errorMessage.style.display = 'none';
+    }
     });
+</script>
+<script>
+    var tagInput1 = new TagsInput({
+        selector: 'tag-input',
+        duplicate: false,
+        max: null
+    });
+
+    var tagInputEl = document.getElementById('tag-input');
+    if (tagInputEl.value.trim() !== "") {
+        var initialTags = tagInputEl.value.split(',');
+        tagInput1.addData(initialTags);
+    }
 </script>

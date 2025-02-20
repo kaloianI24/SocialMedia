@@ -111,7 +111,7 @@
         }
 
         .tags {
-        display: flex;
+        display: block;
         flex-direction: row;
         gap: 10px;
         margin-left: 2px;
@@ -119,8 +119,20 @@
 
         .tags > * {
         color: #0000ff;
-        font-size: 12px;
+        font-size: 13px;
         }
+
+        .taggedUsers {
+            display: block;
+            flex-direction: row;
+            gap: 10px;
+            margin-left: 2px;
+        }
+
+            .taggedUsers-text {
+                color: #7C3DAA;
+                font-size: 15px;
+            }
     </style>
 </head>
 <body>
@@ -138,7 +150,7 @@
         </div>
 
         <div class="tabs">
-            <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "MyPosts", id = Model.Id })">My posts</button>
+            <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "MyPosts", id = Model.Id })">Posts</button>
             <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "TaggedPosts", id = Model.Id })">Tagged posts</button>
             @if ((bool)ViewData["IsOwner"])
             {

@@ -1,8 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Repositories;
+using SocialMedia.Service.Cloud;
 using SocialMedia.Service.Mappings;
 using SocialMedia.Service.Models;
+using SocialMedia.Web.Models.Post;
 using static SocialMedia.Service.Mappings.SocialMediaPostMappings;
 
 namespace SocialMedia.Service.SocialMediaPost
@@ -13,16 +17,19 @@ namespace SocialMedia.Service.SocialMediaPost
         private readonly CloudResourceRepository cloudResourceRepository;
         private readonly TagRepository tagRepository;
         private readonly SocialMediaUserRepository userRepository;
+        private readonly ICloudinaryService cloudinaryService;
 
         public SocialMediaPostService(PostRepository postRepository,
             CloudResourceRepository cloudResourceRepository,
             TagRepository tagRepository,
-            SocialMediaUserRepository userRepository)
+            SocialMediaUserRepository userRepository,
+            ICloudinaryService cloudinaryService)
         {
             this.postRepository = postRepository;
             this.cloudResourceRepository = cloudResourceRepository;
             this.tagRepository = tagRepository;
             this.userRepository = userRepository;
+            this.cloudinaryService = cloudinaryService;
         }
 
         public async Task<PostServiceModel> CreateAsync(PostServiceModel model)
@@ -50,15 +57,19 @@ namespace SocialMedia.Service.SocialMediaPost
 
             foreach (var tag in post.Tags)
             {
-                if (!tagRepository.isAlreadyCreated(tag))
+                if(tag.Name != null && !tag.Name.Equals(""))
                 {
-                    await tagRepository.CreateAsync(tag);
-                    tags.Add(tag);
+                    if (!tagRepository.isAlreadyCreated(tag.Name))
+                    {
+                        await tagRepository.CreateAsync(tag);
+                        tags.Add(tag);
+                    }
+                    else
+                    {
+                        tags.Add(tagRepository.getTagByName(tag.Name));
+                    }
                 }
-                else
-                {
-                    tags.Add(tagRepository.getTagByName(tag.Name));
-                }
+                
             }
 
             post.Tags = tags;            
@@ -87,6 +98,19 @@ namespace SocialMedia.Service.SocialMediaPost
             var targetPost = await postRepository.GetAll().FirstOrDefaultAsync(p => p.Id == id);
             await postRepository.SoftDeletePost(targetPost);
             return targetPost.ToModel(UserPostMappingsContext.Post);
+        }
+
+        public async Task<bool> DeletePermanentlyAsync(string id)
+        {
+            var targetPost = await postRepository.GetAll().Include(p => p.Attachments).FirstOrDefaultAsync(p => p.Id == id);
+            var attachments = targetPost.Attachments.ToList();
+            foreach(var attachment in attachments)
+            {
+                await cloudinaryService.DeleteFileAsync(attachment.CloudUrl);
+                await cloudResourceRepository.DeleteAsync(attachment);
+            }
+            await postRepository.HardDeleteAsync(targetPost);
+            return true;
         }
 
         public async Task<PostServiceModel> RecoverAsync(string id)
@@ -121,11 +145,91 @@ namespace SocialMedia.Service.SocialMediaPost
 
         public async Task<PostServiceModel> GetByIdAsync(string id)
         {
-            var targetPost = await postRepository.GetAll().FirstOrDefaultAsync(p => p.Id == id);
+            var targetPost = await postRepository.GetAll()
+                .Include(p => p.TaggedUsers)
+                    .ThenInclude(u => u.ProfilePicture)
+                .Include(p => p.Tags)
+                .Include(p => p.Attachments)
+                .Include(p => p.CreatedBy)
+                    .ThenInclude(u => u.ProfilePicture)
+                .FirstOrDefaultAsync(p => p.Id == id);
             var targetPostServiceModel = targetPost.ToModel(UserPostMappingsContext.Post);
             return targetPostServiceModel;
         }
 
+        public async Task<PostServiceModel> UpdateAsync(UpdatePostWebModel model)
+        {
+            var targetPost = await postRepository.GetAll()
+                .Include(p => p.TaggedUsers)
+                    .ThenInclude(u => u.ProfilePicture)
+                .Include(p => p.Tags)
+                .Include(p => p.Attachments)
+                .Include(p => p.CreatedBy)
+                    .ThenInclude(u => u.ProfilePicture)
+                .FirstOrDefaultAsync(p => p.Id == model.Id);
+
+            var targetPostAttachments = targetPost.Attachments.ToList();
+
+            var tags = new List<SocialMediaTag>();
+
+            if(model.Tags != null)
+            {
+                foreach (var tag in model.Tags.Split(","))
+                {
+                    if (tag != null && !tag.Equals(""))
+                    {
+                        if (!tagRepository.isAlreadyCreated(tag))
+                        {
+                            var tagEntity = (new TagServiceModel { Name = tag }).ToEntity();
+                            await tagRepository.CreateAsync(tagEntity);
+                            tags.Add(tagEntity);
+                        }
+                        else
+                        {
+                            tags.Add(tagRepository.getTagByName(tag));
+                        }
+                    }
+                }
+            }
+            
+
+            foreach (var attachment in targetPostAttachments)
+            {
+                if(model.RemovedAttachmentIds != null)
+                {
+                    foreach (var attachmentId in model.RemovedAttachmentIds.Split(",").ToList())
+                    {
+                        if (attachment.Id == attachmentId)
+                        {
+                            targetPost.Attachments.Remove(attachment);
+                            await cloudinaryService.DeleteFileAsync(attachment.CloudUrl);
+                            await cloudResourceRepository.DeleteAsync(attachment);
+                        }
+                    }
+                }
+                
+            }
+           
+            var firstId = model.TaggedUsersId.First();
+            if (firstId != null)
+            {
+                var usersIds = model.TaggedUsersId.First().Split(",");
+                var tasks = usersIds.Select(async id => await userRepository.GetUserById(id)).ToList();
+                var taggedUsers = await Task.WhenAll(tasks);
+                targetPost.TaggedUsers = taggedUsers.ToList();
+            }
+            else
+            {
+                targetPost.TaggedUsers = null;
+            }
+
+                targetPost.Description = model.Description;
+            targetPost.Tags = tags;
+            
+            
+            await postRepository.UpdateAsync(targetPost);
+            return targetPost.ToModel(UserPostMappingsContext.Post);
+        }
         public Task<PostServiceModel> InternalCreateAsync(PostServiceModel model)
         {
             throw new NotImplementedException();

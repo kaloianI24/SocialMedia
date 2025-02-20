@@ -22,11 +22,15 @@
                     </a>
                     <div class="post-info">
                         <span class="username">@Model.UserName</span>
-                        <span class="location">@post.CreatedOn</span> <span class="location"></span>
+                        <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
                     </div>
                     @if ((bool)ViewData["IsOwner"])
                     {
                         <button type="button" class="btn-delete-post">Delete post</button>
+                        <button class="btn-update-post"
+                                onclick="window.location.href='/Post/Update?postId=@post.Id'">
+                            Update post
+                        </button>
                     }
                 </div>
                 <div class="carousel">
@@ -77,6 +81,15 @@
                             <span>#@tag.Name</span>
                         }
                     </div>
+
+                    <div class="taggedUsers">
+                        @for (int i = 0; i < post.TaggedUsersId.Count; i++)
+                        {
+                            <a class="links" href="/Post/MyPage?userId=@post.TaggedUsersId.ElementAt(i)">
+                                <span class="taggedUsers-text">@('@')@post.TaggedUsersUserName.ElementAt(i)</span>
+                            </a>
+                        }
+                    </div>
                 </div>
             </div>
 
@@ -87,7 +100,6 @@
 <script>
     document.querySelectorAll('.btn-delete-post').forEach(b => b.addEventListener('click', (e) => {
         const postId = e.target.closest('.post').dataset.postId;
-        console.log(postId);
 
         fetch('/Post/DeletePost?postId=' + postId, {
             method: 'POST',

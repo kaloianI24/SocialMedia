@@ -10,11 +10,11 @@ namespace SocialMedia.Data.Repositories
         {
         }
 
-        public bool isAlreadyCreated (SocialMediaTag socialMediaTag)
+        public bool isAlreadyCreated (string tagName)
         {
-            foreach (SocialMediaTag tag in _context.Tags)
+            foreach (string tag in _context.Tags.Select(t => t.Name))
             {
-                if (tag.Name.ToLower() == socialMediaTag.Name.ToLower())
+                if (tag.ToLower() == tagName.ToLower())
                 {
                     return true;
                 }

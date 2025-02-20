@@ -7,6 +7,7 @@ namespace SocialMedia.Service.Cloud
     public interface ICloudinaryService : IGenericService<CloudResource, CloudResourceServiceModel>
     {
         Task<Dictionary<string, object>> UploadFile(IFormFile file);
+        Task<bool> DeleteFileAsync(string cloudUrl);
 
     }
 }

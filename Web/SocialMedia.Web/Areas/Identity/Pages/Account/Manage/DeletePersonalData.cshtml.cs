@@ -8,8 +8,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SocialMedia.Areas.Identity.Data;
+using SocialMedia.Data.Repositories;
+using SocialMedia.Service.SocialMediaPost;
 
 namespace SocialMedia.Areas.Identity.Pages.Account.Manage
 {
@@ -18,15 +21,21 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<SocialMediaUser> _userManager;
         private readonly SignInManager<SocialMediaUser> _signInManager;
         private readonly ILogger<DeletePersonalDataModel> _logger;
+        private readonly PostRepository postRepository;
+        private readonly ISocialMediaPostService socialMediaPostService;
 
         public DeletePersonalDataModel(
             UserManager<SocialMediaUser> userManager,
             SignInManager<SocialMediaUser> signInManager,
-            ILogger<DeletePersonalDataModel> logger)
+            ILogger<DeletePersonalDataModel> logger,
+            PostRepository postRepository,
+            ISocialMediaPostService socialMediaPostService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            this.postRepository = postRepository;
+            this.socialMediaPostService = socialMediaPostService;
         }
 
         /// <summary>
@@ -72,6 +81,7 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
         public async Task<IActionResult> OnPostAsync()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -87,6 +97,24 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
                 }
             }
 
+            var posts =  postRepository.GetAll().Include(p => p.Attachments).Where(p => p.CreatedById == user.Id).ToList();
+            var taggedPosts = await postRepository.UserTaggedPosts(user.Id);
+
+            if (posts != null)
+            {
+                foreach(var post in posts)
+                {
+                    await socialMediaPostService.DeletePermanentlyAsync(post.Id);
+                }               
+            }
+
+            if(taggedPosts.Count != 0)
+            {
+                foreach(var post in taggedPosts)
+                {
+                    await postRepository.RemoveTaggedUser(user, post);
+                }
+            }
             var result = await _userManager.DeleteAsync(user);
             var userId = await _userManager.GetUserIdAsync(user);
             if (!result.Succeeded)
