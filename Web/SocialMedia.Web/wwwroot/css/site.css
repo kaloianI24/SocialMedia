@@ -1,33 +1,33 @@
 ﻿html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+    color: var(--bs-secondary-color);
+    text-align: end;
 }
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+    text-align: start;
 }
 
 
@@ -84,6 +84,7 @@ body {
     gap: 20px;
     padding: 20px;
 }
+
 .main-content2 {
     display: flex;
     margin-left: 250px;
@@ -359,7 +360,7 @@ body {
     }
 
 
-.links{
+.links {
     text-decoration: none;
 }
 
@@ -408,7 +409,7 @@ body {
 }
 
 .sidebar-images {
-    width: 25px ;
+    width: 25px;
     height: 25px;
     max-width: 25px;
     padding-right: 25px;
@@ -610,7 +611,7 @@ body {
             cursor: pointer;
         }
 
-.btn-delete-post{
+.btn-delete-post {
     margin-left: 160px;
     margin-right: 0px;
     background-color: indianred;
@@ -642,8 +643,9 @@ body {
     border-radius: 20px;
     height: 30px;
 }
+
 .btn-update-post {
-    text-decoration:none;
+    text-decoration: none;
     margin-left: 10px;
     background-color: yellowgreen;
     border-radius: 20px;
@@ -867,3 +869,18 @@ textarea, input[type="text"] {
         margin-right: 10px;
         border-radius: 50%;
     }
+
+.admin-banner {
+    text-align: center;
+    color: red;
+    font-weight: bold;
+    font-size: 24px;
+    background-color: rgb(255, 0, 0);
+    padding: 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}

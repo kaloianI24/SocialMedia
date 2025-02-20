@@ -29,8 +29,18 @@ namespace SocialMedia.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await GetUser();
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
-            ViewData["ProfilePictureUrl"] = user?.ProfilePicture?.CloudUrl;
+
+            var roles = await _userManager.GetRolesAsync(user);
+            bool isAdmin = roles.Contains("Admin");
+
+
+            ViewData["IsAdmin"] = isAdmin;
+            ViewData["ProfilePictureUrl"] = user.ProfilePicture?.CloudUrl;
 
             return View(user);
         }
@@ -61,12 +71,12 @@ namespace SocialMedia.Controllers
         public async Task<IActionResult> Register()
         {
             var user = new SocialMediaUser { UserName = "newUser", Email = "user@example.com" }; // Assume registration happened here
-           
+
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
             var confirmationLink = Url.Action("ConfirmEmail", "Home", new { userId = user.Id, token = token }, protocol: Request.Scheme);
 
-           
+
             string subject = "Email Confirmation";
             string message = $"Please confirm your email by clicking the link below: <a href='{confirmationLink}'>Confirm Email</a>";
 
@@ -75,7 +85,7 @@ namespace SocialMedia.Controllers
             return View();
         }
 
-       
+
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
             if (userId == null || token == null)

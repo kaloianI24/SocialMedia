@@ -6,6 +6,7 @@
 
 @{
     ViewData["Title"] = "Home Page";
+    var isAdmin = ViewData["IsAdmin"] != null && (bool)ViewData["IsAdmin"];
 }
 
 @model SocialMediaUser
@@ -23,6 +24,13 @@
         <title>Document</title>
     </head>
     <body>
+
+        @if (isAdmin)
+        {
+            <div class="admin-banner">
+                Admin
+            </div>
+        }
 
         <div class="navbar">
             <input placeholder="Search..." type="text" name="text" class="input">
@@ -115,7 +123,6 @@
             </div>
         </div>
 
-
         <div class="main-content">
             <div class="post">
                 <div class="post-header">
@@ -142,7 +149,6 @@
                     </div>
                     <div class="image-counter">1 / 4</div>
                 </div>
-
 
                 <div class="post-actions">
                     <div class="post-likes">
@@ -221,5 +227,4 @@
     @section Scripts {
     <script src="~/js/imagesFunctions.js"></script>
     }
-
 }
