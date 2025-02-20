@@ -10,6 +10,7 @@ using SocialMedia;
 using System;
 using SocialMedia.Service;
 using Microsoft.Extensions.DependencyInjection;
+using SocialMedia.Service.Reaction;
 
 namespace SocialMedia
 {
@@ -41,8 +42,10 @@ namespace SocialMedia
             builder.Services.AddTransient<CloudResourceRepository>();
             builder.Services.AddTransient<TagRepository>();
             builder.Services.AddTransient<SocialMediaUserRepository>();
+            builder.Services.AddTransient<ReactionRepository>();
 
             builder.Services.AddTransient<ICloudinaryService, CloudinaryService>();
+            builder.Services.AddTransient<IReactionService, ReactionService>();
             builder.Services.AddTransient<ISocialMediaPostService, SocialMediaPostService>();
 
             // Add services to the container

@@ -20,6 +20,11 @@ namespace SocialMedia.Service.Mappings
 
         public static CloudResourceServiceModel ToModel(this CloudResource entity)
         {
+            if (entity == null)
+            {
+                return null;
+            }
+
             return new CloudResourceServiceModel
             {
                 CloudUrl = entity.CloudUrl,

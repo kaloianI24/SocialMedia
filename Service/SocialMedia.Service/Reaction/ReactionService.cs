@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SocialMedia.Service.Mappings;
 using static SocialMedia.Service.Mappings.SocialMediaPostMappings;
+using Microsoft.EntityFrameworkCore;
 
 namespace SocialMedia.Service.Reaction
 {
@@ -36,7 +37,7 @@ namespace SocialMedia.Service.Reaction
 
         public IQueryable<SocialMediaReactionServiceModel> GetAll()
         {
-            throw new NotImplementedException();
+           return this.InternalGetAll().Select(e => e.ToModel(UserPostMappingsContext.Reaction));
         }
 
         public Task<SocialMediaReactionServiceModel> GetByIdAsync(string id)
@@ -52,6 +53,15 @@ namespace SocialMedia.Service.Reaction
         public Task<SocialMediaReactionServiceModel> UpdateAsync(SocialMediaReactionServiceModel model)
         {
             throw new NotImplementedException();
+        }
+
+        private IQueryable<SocialMediaReaction> InternalGetAll()
+        {
+            return this.reactionRepository.GetAll()
+                .Include(e => e.Emote)
+                .Include(e => e.CreatedBy)
+                .Include(e => e.UpdatedBy)
+                .Include(e => e.DeletedBy);
         }
     }
 }
