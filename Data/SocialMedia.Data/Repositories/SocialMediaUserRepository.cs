@@ -41,5 +41,11 @@ namespace SocialMedia.Data.Repositories
                     .ThenInclude(p => p.Attachments)
                 .FirstOrDefault(u => u.Id == id);
         }
+        public async Task<SocialMediaUser> UpdateAsync(SocialMediaUser user)
+        {
+            this._context.Update(user);
+            await this._context.SaveChangesAsync();
+            return user;
+        }
     }
 }

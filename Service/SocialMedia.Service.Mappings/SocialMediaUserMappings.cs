@@ -1,4 +1,5 @@
 ﻿using SocialMedia.Areas.Identity.Data;
+using SocialMedia.Service.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,25 @@ namespace SocialMedia.Service.Mappings
                 Email = entity.Email,
                 ProfilePicture = entity.ProfilePicture.ToModel(),
                 Posts = ShouldMapPost(context) ? entity.Posts?.Select(post => post.ToModel(UserPostMappingsContext.User)).ToList() : null,
+                Friends = entity.Friends?.Select(friend => friend.ToModelBasic()).ToList(),
+                Followers = entity.Followers?.Select(f => f.ToModelBasic()).ToList(),
+                Following = entity.Following?.Select(f => f.ToModelBasic()).ToList(),
             };
         }
+
+        public static SocialMediaUserBasicServiceModel ToModelBasic(this SocialMediaUser entity)
+        {
+            if (entity is null)
+            {
+                return null;
+            }
+            return new SocialMediaUserBasicServiceModel
+            {
+                Id = entity.Id,
+                UserName = entity.UserName,
+                ProfilePicture = entity.ProfilePicture.ToModel(),
+            };
+        }
+
     }
 }

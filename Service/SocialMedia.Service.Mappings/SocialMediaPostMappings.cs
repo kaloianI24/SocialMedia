@@ -9,7 +9,8 @@ namespace SocialMedia.Service.Mappings
         {
             Post,
             User,
-            Reaction
+            Reaction,
+            Friend
         }
         public static SocialMediaPost ToEntity(this PostServiceModel model)
         {

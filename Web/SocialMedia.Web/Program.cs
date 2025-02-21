@@ -11,6 +11,7 @@ using System;
 using SocialMedia.Service;
 using Microsoft.Extensions.DependencyInjection;
 using SocialMedia.Service.Reaction;
+using SocialMedia.Service.Friends;
 
 namespace SocialMedia
 {
@@ -43,10 +44,12 @@ namespace SocialMedia
             builder.Services.AddTransient<TagRepository>();
             builder.Services.AddTransient<SocialMediaUserRepository>();
             builder.Services.AddTransient<ReactionRepository>();
+            builder.Services.AddTransient<FriendRequestRepository>();
 
             builder.Services.AddTransient<ICloudinaryService, CloudinaryService>();
             builder.Services.AddTransient<IReactionService, ReactionService>();
             builder.Services.AddTransient<ISocialMediaPostService, SocialMediaPostService>();
+            builder.Services.AddTransient<IFriendRequestService, FriendRequestService>();
 
             // Add services to the container
             builder.Services.AddControllersWithViews();

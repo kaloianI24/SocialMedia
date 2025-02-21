@@ -86,7 +86,15 @@ namespace SocialMedia.Controllers
             var currentUserId = currentUser.Id;
             var targetUserId = userId ?? currentUserId;
             var targetUser = await GetUserById(targetUserId);
+
             ViewData["IsOwner"] = (currentUserId == targetUserId);
+            if(currentUserId != targetUserId)
+            {
+                var areFriends = currentUser.Friends.Any(f => f.Id == targetUser.Id);
+                ViewData["AreFriends"] = areFriends;
+                var isFolowing = currentUser.Following.Any(f => f.Id == targetUser.Id);
+                ViewData["IsFollowing"] = isFolowing;
+            }
             ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
             return View(targetUser.ToModel(UserPostMappingsContext.User));
         }
@@ -208,6 +216,7 @@ namespace SocialMedia.Controllers
 
             return webModels;
         }
+
         private async Task<string> UploadPhoto(IFormFile photo)
         {
             var uploadResponse = await _cloudinaryService.UploadFile(photo);

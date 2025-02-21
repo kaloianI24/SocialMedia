@@ -8,5 +8,6 @@ namespace SocialMedia.Data.Repositories
         public FriendRequestRepository(SocialMediaDbContext context, IHttpContextAccessor httpContextAccessor) : base(context, httpContextAccessor)
         {
         }
+
     }
 }

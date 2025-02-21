@@ -5,10 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Models;
-using SocialMedia.Service.Mappings;
-using SocialMedia.Web.Models.Post;
-using System.Threading.Tasks;
-using System;
+using SocialMedia.Service.Friends;
 
 namespace SocialMedia.Controllers
 {
@@ -18,12 +15,14 @@ namespace SocialMedia.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly UserManager<SocialMediaUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly IFriendRequestService _friendRequestsService;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<SocialMediaUser> userManager, IEmailSender emailSender)
+        public HomeController(ILogger<HomeController> logger, UserManager<SocialMediaUser> userManager, IEmailSender emailSender, IFriendRequestService friendRequestsService)
         {
             _logger = logger;
             _userManager = userManager;
             _emailSender = emailSender;
+            _friendRequestsService = friendRequestsService;
         }
 
         public async Task<IActionResult> Index()
@@ -41,6 +40,7 @@ namespace SocialMedia.Controllers
 
             ViewData["IsAdmin"] = isAdmin;
             ViewData["ProfilePictureUrl"] = user.ProfilePicture?.CloudUrl;
+            ViewData["FriendRequests"] = user.ReceivedFriendRequests.ToList();
 
             return View(user);
         }
@@ -64,7 +64,11 @@ namespace SocialMedia.Controllers
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.TaggedUsers)
             .Include(u => u.Following)
+            .Include(u => u.Followers)
             .Include(u => u.Friends)
+            .Include(u => u.ReceivedFriendRequests)
+                .ThenInclude(r => r.CreatedBy)
+                    .ThenInclude(u => u.ProfilePicture)
             .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
         }
 
@@ -106,6 +110,90 @@ namespace SocialMedia.Controllers
             }
 
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> SentFriendRequest([FromQuery] string friendId)
+        {
+            try
+            {
+                var receiver = await _userManager.FindByIdAsync(friendId);
+                var sender = await GetUser();
+                await _friendRequestsService.CreateFriendRequest(receiver, sender);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> AcceptFriendRequest([FromQuery] string requestId)
+        {
+            await _friendRequestsService.AcceptFriendRequest(requestId);
+            return NoContent();
+        }
+
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> DeleteFriendRequest([FromQuery] string requestId)
+        {
+            await _friendRequestsService.DeleteFriendRequest(requestId);
+            return NoContent();
+        }
+
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> RemoveFriend([FromQuery] string friendId)
+        {
+            try
+            {
+                var currentUser = await _userManager.FindByIdAsync(friendId);
+                var friend = await GetUser();
+                await _friendRequestsService.RemoveFriend(currentUser, friend);
+                return NoContent();
+            }
+            
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> Follow([FromQuery] string followingId)
+        {
+            try
+            {
+                var following = await _userManager.FindByIdAsync(followingId);
+                var currentUser = await GetUser();
+                await _friendRequestsService.Follow(currentUser, following);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> Unfollow([FromQuery] string unfollowingId)
+        {
+            try
+            {
+                var unfollowing = await _userManager.FindByIdAsync(unfollowingId);
+                var currentUser = await GetUser();
+                await _friendRequestsService.Unfollow(currentUser, unfollowing);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

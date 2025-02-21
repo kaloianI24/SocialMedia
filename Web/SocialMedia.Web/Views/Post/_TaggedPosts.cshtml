@@ -97,7 +97,6 @@
 <script>
     document.querySelectorAll('.btn-untagging-post').forEach(b => b.addEventListener('click', (e) => {
         const postId = e.target.closest('.post').dataset.postId;
-        console.log(postId);
 
         fetch('/Post/RemoveTaggedUser?postId=' + postId, {
             method: 'POST',

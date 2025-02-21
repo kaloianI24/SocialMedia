@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using SocialMedia.Areas.Identity.Data
+@using SocialMedia.Data.Models
 
 @inject SignInManager<SocialMediaUser> SignInManager
 @inject UserManager<SocialMediaUser> UserManager
@@ -7,6 +8,8 @@
 @{
     ViewData["Title"] = "Home Page";
     var isAdmin = ViewData["IsAdmin"] != null && (bool)ViewData["IsAdmin"];
+    var requests = (List<FriendRequest>)this.ViewData["FriendRequests"];
+
 }
 
 @model SocialMediaUser
@@ -38,88 +41,24 @@
 
         <div class="sidebar-right">
             <div class="friend-requests-heading">Friend requests</div>
-
             <div class="all-requests">
-                <div class="friend-requests">
-                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger">
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
+            @foreach(var request in requests.Where(r => r.Status.Equals("Pending")))
+            {
+                    <div class="friend-requests" data-request-id="@request.Id">
+                    <img src="@request.CreatedBy.ProfilePicture.CloudUrl" alt="Profile Picture" class="profile-pic">
                     <div class="request-info">
-                        <span class="username-request">username</span>
-                        <button class="btn-confirm">Confirm</button>
-                        <button class="btn-delete">Delete</button>
+                        <span class="username-request">@request.CreatedBy.UserName</span>
+                        <button class="btn-confirm" id="@request.Id">Confirm</button>
+                        <button class="btn-delete" id="@request.Id">Delete</button>
                     </div>
                 </div>
-                <div class="friend-requests">
-                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
-                    <div class="request-info">
-                        <span class="username-request">username</span>
-                        <button class="btn-confirm">Confirm</button>
-                        <button class="btn-delete">Delete</button>
-                    </div>
-                </div>
-                <div class="friend-requests">
-                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
-                    <div class="request-info">
-                        <span class="username-request">username</span>
-                        <button class="btn-confirm">Confirm</button>
-                        <button class="btn-delete">Delete</button>
-                    </div>
-                </div>
-                <div class="friend-requests">
-                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
-                    <div class="request-info">
-                        <span class="username-request">username</span>
-                        <button class="btn-confirm">Confirm</button>
-                        <button class="btn-delete">Delete</button>
-                    </div>
-                </div>
-                <div class="friend-requests">
-                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
-                    <div class="request-info">
-                        <span class="username-request">username</span>
-                        <button class="btn-confirm">Confirm</button>
-                        <button class="btn-delete">Delete</button>
-                    </div>
-                </div>
-                <div class="friend-requests">
-                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
-                    <div class="request-info">
-                        <span class="username-request">username</span>
-                        <button class="btn-confirm">Confirm</button>
-                        <button class="btn-delete">Delete</button>
-                    </div>
-                </div>
-                <div class="friend-requests">
-                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
-                    <div class="request-info">
-                        <span class="username-request">username</span>
-                        <button class="btn-confirm">Confirm</button>
-                        <button class="btn-delete">Delete</button>
-                    </div>
-                </div>
-                <div class="friend-requests">
-                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
-                    <div class="request-info">
-                        <span class="username-request">username</span>
-                        <button class="btn-confirm">Confirm</button>
-                        <button class="btn-delete">Delete</button>
-                    </div>
-                </div>
-                <div class="friend-requests">
-                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
-                    <div class="request-info">
-                        <span class="username-request">username</span>
-                        <button class="btn-confirm">Confirm</button>
-                        <button class="btn-delete">Delete</button>
-                    </div>
-                </div>
-                <div class="friend-requests">
-                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
-                    <div class="request-info">
-                        <span class="username-request">username</span>
-                        <button class="btn-confirm">Confirm</button>
-                        <button class="btn-delete">Delete</button>
-                    </div>
-                </div>
+            }         
             </div>
         </div>
 
@@ -226,5 +165,47 @@
     </html>
     @section Scripts {
     <script src="~/js/imagesFunctions.js"></script>
+    <script>
+        document.querySelectorAll('.btn-confirm').forEach(b => b.addEventListener('click', (e) => {
+            var requestId = e.target.id;
+
+            fetch('/Home/AcceptFriendRequest?requestId=' + requestId, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then((res) => {
+                if (res.ok) {
+                     document.querySelector(`.friend-requests[data-request-id="${requestId}"]`).remove();
+                    alert('You have successfully accepted the friend request!');
+                } else {
+                    alert('Failed to accept the request.');
+                }
+            })
+            .catch((error) => console.error(error));
+        }));
+    </script>
+        <script>
+            document.querySelectorAll('.btn-delete').forEach(b => b.addEventListener('click', (e) => {
+                var requestId = e.target.id;
+
+                fetch('/Home/DeleteFriendRequest?requestId=' + requestId, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then((res) => {
+                    if (res.ok) {
+                        document.querySelector(`.friend-requests[data-request-id="${requestId}"]`).remove();
+                        alert('You have successfully deleted the friend request!');
+                    } else {
+                        alert('Failed to delete the request.');
+                    }
+                })
+                .catch((error) => console.error(error));
+            }));
+        </script>
     }
 }

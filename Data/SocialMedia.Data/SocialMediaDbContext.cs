@@ -84,15 +84,43 @@ namespace SocialMedia.Data
                       .OnDelete(DeleteBehavior.Cascade)
             );
 
-            builder.Entity<SocialMediaUser>()
-                .HasMany(u => u.SentFriendRequests)
+            builder.Entity<FriendRequest>()
+            .HasOne(fr => fr.CreatedBy)
+            .WithMany(u => u.SentFriendRequests)
+            .HasForeignKey(fr => fr.CreatedById)
+            .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<FriendRequest>()
+            .HasOne(fr => fr.Receiver)
+            .WithMany(u => u.ReceivedFriendRequests)
+            .HasForeignKey(fr => fr.ReceiverId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<FriendRequest>()
+                .HasOne(fr => fr.CreatedBy)
+                .WithMany(u => u.SentFriendRequests)
+                .HasForeignKey(fr => fr.CreatedById)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<FriendRequest>()
+                .HasOne(fr => fr.Receiver)
                 .WithMany(u => u.ReceivedFriendRequests)
-                .UsingEntity<Dictionary<string, object>>(
-                    "UserFriendRequests",
-                    j => j.HasOne<SocialMediaUser>().WithMany().HasForeignKey("ReceiverId"),
-                    j => j.HasOne<SocialMediaUser>().WithMany().HasForeignKey("SenderId"),
-                    j => j.ToTable("UserFriendRequests")
-                );
+                .HasForeignKey(fr => fr.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<FriendRequest>()
+                .HasOne(fr => fr.UpdatedBy)
+                .WithMany()
+                .HasForeignKey(fr => fr.UpdatedById)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<FriendRequest>()
+                .HasOne(fr => fr.DeletedBy)
+                .WithMany()
+                .HasForeignKey(fr => fr.DeletedById)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
             base.OnModelCreating(builder);
             // Customize the ASP.NET Identity model and override the defaults if needed.
             // For example, you can rename the ASP.NET Identity table names and more.
