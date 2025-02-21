@@ -5,25 +5,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Models;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 using SocialMedia.Service.Friends;
-=======
-=======
->>>>>>> Stashed changes
-<<<<<<< HEAD
 using SocialMedia.Service.Mappings;
 using SocialMedia.Web.Models.Post;
 using System.Threading.Tasks;
 using System;
 using SocialMedia.Service.Reaction;
-=======
-using SocialMedia.Service.Friends;
->>>>>>> 89a3c39784c182b5d39d11611aef0d2b50afb75f
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
+
 
 namespace SocialMedia.Controllers
 {
@@ -33,49 +22,17 @@ namespace SocialMedia.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly UserManager<SocialMediaUser> _userManager;
         private readonly IEmailSender _emailSender;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
         private readonly IFriendRequestService _friendRequestsService;
-
-        public HomeController(ILogger<HomeController> logger, UserManager<SocialMediaUser> userManager, IEmailSender emailSender, IFriendRequestService friendRequestsService)
-=======
-<<<<<<< HEAD
         private readonly IReactionService _reactionService;
+        public HomeController(ILogger<HomeController> logger, UserManager<SocialMediaUser> userManager, IEmailSender emailSender, IFriendRequestService friendRequestsService, IReactionService reactionService)
 
-=======
-<<<<<<< HEAD
-        private readonly IReactionService _reactionService;
-
->>>>>>> Stashed changes
-        public HomeController(ILogger<HomeController> logger, UserManager<SocialMediaUser> userManager, IEmailSender emailSender, IReactionService reactionService)
-=======
-        private readonly IFriendRequestService _friendRequestsService;
-
-        public HomeController(ILogger<HomeController> logger, UserManager<SocialMediaUser> userManager, IEmailSender emailSender, IFriendRequestService friendRequestsService)
->>>>>>> 89a3c39784c182b5d39d11611aef0d2b50afb75f
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
         {
             _logger = logger;
             _userManager = userManager;
             _emailSender = emailSender;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
             _friendRequestsService = friendRequestsService;
-=======
-=======
->>>>>>> Stashed changes
-<<<<<<< HEAD
             _reactionService = reactionService;
-=======
-            _friendRequestsService = friendRequestsService;
->>>>>>> 89a3c39784c182b5d39d11611aef0d2b50afb75f
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
         }
 
         public async Task<IActionResult> Index()
