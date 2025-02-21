@@ -18,16 +18,23 @@ public class SocialMediaUser : IdentityUser
     [Column(TypeName = "nvarchar(100)")]
     public string LastName { get; set; }
 
+    public bool isPrivate { get; set; }
     public SocialMediaRole? Role { get; set; }
 
     public CloudResource? ProfilePicture { get; set; }
 
     public List<SocialMediaUser>? Friends { get; set; } = new List<SocialMediaUser>();
 
+    public List<SocialMediaUser>? Following { get; set; } = new List<SocialMediaUser>();
     public List<SocialMediaUser>? Followers { get; set; } = new List<SocialMediaUser>();
 
     public List<SocialMediaPost>? Posts { get; set; } = new List<SocialMediaPost>();
     public List<SocialMediaPost>? TaggedPosts { get; set; } = new List<SocialMediaPost>();
+
+    public List<SocialMediaUser> SentFriendRequests { get; set; } = new List<SocialMediaUser>();
+
+    public List<SocialMediaUser> ReceivedFriendRequests { get; set; } = new List<SocialMediaUser>();
+
 
 }
 

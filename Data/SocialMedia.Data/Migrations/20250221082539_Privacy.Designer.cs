@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialMedia.Data;
 
@@ -11,9 +12,11 @@ using SocialMedia.Data;
 namespace SocialMedia.Migrations
 {
     [DbContext(typeof(SocialMediaDbContext))]
-    partial class SocialMediaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250221082539_Privacy")]
+    partial class Privacy
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -678,49 +681,19 @@ namespace SocialMedia.Migrations
                     b.ToTable("PostTaggedUsers", (string)null);
                 });
 
-            modelBuilder.Entity("UserFollows", b =>
+            modelBuilder.Entity("SocialMediaUserSocialMediaUser", b =>
                 {
-                    b.Property<string>("FollowedUserId")
+                    b.Property<string>("FollowingId")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("FollowerId")
+                    b.Property<string>("FriendsId")
                         .HasColumnType("varchar(255)");
 
-                    b.HasKey("FollowedUserId", "FollowerId");
+                    b.HasKey("FollowingId", "FriendsId");
 
-                    b.HasIndex("FollowerId");
+                    b.HasIndex("FriendsId");
 
-                    b.ToTable("UserFollows");
-                });
-
-            modelBuilder.Entity("UserFriendRequests", b =>
-                {
-                    b.Property<string>("ReceiverId")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("SenderId")
-                        .HasColumnType("varchar(255)");
-
-                    b.HasKey("ReceiverId", "SenderId");
-
-                    b.HasIndex("SenderId");
-
-                    b.ToTable("UserFriendRequests", (string)null);
-                });
-
-            modelBuilder.Entity("UserFriends", b =>
-                {
-                    b.Property<string>("FriendId")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("varchar(255)");
-
-                    b.HasKey("FriendId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserFriends", (string)null);
+                    b.ToTable("SocialMediaUserSocialMediaUser");
                 });
 
             modelBuilder.Entity("CloudResourceSocialMediaComment", b =>
@@ -1098,47 +1071,17 @@ namespace SocialMedia.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("UserFollows", b =>
+            modelBuilder.Entity("SocialMediaUserSocialMediaUser", b =>
                 {
                     b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", null)
                         .WithMany()
-                        .HasForeignKey("FollowedUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", null)
-                        .WithMany()
-                        .HasForeignKey("FollowerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("UserFriendRequests", b =>
-                {
-                    b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", null)
-                        .WithMany()
-                        .HasForeignKey("ReceiverId")
+                        .HasForeignKey("FollowingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", null)
                         .WithMany()
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("UserFriends", b =>
-                {
-                    b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", null)
-                        .WithMany()
-                        .HasForeignKey("FriendId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("FriendsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

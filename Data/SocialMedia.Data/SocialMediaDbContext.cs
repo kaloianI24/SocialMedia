@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Data.Models;
+using System.Reflection.Emit;
 
 namespace SocialMedia.Data
 {
@@ -56,8 +57,42 @@ namespace SocialMedia.Data
 
             builder.Entity<SocialMediaPost>()
                 .HasMany(p => p.Attachments)
-                .WithMany();
+            .WithMany();
 
+            builder.Entity<SocialMediaUser>()
+            .HasMany(u => u.Friends)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>(
+                "UserFriends",
+                j => j.HasOne<SocialMediaUser>().WithMany().HasForeignKey("FriendId"),
+                j => j.HasOne<SocialMediaUser>().WithMany().HasForeignKey("UserId"),
+                j => j.ToTable("UserFriends")
+            );
+
+            builder.Entity<SocialMediaUser>()
+            .HasMany(u => u.Following)
+            .WithMany(u => u.Followers)
+            .UsingEntity<Dictionary<string, object>>(
+                "UserFollows",
+                j => j.HasOne<SocialMediaUser>()
+                      .WithMany()
+                      .HasForeignKey("FollowedUserId")
+                      .OnDelete(DeleteBehavior.Restrict),
+                j => j.HasOne<SocialMediaUser>()
+                      .WithMany()
+                      .HasForeignKey("FollowerId")
+                      .OnDelete(DeleteBehavior.Cascade)
+            );
+
+            builder.Entity<SocialMediaUser>()
+                .HasMany(u => u.SentFriendRequests)
+                .WithMany(u => u.ReceivedFriendRequests)
+                .UsingEntity<Dictionary<string, object>>(
+                    "UserFriendRequests",
+                    j => j.HasOne<SocialMediaUser>().WithMany().HasForeignKey("ReceiverId"),
+                    j => j.HasOne<SocialMediaUser>().WithMany().HasForeignKey("SenderId"),
+                    j => j.ToTable("UserFriendRequests")
+                );
             base.OnModelCreating(builder);
             // Customize the ASP.NET Identity model and override the defaults if needed.
             // For example, you can rename the ASP.NET Identity table names and more.
