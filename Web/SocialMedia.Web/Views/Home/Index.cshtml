@@ -1,20 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using SocialMedia.Areas.Identity.Data
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-@using SocialMedia.Data.Models
-=======
-=======
->>>>>>> Stashed changes
-<<<<<<< HEAD
-@using SocialMedia.Service.Models
-=======
-@using SocialMedia.Data.Models
->>>>>>> 89a3c39784c182b5d39d11611aef0d2b50afb75f
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
 @inject SignInManager<SocialMediaUser> SignInManager
 @inject UserManager<SocialMediaUser> UserManager
@@ -207,62 +192,6 @@
 
     </html>
     @section Scripts {
-<<<<<<< HEAD
-        <script src="~/js/imagesFunctions.js"></script>
-=======
     <script src="~/js/imagesFunctions.js"></script>
-    <script>
-        document.querySelectorAll('.btn-confirm').forEach(b => b.addEventListener('click', (e) => {
-            var requestId = e.target.id;
-
-            fetch('/Home/AcceptFriendRequest?requestId=' + requestId, {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            })
-            .then((res) => {
-                if (res.ok) {
-                     document.querySelector(`.friend-requests[data-request-id="${requestId}"]`).remove();
-                    alert('You have successfully accepted the friend request!');
-                } else {
-                    alert('Failed to accept the request.');
-                }
-            })
-            .catch((error) => console.error(error));
-        }));
-    </script>
-        <script>
-            document.querySelectorAll('.btn-delete').forEach(b => b.addEventListener('click', (e) => {
-                var requestId = e.target.id;
-
-                fetch('/Home/DeleteFriendRequest?requestId=' + requestId, {
-                    method: 'POST',
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                })
-                .then((res) => {
-                    if (res.ok) {
-                        document.querySelector(`.friend-requests[data-request-id="${requestId}"]`).remove();
-                        alert('You have successfully deleted the friend request!');
-                    } else {
-                        alert('Failed to delete the request.');
-                    }
-                })
-                .catch((error) => console.error(error));
-            }));
-        </script>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
->>>>>>> 89a3c39784c182b5d39d11611aef0d2b50afb75f
->>>>>>> Stashed changes
-=======
->>>>>>> 89a3c39784c182b5d39d11611aef0d2b50afb75f
->>>>>>> Stashed changes
     }
 }
-
-
-
