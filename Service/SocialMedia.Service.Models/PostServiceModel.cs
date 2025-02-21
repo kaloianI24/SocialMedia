@@ -21,8 +21,8 @@ namespace SocialMedia.Service.Models
 
         public List<TagServiceModel>? Tags { get; set; }
         
-        //public List<UserPostComment> Comments { get; set; }
+        public List<UserPostComment> Comments { get; set; }
 
-        //public List<UserPostReaction> Reactions { get; set; }
+        public List<UserPostReaction> Reactions { get; set; }
     }
 }
