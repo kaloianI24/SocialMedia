@@ -5,6 +5,7 @@ namespace SocialMedia.Areas.Administration.Controllers
 {
     [Area("Administration")]
     [Authorize(Roles = "Administrator")]
+    //[Authorize(Roles = "Admin")]
     public class HomeController : Controller
     {
         public IActionResult Index()
