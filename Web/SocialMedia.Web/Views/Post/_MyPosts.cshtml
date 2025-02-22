@@ -56,13 +56,20 @@
                 <div class="post-actions">
                     <div class="post-likes">
                         <div class="likes-count">
-                            <img src="~/images/heart.svg" class="reaction-heart">
-                            <div class="count-likes-number">Reactions.Count</div>
-                            <img src="~/images/comment.svg" class="comment-image">
-                            <div class="count-likes-number">Comments.Count</div>
+                            <img src="@Url.Content("~/images/heart.svg")"
+                                 class="reaction-heart"
+                                 data-liked="false"
+                                 data-post-id="@post.Id" />
+
+                            <div class="count-likes-number">0</div>
+
+                            <img src="@Url.Content("~/images/comment.svg")" class="comment-image">
+                            <div class="count-comment-number">0</div>
                         </div>
                     </div>
                 </div>
+				
+                 
                 <div class="post-caption">
                     <span class="username">@Model.UserName</span>
                     <p class="post-description">
@@ -81,7 +88,7 @@
                             <span>#@tag.Name</span>
                         }
                     </div>
-
+					
                     <div class="taggedUsers">
                         @for (int i = 0; i < post.TaggedUsersId.Count; i++)
                         {
@@ -96,7 +103,25 @@
         }
     }
 </div>
+<script>
+										document.addEventListener("click", function (event) {
+		if (event.target.classList.contains("reaction-heart")) {
+			let image = event.target;
+			let liked = image.getAttribute("data-liked") === "true";
+			let counter = image.parentElement.querySelector(".count-likes-number");
 
+			if (liked) {
+				image.src = "/images/heart.svg";
+				counter.textContent = Math.max(0, parseInt(counter.textContent) - 1);
+				image.setAttribute("data-liked", "false");
+			} else {
+				image.src = "/images/heart.png";
+				counter.textContent = parseInt(counter.textContent) + 1;
+				image.setAttribute("data-liked", "true");
+			}
+		}
+	});
+</script>
 <script>
     document.querySelectorAll('.btn-delete-post').forEach(b => b.addEventListener('click', (e) => {
         const postId = e.target.closest('.post').dataset.postId;

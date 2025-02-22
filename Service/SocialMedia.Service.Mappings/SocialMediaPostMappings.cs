@@ -34,10 +34,12 @@ namespace SocialMedia.Service.Mappings
                 Tags = entity.Tags?.Select(tag => tag.ToModel()).ToList(),
                 TaggedUsersId = entity.TaggedUsers?.Select(u => u.Id).ToList(),
                 TaggedUsersUserName = entity.TaggedUsers?.Select(u => u.UserName).ToList(),
+                Reactions = entity.Reactions?.Select(reaction => reaction.ToModel(UserPostReactionMappingsContext.Post)).ToList(),
+                Comments = entity.Comments?.Select(comment => comment.ToModel(UserPostCommentMappingsContext.Post)).ToList(),
                 CreatedOn = entity.CreatedOn,
                 UpdatedOn = entity.UpdatedOn,
                 DeletedOn = entity.DeletedOn,
-                CreatedBy = ShouldMapUser (context) ? entity.CreatedBy.ToModel(UserPostMappingsContext.Post) : null,
+                CreatedBy = ShouldMapUser(context) ? entity.CreatedBy.ToModel(UserPostMappingsContext.Post) : null,
                 UpdatedBy = ShouldMapUser(context) ? entity.UpdatedBy?.ToModel(UserPostMappingsContext.Post) : null,
                 DeletedBy = ShouldMapUser(context) ? entity.DeletedBy?.ToModel(UserPostMappingsContext.Post) : null,
             };

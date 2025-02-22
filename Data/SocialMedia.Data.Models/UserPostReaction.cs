@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SocialMedia.Data.Models
 {
-    public class UserPostReaction : MetadataBaseEntity
+    public class UserPostReaction : BaseEntity
     {
         public SocialMediaUser User { get; set; }
 

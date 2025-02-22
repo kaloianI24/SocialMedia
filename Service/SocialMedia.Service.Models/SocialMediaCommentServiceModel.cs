@@ -16,5 +16,7 @@ namespace SocialMedia.Service.Models
         public List<UserCommentReactionServiceModel> Reactions { get; set; }
 
         public List<SocialMediaCommentServiceModel> Replies { get; set; }
+
+        public SocialMediaCommentServiceModel? Parent { get; set; }
     }
 }
