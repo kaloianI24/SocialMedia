@@ -37,7 +37,7 @@ namespace SocialMedia.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var user = await GetUser();
+            var user = await GetUserFeed();
             if (user == null)
             {
                 return RedirectToAction("Login", "Account");
@@ -52,8 +52,24 @@ namespace SocialMedia.Controllers
             ViewData["IsAdmin"] = isAdmin;
             ViewData["ProfilePictureUrl"] = user.ProfilePicture?.CloudUrl;
             ViewData["FriendRequests"] = user.ReceivedFriendRequests.ToList();
+            var posts = user.Friends.SelectMany(f => f.Posts).OrderByDescending(p => p.CreatedOn).ToList();
+            posts.AddRange(user.Following.SelectMany(f => f.Posts).OrderByDescending(p => p.CreatedOn));
 
-            return View(user);
+            var postWebModel = posts.Select(p => new TaggedPostWebModel
+            {
+                Id = p.Id,
+                Description = p.Description,
+                AttachmentUrls = p.Attachments.Select(a => a.CloudUrl).ToList(),
+                Tags = p.Tags.Select(t => t.Name).ToList(),
+                UserName = p.CreatedBy.UserName,
+                ProfilePictureUrl = p.CreatedBy.ProfilePicture?.CloudUrl,
+                CreatedOn = p.CreatedOn,
+                CreatedById = p.CreatedBy.Id,
+                TaggedUsersId = p.TaggedUsers.Select(u => u.Id).ToList(),
+                TaggedUsersUserNames = p.TaggedUsers.Select(u => u.UserName).ToList(),
+
+            }).ToList();
+            return View(postWebModel);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -226,6 +242,40 @@ namespace SocialMedia.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        private async Task<SocialMediaUser> GetUserFeed()
+        {
+            return await _userManager.Users
+            .Include(u => u.ProfilePicture)
+            .Include(u => u.Posts)
+                .ThenInclude(p => p.Attachments)
+             .Include(u => u.Posts)
+                .ThenInclude(p => p.Tags)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(p => p.Attachments)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(p => p.TaggedUsers)
+            .Include(u => u.Following)
+                .ThenInclude(f => f.ProfilePicture)
+                .Include(f => f.Posts)
+                    .ThenInclude(p => p.Attachments)
+                .Include(f => f.Posts)
+                    .ThenInclude(p => p.Tags)
+                .Include(f => f.Posts)
+                    .ThenInclude(p => p.TaggedUsers)
+            .Include(u => u.Friends).
+                ThenInclude(f => f.ProfilePicture)
+                .Include(f => f.Posts)
+                    .ThenInclude(p => p.Attachments)
+                .Include(f => f.Posts)
+                    .ThenInclude(p => p.Tags)
+                .Include(f => f.Posts)
+                    .ThenInclude(p => p.TaggedUsers)
+            .Include(u => u.ReceivedFriendRequests)
+                .ThenInclude(r => r.CreatedBy)
+                    .ThenInclude(u => u.ProfilePicture)
+            .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
         }
     }
 }

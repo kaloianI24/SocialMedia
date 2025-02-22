@@ -15,8 +15,7 @@
 
 }
 
-@model SocialMediaUser
-
+@model List<SocialMedia.Web.Models.Post.TaggedPostWebModel>
 @if (SignInManager.IsSignedIn(User))
 {
     <!DOCTYPE html>
@@ -51,143 +50,120 @@
                         @TempData["ErrorMessage"]
                     </div>
                 }
-            @foreach(var request in requests.Where(r => r.Status.Equals("Pending")))
-            {
+                @foreach(var request in requests.Where(r => r.Status.Equals("Pending")))
+                {
                     <div class="friend-requests" data-request-id="@request.Id">
-                    <img src="@request.CreatedBy.ProfilePicture.CloudUrl" alt="Profile Picture" class="profile-pic">
-                    <div class="request-info">
-                        <span class="username-request">@request.CreatedBy.UserName</span>
-                        <button class="btn-confirm" id="@request.Id">Confirm</button>
-                        <button class="btn-delete" id="@request.Id">Delete</button>
+                        <img src="@request.CreatedBy.ProfilePicture.CloudUrl" alt="Profile Picture" class="profile-pic">
+                        <div class="request-info">
+                            <span class="username-request">@request.CreatedBy.UserName</span>
+                            <button class="btn-confirm" id="@request.Id">Confirm</button>
+                            <button class="btn-delete" id="@request.Id">Delete</button>
+                        </div>
                     </div>
-                </div>
-            }         
+                }         
             </div>
         </div>
 
         <div class="main-content">
-            <div class="post">
-                <div class="post-header">
-                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
-                    <div class="post-info">
-                        <span class="username">username</span>
-                        <span class="location">Sofia, Bulgaria</span> <span class="location"></span>
+            @foreach(var post in Model)
+            {
+                <div class="post">
+                    <div class="post-header">
+                        <a href="/Post/MyPage?userId=@post.CreatedById">
+                            <img src="@post.ProfilePictureUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
+                        </a>
+                        <div class="post-info">
+                            <span class="username">@post.UserName</span>
+                            <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
+                        </div>
                     </div>
-                </div>
-                <div class="carousel">
-                    <div class="carousel-images">
-                        <img src="~/images/d336a6c5-4918-4333-bf59-1a20d4a2d328.jpg" alt="Post Image 1" class="post-image">
-                        <img src="~/images/🌊.jpg" alt="Post Image 2" class="post-image">
-                        <img src="~/images/d336a6c5-4918-4333-bf59-1a20d4a2d328.jpg" alt="Post Image 3" class="post-image">
-                        <img src="~/images/🌊.jpg" alt="Post Image 4" class="post-image">
+                    <div class="carousel">
+                        <div class="carousel-images">
+                            @foreach (var attachmentUrl in post.AttachmentUrls)
+                            {
+                                <img src=@attachmentUrl.Replace("http://", "https://") alt="Post Image" class="post-image">
+                            }
+                        </div>
+                        <button type="button" button class="carousel-arrow left-arrow">&lt;</button>
+                        <button type="button" button class="carousel-arrow right-arrow">&gt;</button>
+                        <div class="carousel-indicators">
+                            <span class="dot active"></span>
+                            @for (int i = 0; i < post.AttachmentUrls.Count - 1; i++)
+                            {
+                                <span class="dot"></span>
+                            }
+                        </div>
+                        <div class="image-counter">1 / @post.AttachmentUrls.Count</div>
                     </div>
-                    <button class="carousel-arrow left-arrow">&lt;</button>
-                    <button class="carousel-arrow right-arrow">&gt;</button>
-                    <div class="carousel-indicators">
-                        <span class="dot active"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                    </div>
-                    <div class="image-counter">1 / 4</div>
-                </div>
 
-                <div class="post-actions">
-                    <div class="post-likes">
-                        <div class="likes-count" id="image-container">
-                            <img id="toggleImage" src="~/images/heart.svg" alt="SVG Image" class="reaction-heart" data-liked="false">
+                    <div class="post-actions">
+                        <div class="post-likes">
+                            <div class="likes-count" id="image-container">
+                                <img id="toggleImage" src="~/images/heart.svg" alt="SVG Image" class="reaction-heart" data-liked="false">
 
-                            <script>
-                                document.addEventListener("DOMContentLoaded", function () {
-                                    const images = document.querySelectorAll(".reaction-heart");
-                                    const img1 = "/images/heart.svg";
-                                    const img2 = "/images/heart.png";
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function () {
+                                        const images = document.querySelectorAll(".reaction-heart");
+                                        const img1 = "/images/heart.svg";
+                                        const img2 = "/images/heart.png";
 
-                                    images.forEach(image => {
-                                        image.addEventListener("click", function() {
-                                            let liked = this.getAttribute("data-liked") === "true";
-                                            let counter = this.parentElement.querySelector(".count-likes-number");
+                                        images.forEach(image => {
+                                            image.addEventListener("click", function() {
+                                                let liked = this.getAttribute("data-liked") === "true";
+                                                let counter = this.parentElement.querySelector(".count-likes-number");
 
-                                            if (liked) {
-                                                this.src = img1;
-                                                counter.textContent = Math.max(0, parseInt(counter.textContent) - 1);
-                                                this.setAttribute("data-liked", "false");
-                                            } else {
-                                                this.src = img2;
-                                                counter.textContent = parseInt(counter.textContent) + 1;
-                                                this.setAttribute("data-liked", "true");
-                                            }
+                                                if (liked) {
+                                                    this.src = img1;
+                                                    counter.textContent = Math.max(0, parseInt(counter.textContent) - 1);
+                                                    this.setAttribute("data-liked", "false");
+                                                } else {
+                                                    this.src = img2;
+                                                    counter.textContent = parseInt(counter.textContent) + 1;
+                                                    this.setAttribute("data-liked", "true");
+                                                }
+                                            });
                                         });
                                     });
-                                });
-                            </script>
+                                </script>
 
-                            <div class="count-likes-number">0</div>
-                            <img src="~/images/comment.svg" class="comment-image">
-                            <div class="count-comment-number">0</div>
+                                <div class="count-likes-number">0</div>
+                                <img src="~/images/comment.svg" class="comment-image">
+                                <div class="count-comment-number">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="post-caption">
+                        <span class="username">@post.UserName</span>
+                        <p class="post-description">
+                            @string.Join(" ", @post.Description.Split(" ").Take(10))
+                            <span class="post-description-hidden-text">
+                                @string.Join(" ", @post.Description.Split(" ").Skip(10))
+                            </span>
+                            @if (post.Description.Split(" ").Length > 10)
+                            {
+                                <button type="button" class="toggle-btn">Read more</button>
+                            }
+                        </p>
+                        <div class="tags">
+                            @foreach (var tag in @post.Tags)
+                            {
+                                <span>#@tag</span>
+                            }
+                        </div>
+                        <div class="taggedUsers">
+                            @for (int i = 0; i < post.TaggedUsersId.Count; i++)
+                            {
+                                <a class="links" href="/Post/MyPage?userId=@post.TaggedUsersId.ElementAt(i)">
+                                    <span class="taggedUsers-text">@('@')@post.TaggedUsersUserNames.ElementAt(i)</span>
+                                </a>
+                            }
                         </div>
                     </div>
                 </div>
 
-                <div class="post-caption">
-                    <span class="username">username</span>
-                    <p class="post-description">
-                        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Rem, earum quibusdam cumque quod sit nisi ab
-                        <span class="post-description-hidden-text">
-                            exercitationem voluptas consequuntur enim, unde tempore? Dolor dignissimos maxime optio minus tempore
-                            quaerat molestias.
-                        </span>
-                        <button class="toggle-btn">Read more</button>
-                    </p>
-                </div>
-            </div>
-
-            <div class="post">
-                <div class="post-header">
-                    <img src="~/images/profile.svg" alt="Profile Picture" class="profile-pic">
-                    <div class="post-info">
-                        <span class="username">username</span>
-                        <span class="location">Sofia, Bulgaria</span> <span class="location"></span>
-                    </div>
-                </div>
-
-                <div class="carousel">
-                    <div class="carousel-images">
-                        <img src="~/images/images.jpeg" alt="Post Image 1" class="post-image">
-                        <img src="24-12-01_-_НПМГ_-_12А_-_138 (1).jpg" alt="Post Image 2" class="post-image">
-                        <img src="24-12-01_-_НПМГ_-_12А_-_139 (1).jpg" alt="Post Image 3" class="post-image">
-                    </div>
-                    <button class="carousel-arrow left-arrow">&lt;</button>
-                    <button class="carousel-arrow right-arrow">&gt;</button>
-                    <div class="carousel-indicators">
-                        <span class="dot active"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                    </div>
-                    <div class="image-counter">1 / 3</div>
-                </div>
-                <div class="post-actions">
-                    <div class="post-likes">
-                        <div class="likes-count">
-                            <img src="~/images/heart.svg" class="reaction-heart">
-                            <div class="count-likes-number">0</div>
-                            <img src="~/images/comment.svg" class="comment-image">
-                            <div class="count-comment-number">0</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="post-caption">
-                    <span class="username">username</span>
-                    <p class="post-description">
-                        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Rem, earum quibusdam cumque quod sit nisi ab
-                        <span class="post-description-hidden-text">
-                            exercitationem voluptas consequuntur enim, unde tempore? Dolor dignissimos maxime optio minus tempore
-                            quaerat molestias.
-                        </span>
-                        <button class="toggle-btn">Read more</button>
-					</p>
-                </div>
-            </div>
+            }
+           
 		</div>
 		
     </body>
