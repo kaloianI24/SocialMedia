@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using SocialMedia.Service.Mappings;
 using Microsoft.EntityFrameworkCore;
 using Azure.Core;
+using System.Reflection;
 
 namespace SocialMedia.Service.Friends
 {
@@ -39,25 +40,7 @@ namespace SocialMedia.Service.Friends
                  .Any(r => r.CreatedById == receiver.Id && r.ReceiverId == sender.Id || r.CreatedById == sender.Id && r.ReceiverId == receiver.Id);
 
             var isRequestValid = receiver.Id != sender.Id;
-
-            var areTheyFollowed = receiver.Following.Any(f => f.Id == sender.Id);
-            if(areTheyFollowed)
-            {
-                receiver.Following.Remove(sender);
-                sender.Followers.Remove(receiver);
-                await socialMediaUserRepository.UpdateAsync(receiver);
-                await socialMediaUserRepository.UpdateAsync(sender);
-            }
-
-            var areTheyFollowing = sender.Following.Any(f => f.Id == receiver.Id);
-            if(areTheyFollowed)
-            {
-                sender.Following.Remove(receiver);
-                receiver.Followers.Remove(sender);
-                await socialMediaUserRepository.UpdateAsync(receiver);
-                await socialMediaUserRepository.UpdateAsync(sender);
-            }
-
+                      
             if (!ifRequestExists && isRequestValid)
             {
                 var request = await friendRequestRepository.CreateAsync(new FriendRequest { Receiver = receiver, Status = "Pending" });
@@ -85,11 +68,36 @@ namespace SocialMedia.Service.Friends
             var request = friendRequestRepository.GetAll()
                 .Include(r => r.CreatedBy)
                     .ThenInclude(u => u.Friends)
+                 .Include(r => r.CreatedBy)
+                    .ThenInclude(u => u.Followers)
+                 .Include(r => r.CreatedBy)
+                    .ThenInclude(u => u.Following)
                 .Include(r => r.Receiver)
                     .ThenInclude(u => u.Friends)
+                .Include(r => r.Receiver)
+                    .ThenInclude(u => u.Followers)
+                 .Include(r => r.Receiver)
+                    .ThenInclude(u => u.Following)
                 .FirstOrDefault(r => r.Id == requestId);
 
             request.Status = "Accepted";
+            var areTheyFollowed = request.Receiver.Following.Any(f => f.Id == request.CreatedBy.Id);
+            if (areTheyFollowed)
+            {
+                request.Receiver.Following.Remove(request.CreatedBy);
+                request.CreatedBy.Followers.Remove(request.Receiver);
+                await socialMediaUserRepository.UpdateAsync(request.Receiver);
+                await socialMediaUserRepository.UpdateAsync(request.CreatedBy);
+            }
+
+            var areTheyFollowing = request.CreatedBy.Following.Any(f => f.Id == request.Receiver.Id);
+            if (areTheyFollowing)
+            {
+                request.CreatedBy.Following.Remove(request.Receiver);
+                request.Receiver.Followers.Remove(request.CreatedBy);
+                await socialMediaUserRepository.UpdateAsync(request.Receiver);
+                await socialMediaUserRepository.UpdateAsync(request.CreatedBy);
+            }
             request.CreatedBy.Friends.Add(request.Receiver);
             request.Receiver.Friends.Add(request.CreatedBy);
 
@@ -133,7 +141,7 @@ namespace SocialMedia.Service.Friends
             }
             else
             {
-                await friendRequestRepository.DeleteAsync(request);
+                await friendRequestRepository.HardDeleteAsync(request);
                 user.Friends.Remove(friend);
                 friend.Friends.Remove(user);
                 await socialMediaUserRepository.UpdateAsync(user);

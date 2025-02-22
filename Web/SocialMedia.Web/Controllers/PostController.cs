@@ -246,6 +246,7 @@ namespace SocialMedia.Controllers
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.TaggedUsers)
             .Include(u => u.Following)
+            .Include(u => u.Followers)
             .Include(u => u.Friends)
             .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
         }
@@ -267,6 +268,7 @@ namespace SocialMedia.Controllers
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.TaggedUsers)
             .Include(u => u.Following)
+            .Include(u => u.Followers)
             .Include(u => u.Friends)
             .FirstOrDefaultAsync(u => u.Id == id);
         }

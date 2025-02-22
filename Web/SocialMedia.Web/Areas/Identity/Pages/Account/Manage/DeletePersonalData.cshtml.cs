@@ -23,19 +23,25 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
         private readonly ILogger<DeletePersonalDataModel> _logger;
         private readonly PostRepository postRepository;
         private readonly ISocialMediaPostService socialMediaPostService;
+        private readonly SocialMediaUserRepository socialMediaUserRepository;
+        private readonly FriendRequestRepository friendRequestRepository;
 
         public DeletePersonalDataModel(
             UserManager<SocialMediaUser> userManager,
             SignInManager<SocialMediaUser> signInManager,
             ILogger<DeletePersonalDataModel> logger,
             PostRepository postRepository,
-            ISocialMediaPostService socialMediaPostService)
+            ISocialMediaPostService socialMediaPostService,
+            SocialMediaUserRepository socialMediaUserRepository,
+            FriendRequestRepository friendRequestRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             this.postRepository = postRepository;
             this.socialMediaPostService = socialMediaPostService;
+            this.socialMediaUserRepository = socialMediaUserRepository;
+            this.friendRequestRepository = friendRequestRepository;
         }
 
         /// <summary>
@@ -115,6 +121,38 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
                     await postRepository.RemoveTaggedUser(user, post);
                 }
             }
+            var requests = friendRequestRepository.GetAll().Where(fr => fr.CreatedById == user.Id || fr.ReceiverId == user.Id).ToList();
+            foreach(var request in requests)
+            {
+                await friendRequestRepository.HardDeleteAsync(request);
+            }
+
+            var userDb = await socialMediaUserRepository.GetUserFullInformation(user.Id);
+            var friends = userDb.Friends.ToList();
+            foreach(var friend in friends)
+            {
+                userDb.Friends.Remove(friend);
+                friend.Friends.Remove(userDb);
+                await socialMediaUserRepository.UpdateAsync(friend);
+            }
+
+            var followers = userDb.Followers.ToList();
+            foreach(var follower in followers)
+            {
+                userDb.Followers.Remove(follower);
+                follower.Following.Remove(userDb);
+                await socialMediaUserRepository.UpdateAsync(follower);
+            }
+
+            var followings = userDb.Following.ToList();
+
+            foreach(var following in followings)
+            {
+                userDb.Following.Remove(following);
+                following.Followers.Remove(userDb);
+                await socialMediaUserRepository.UpdateAsync(following);
+            }
+            socialMediaUserRepository.UpdateAsync(userDb);
             var result = await _userManager.DeleteAsync(user);
             var userId = await _userManager.GetUserIdAsync(user);
             if (!result.Succeeded)

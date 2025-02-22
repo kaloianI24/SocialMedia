@@ -83,6 +83,27 @@ namespace SocialMedia.Controllers
             .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
         }
 
+        private Task<SocialMediaUser> GetUserById(string id)
+        {
+            return _userManager.Users
+            .Include(u => u.ProfilePicture)
+            .Include(u => u.Posts)
+                .ThenInclude(p => p.Attachments)
+             .Include(u => u.Posts)
+                .ThenInclude(p => p.Tags)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(p => p.Attachments)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(p => p.TaggedUsers)
+            .Include(u => u.Following)
+            .Include(u => u.Followers)
+            .Include(u => u.Friends)
+            .Include(u => u.ReceivedFriendRequests)
+                .ThenInclude(r => r.CreatedBy)
+                    .ThenInclude(u => u.ProfilePicture)
+            .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
         public async Task<IActionResult> Register()
         {
             var user = new SocialMediaUser { UserName = "newUser", Email = "user@example.com" }; // Assume registration happened here
@@ -129,7 +150,7 @@ namespace SocialMedia.Controllers
         {
             try
             {
-                var receiver = await _userManager.FindByIdAsync(friendId);
+                var receiver = await GetUserById(friendId);
                 var sender = await GetUser();
                 await _friendRequestsService.CreateFriendRequest(receiver, sender);
                 return NoContent();
@@ -162,7 +183,7 @@ namespace SocialMedia.Controllers
         {
             try
             {
-                var currentUser = await _userManager.FindByIdAsync(friendId);
+                var currentUser = await GetUserById(friendId);
                 var friend = await GetUser();
                 await _friendRequestsService.RemoveFriend(currentUser, friend);
                 return NoContent();
@@ -180,7 +201,7 @@ namespace SocialMedia.Controllers
         {
             try
             {
-                var following = await _userManager.FindByIdAsync(followingId);
+                var following = await GetUserById(followingId);
                 var currentUser = await GetUser();
                 await _friendRequestsService.Follow(currentUser, following);
                 return NoContent();
@@ -196,7 +217,7 @@ namespace SocialMedia.Controllers
         {
             try
             {
-                var unfollowing = await _userManager.FindByIdAsync(unfollowingId);
+                var unfollowing = await GetUserById(unfollowingId);
                 var currentUser = await GetUser();
                 await _friendRequestsService.Unfollow(currentUser, unfollowing);
                 return NoContent();
