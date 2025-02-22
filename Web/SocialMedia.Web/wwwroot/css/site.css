@@ -884,3 +884,23 @@ textarea, input[type="text"] {
     z-index: 1000;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
+
+
+/* comment */
+
+.comment-input-field
+{
+    padding: 25px;
+    background: transparent;
+}
+
+.comment-input-field input {
+    background: transparent;
+    color: #FFFFFF;
+    font-weight: bold;
+}
+
+    .comment-input-field input::placeholder {
+        color: 737373;
+        font-weight: bold;
+    }
