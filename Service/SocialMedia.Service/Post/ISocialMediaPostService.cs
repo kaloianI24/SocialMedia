@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Data.Models;
 using SocialMedia.Service.Models;
 using SocialMedia.Web.Models.Post;
@@ -12,7 +13,7 @@ namespace SocialMedia.Service.SocialMediaPost
 {
     public interface ISocialMediaPostService : IGenericService<Data.Models.SocialMediaPost, PostServiceModel>
     {
-        public IQueryable<PostServiceModel> GetAllTaggedPosts(string id);
+        public IQueryable<PostServiceModel> GetAllTaggedPosts(SocialMediaUser user, bool isOwner, SocialMediaUser currentUser);
 
         public Task<PostServiceModel> RecoverAsync(string id);
 

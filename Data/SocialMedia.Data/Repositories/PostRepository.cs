@@ -39,6 +39,7 @@ namespace SocialMedia.Data.Repositories
             return await _context.Posts
                 .Include(p => p.TaggedUsers)
                 .Where(p => p.TaggedUsers.Any(u => u.Id == userId))
+                .Include(p => p.CreatedBy)
                 .ToListAsync();
         }
         public async Task HardDeleteAsync(SocialMediaPost post)

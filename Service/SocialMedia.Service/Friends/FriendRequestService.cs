@@ -162,6 +162,11 @@ namespace SocialMedia.Service.Friends
             {
                 throw new Exception("You cannot follow a user how is already your friend");
             }
+
+            if(user.IsPrivate)
+            {
+                throw new Exception("You cannot follow a user whose account is private.");
+            }
             else
             {
                 user.Following.Add(following);

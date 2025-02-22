@@ -18,7 +18,7 @@ public class SocialMediaUser : IdentityUser
     [Column(TypeName = "nvarchar(100)")]
     public string LastName { get; set; }
 
-    public bool isPrivate { get; set; }
+    public bool IsPrivate { get; set; }
     public SocialMediaRole? Role { get; set; }
 
     public CloudResource? ProfilePicture { get; set; }

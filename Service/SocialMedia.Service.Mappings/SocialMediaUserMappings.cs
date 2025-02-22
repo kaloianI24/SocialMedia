@@ -31,6 +31,7 @@ namespace SocialMedia.Service.Mappings
                 UserName = entity.UserName,
                 Email = entity.Email,
                 ProfilePicture = entity.ProfilePicture.ToModel(),
+                IsPrivate = entity.IsPrivate,
                 Posts = ShouldMapPost(context) ? entity.Posts?.Select(post => post.ToModel(UserPostMappingsContext.User)).ToList() : null,
                 Friends = entity.Friends?.Select(friend => friend.ToModelBasic()).ToList(),
                 Followers = entity.Followers?.Select(f => f.ToModelBasic()).ToList(),

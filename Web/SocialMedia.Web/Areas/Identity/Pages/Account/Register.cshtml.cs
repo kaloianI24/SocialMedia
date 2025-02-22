@@ -81,6 +81,9 @@ namespace SocialMedia.Areas.Identity.Pages.Account
             public IFormFile ProfilePicture { get; set; }
 
             [Required]
+            public bool IsPrivate { get; set; }
+
+            [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
@@ -109,7 +112,7 @@ namespace SocialMedia.Areas.Identity.Pages.Account
                 
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
-
+                user.IsPrivate = Input.IsPrivate;
                 if (user.ProfilePicture is not null)
                 {
                     string profilePhotoUrl = await UploadPhoto(Input.ProfilePicture);

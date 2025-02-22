@@ -20,6 +20,7 @@ public class SocialMediaUserServiceModel : IdentityUser
 
     public CloudResourceServiceModel? ProfilePicture { get; set; }
 
+    public bool IsPrivate { get; set; }
     public List<SocialMediaUserBasicServiceModel>? Friends { get; set; } = new List<SocialMediaUserBasicServiceModel>();
 
     public List<SocialMediaUserBasicServiceModel>? Followers { get; set; } = new List<SocialMediaUserBasicServiceModel>();

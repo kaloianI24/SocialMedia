@@ -200,11 +200,11 @@
             if(!(bool)ViewData["AreFriends"])
             {
                 <button class="btn-add-friend-request" id="@Model.Id">Add friend</button>
-                if (!(bool)ViewData["IsFollowing"])
+                if (!(bool)ViewData["IsFollowing"] && !Model.IsPrivate)
                 {
                     <button class="btn-follow" id="@Model.Id">Follow</button>
                 }
-                else
+                else if ((bool)ViewData["IsFollowing"])
                 {
                     <button class="btn-unfollow" id="@Model.Id">Unfollow</button>
                 }

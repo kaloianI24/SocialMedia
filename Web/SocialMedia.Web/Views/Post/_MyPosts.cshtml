@@ -7,50 +7,56 @@
 
 @model SocialMediaUserServiceModel
 <div class="main-content2">
-    @if (!Model.Posts.Any(p => p.DeletedOn == null))
+    @if (Model.IsPrivate && !(bool)ViewData["AreFriends"] && !(bool)ViewData["IsOwner"])
     {
-        <h1>You don't have posts</h1>
+        <h3>This account is private so you cannot see the posts.</h3>
     }
     else
     {
-        @foreach (var post in @Model.Posts.Where(p => p.DeletedOn == null).OrderByDescending(p => p.CreatedOn))
+        @if (!Model.Posts.Any(p => p.DeletedOn == null))
         {
-            <div class="post" data-post-id="@post.Id">
-                <div class="post-header">
-                    <a href="/Post/MyPage?userId=@Model.Id">
-                        <img src="@Model.ProfilePicture.CloudUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
-                    </a>
-                    <div class="post-info">
-                        <span class="username">@Model.UserName</span>
-                        <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
-                    </div>
-                    @if ((bool)ViewData["IsOwner"])
-                    {
-                        <button type="button" class="btn-delete-post">Delete post</button>
-                        <button class="btn-update-post"
-                                onclick="window.location.href='/Post/Update?postId=@post.Id'">
-                            Update post
-                        </button>
-                    }
-                </div>
-                <div class="carousel">
-                    <div class="carousel-images">
-                        @foreach (var photo in post.Attachments)
+            <h3>You don't have posts</h3>
+        }
+        else
+        {        
+            @foreach (var post in @Model.Posts.Where(p => p.DeletedOn == null).OrderByDescending(p => p.CreatedOn))
+            {
+                <div class="post" data-post-id="@post.Id">
+                    <div class="post-header">
+                        <a href="/Post/MyPage?userId=@Model.Id">
+                            <img src="@Model.ProfilePicture.CloudUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
+                        </a>
+                        <div class="post-info">
+                            <span class="username">@Model.UserName</span>
+                            <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
+                        </div>
+                        @if ((bool)ViewData["IsOwner"])
                         {
-                            <img src=@photo.CloudUrl.Replace("http://", "https://") alt="Post Image" class="post-image">
+                            <button type="button" class="btn-delete-post">Delete post</button>
+                            <button class="btn-update-post"
+                                    onclick="window.location.href='/Post/Update?postId=@post.Id'">
+                                Update post
+                            </button>
                         }
                     </div>
-                    <button type="button" button class="carousel-arrow left-arrow">&lt;</button>
-                    <button type="button" button class="carousel-arrow right-arrow">&gt;</button>
-                    <div class="carousel-indicators">
-                        <span class="dot active"></span>
-                        @for (int i = 0; i < post.Attachments.Count - 1; i++)
-                        {
-                            <span class="dot"></span>
-                        }
+                    <div class="carousel">
+                        <div class="carousel-images">
+                            @foreach (var photo in post.Attachments)
+                            {
+                                <img src=@photo.CloudUrl.Replace("http://", "https://") alt="Post Image" class="post-image">
+                            }
+                        </div>
+                        <button type="button" button class="carousel-arrow left-arrow">&lt;</button>
+                        <button type="button" button class="carousel-arrow right-arrow">&gt;</button>
+                        <div class="carousel-indicators">
+                            <span class="dot active"></span>
+                            @for (int i = 0; i < post.Attachments.Count - 1; i++)
+                            {
+                                <span class="dot"></span>
+                            }
+                        </div>
+                        <div class="image-counter">1 / @post.Attachments.Count</div>
                     </div>
-                    <div class="image-counter">1 / @post.Attachments.Count</div>
-                </div>
 
 
                 <div class="post-actions">
