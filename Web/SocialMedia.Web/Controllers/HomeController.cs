@@ -70,7 +70,7 @@ namespace SocialMedia.Controllers
 
         public async Task<IActionResult> Register()
         {
-            var user = new SocialMediaUser { UserName = "newUser", Email = "user@example.com" }; // Assume registration happened here
+            var user = new SocialMediaUser { UserName = "newUser", Email = "user@example.com" }; 
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 

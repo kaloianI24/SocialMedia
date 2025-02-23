@@ -90,6 +90,8 @@ namespace SocialMedia.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            public bool AgreeTerms { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -97,6 +99,7 @@ namespace SocialMedia.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
+
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
@@ -106,11 +109,14 @@ namespace SocialMedia.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
-                
+
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
+                user.UserName = Input.Email; 
+                user.Email = Input.Email;
+                user.AcceptedTerms = Input.AgreeTerms; 
 
-                if (user.ProfilePicture is not null)
+                if (Input.ProfilePicture is not null)
                 {
                     string profilePhotoUrl = await UploadPhoto(Input.ProfilePicture);
                     user.ProfilePicture = new CloudResourceServiceModel { CloudUrl = profilePhotoUrl }.ToEntity();
@@ -144,18 +150,16 @@ namespace SocialMedia.Areas.Identity.Pages.Account
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                         var callbackUrl = Url.Page(
-                          "/Account/RegisterConf",  
-                           pageHandler: null,
-                              values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                             protocol: Request.Scheme);
-                        ;
+                            "/Account/RegisterConf",
+                            pageHandler: null,
+                            values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                            protocol: Request.Scheme);
 
                         await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                             $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)
                         {
-                            
                             return RedirectToPage("/Account/RegisterConf", new { area = "Identity", email = Input.Email, returnUrl = returnUrl });
                         }
                         else
@@ -163,7 +167,6 @@ namespace SocialMedia.Areas.Identity.Pages.Account
                             await _signInManager.SignInAsync(user, isPersistent: false);
                             return LocalRedirect(returnUrl);
                         }
-
                     }
 
                     foreach (var error in result.Errors)

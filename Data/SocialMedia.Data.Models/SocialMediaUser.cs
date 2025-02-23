@@ -7,7 +7,6 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Areas.Identity.Data;
 
-// Add profile data for application users by adding properties to the SocialMediaUser class
 public class SocialMediaUser : IdentityUser
 {
     [PersonalData]
@@ -34,6 +33,8 @@ public class SocialMediaUser : IdentityUser
     public List<SocialMediaUser> SentFriendRequests { get; set; } = new List<SocialMediaUser>();
 
     public List<SocialMediaUser> ReceivedFriendRequests { get; set; } = new List<SocialMediaUser>();
+
+    public bool AcceptedTerms { get; set; }
 
 
 }
