@@ -128,19 +128,20 @@
 
                                 <div class="count-likes-number">0</div>
                                 <img src="~/images/comment.svg" class="comment-image">
+								<div class="count-comment-number">0</div>
 
-
-								<div class ="comment-input-field">
-                                    <input class="form-control" placeholder="Add a comment..."/>
-                                    
-                                    <button class="btn btn-primary comment-submit-button">Post</button>
+								<div class="comment-input-field">
+									<textarea class="form-control" me-1 rows="1" placeholder="Add a comment..."></textarea>
                                 </div>
+                                        <div class="comment-button-holder d-none d-flex justify-content-end">
+										    <button class="btn btn-primary fw-bold comment-submit-button">Post</button>
+                                        </div>
 
                                 <div class="details-posted-comment">
 
                                 </div>
 
-                                <div class="count-comment-number">0</div>
+
                             </div>
                         </div>
                     </div>
@@ -189,9 +190,27 @@
     <script src="~/js/imagesFunctions.js"></script>
 
     <script>
-        document.querySelector(".comment-input-field input".addEventListener("focusin", () => {
+        const autoResizeTextarea = (textarea) => {
+                textarea.style.height = "auto";
+                textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
+        };
 
-        });
+        const textarea = document.querySelector(".comment-input-field textarea");
+
+        textarea.addEventListener("input", () => {
+            autoResizeTextarea(textarea);
+
+        document.querySelector(".comment-input-field textarea".addEventListener("focusin", () => {
+            autoResizeTextarea(textarea);
+            document.querySelector(".comment-button-holder").classList.remove("d-none");
+            document.querySelector(".comment-button-holder").classList.add("d-flex");
+        }));
+
+            document.querySelector(".comment-input-field textarea".addEventListener("focusout", () => {
+                document.querySelector(".comment-button-holder").classList.add("d-none");
+                document.querySelector(".comment-button-holder").classList.remove("d-flex");
+            }));
+
     </script>
 
     <script>

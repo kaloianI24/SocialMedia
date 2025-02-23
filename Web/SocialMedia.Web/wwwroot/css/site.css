@@ -888,19 +888,34 @@ textarea, input[type="text"] {
 
 /* comment */
 
-.comment-input-field
+
+.comment-input-field textarea
 {
-    padding: 25px;
     background: transparent;
+    padding: 25px;
+    width: 100%;
+    box-sizing: border-box;
+    resize:none;
+    height: 40px;
+    max-height: 150px;
+    overflow-y: auto;
+    font-size: 14px;
 }
 
-.comment-input-field input {
+.comment-input-field textarea:focus {
     background: transparent;
-    color: #FFFFFF;
+    color: #black;
     font-weight: bold;
 }
 
-    .comment-input-field input::placeholder {
+.comment-input-field textarea::placeholder {
         color: 737373;
         font-weight: bold;
-    }
+}
+.form-control {
+    margin-left: 5px;
+}
+
+.comment-button-holder {
+    margin-left: 10px;
+}

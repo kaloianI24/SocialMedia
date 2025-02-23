@@ -1,4 +1,6 @@
-﻿namespace SocialMedia.Service
+﻿using SocialMedia.Service.Models;
+
+namespace SocialMedia.Service
 {
     public interface IGenericService<TEntity, TModel>
     {
