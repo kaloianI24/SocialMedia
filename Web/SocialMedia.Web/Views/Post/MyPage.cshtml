@@ -123,16 +123,56 @@
         }
 
         .taggedUsers {
-            display: block;
-            flex-direction: row;
-            gap: 10px;
-            margin-left: 2px;
+        display: block;
+        flex-direction: row;
+        gap: 10px;
+        margin-left: 2px;
         }
 
-            .taggedUsers-text {
-                color: #7C3DAA;
-                font-size: 15px;
-            }
+        .taggedUsers-text {
+        color: #7C3DAA;
+        font-size: 15px;
+        }
+
+        .btn-add-friend-request{
+            background-color: lightblue;
+            font-size: 15px;
+            border-radius: 20px;
+            margin-left: 250px;
+            height: 35px;
+            width: 100px;
+            margin-bottom: 30px;
+        }
+
+        .btn-remove-friend-request {
+            background-color: lightcoral;
+            font-size: 15px;
+            border-radius: 20px;
+            margin-left: 250px;
+            height: 35px;
+            width: 100px;
+            margin-bottom: 30px;
+        }
+
+        .btn-follow {
+            background-color: lightblue;
+            font-size: 15px;
+            border-radius: 20px;
+            margin-left: 20px;
+            height: 35px;
+            width: 100px;
+            margin-bottom: 30px;
+        }
+
+        .btn-unfollow {
+            background-color: lightcoral;
+            font-size: 15px;
+            border-radius: 20px;
+            margin-left: 20px;
+            height: 35px;
+            width: 100px;
+            margin-bottom: 30px;
+        }
     </style>
 </head>
 <body>
@@ -143,12 +183,40 @@
                 <h1>@Model.UserName</h1>
                 <div class="stats">
                     <span>@Model.Posts.Where(p => p.DeletedOn == null).Count() posts</span>
-                    <span>123 Followers</span>
-                    <span>123 Following</span>
+                    <span>@Model.Friends.Count Friends</span>
+                    <span>@Model.Followers.Count Followers</span>
+                    <span>@Model.Following.Count Following</span>
                 </div>
             </div>
         </div>
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        @if (!(bool)ViewData["IsOwner"])
+        {
+            if(!(bool)ViewData["AreFriends"])
+            {
+                <button class="btn-add-friend-request" id="@Model.Id">Add friend</button>
+                if (!(bool)ViewData["IsFollowing"] && !Model.IsPrivate)
+                {
+                    <button class="btn-follow" id="@Model.Id">Follow</button>
+                }
+                else if ((bool)ViewData["IsFollowing"])
+                {
+                    <button class="btn-unfollow" id="@Model.Id">Unfollow</button>
+                }
 
+            }
+            else
+            {
+                <button class="btn-remove-friend-request" id="@Model.Id">Remove friend</button>
+            }
+           
+        }
+        
         <div class="tabs">
             <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "MyPosts", id = Model.Id })">Posts</button>
             <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "TaggedPosts", id = Model.Id })">Tagged posts</button>
@@ -184,6 +252,109 @@
             });
         });
     </script>
+    <script>
+          document.querySelector('.btn-add-friend-request').addEventListener('click', (e) => {
+            var friendId = e.target.id;
 
+            fetch('/Home/SentFriendRequest?friendId=' + friendId, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then((res) => {
+                if (res.ok) {
+                    alert('You have successfully sent a friend request!');
+                    window.location.reload();
+                } else {
+                    return res.text();
+                }
+            })
+            .then((errorMessage) => {
+                if (errorMessage) {
+                    alert(errorMessage);
+                }
+            })
+            .catch((error) => console.error(error));
+        });
+    </script>
+    <script>
+          document.querySelector('.btn-remove-friend-request').addEventListener('click', (e) => {
+            var friendId = e.target.id;
+
+            fetch('/Home/RemoveFriend?friendId=' + friendId, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then((res) => {
+                if (res.ok) {
+                    alert('You have successfully removed the user from your friends!');
+                    window.location.reload();
+                } else {
+                    return res.text();
+                }
+            })
+            .then((errorMessage) => {
+                if (errorMessage) {
+                    alert(errorMessage);
+                }
+            })
+            .catch((error) => console.error(error));
+        });
+    </script>
+    <script>
+          document.querySelector('.btn-follow').addEventListener('click', (e) => {
+            var followingId = e.target.id;
+
+            fetch('/Home/Follow?followingId=' + followingId, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then((res) => {
+                if (res.ok) {
+                    alert('You successfully followed the user!');
+                    window.location.reload();
+                } else {
+                    return res.text();
+                }
+            })
+            .then((errorMessage) => {
+                if (errorMessage) {
+                    alert(errorMessage);
+                }
+            })
+            .catch((error) => console.error(error));
+        });
+    </script>
+    <script>
+          document.querySelector('.btn-unfollow').addEventListener('click', (e) => {
+            var unfollowingId = e.target.id;
+
+            fetch('/Home/Unfollow?unfollowingId=' + unfollowingId, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then((res) => {
+                if (res.ok) {
+                    alert('You successfully unfollowed the user!');
+                    window.location.reload();
+                } else {
+                    return res.text();
+                }
+            })
+            .then((errorMessage) => {
+                if (errorMessage) {
+                    alert(errorMessage);
+                }
+            })
+            .catch((error) => console.error(error));
+        });
+    </script>
 }
 

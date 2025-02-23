@@ -17,7 +17,7 @@ public class SocialMediaUser : IdentityUser
     [Column(TypeName = "nvarchar(100)")]
     public string LastName { get; set; }
 
-    public bool isPrivate { get; set; }
+    public bool IsPrivate { get; set; }
     public SocialMediaRole? Role { get; set; }
 
     public CloudResource? ProfilePicture { get; set; }
@@ -30,9 +30,9 @@ public class SocialMediaUser : IdentityUser
     public List<SocialMediaPost>? Posts { get; set; } = new List<SocialMediaPost>();
     public List<SocialMediaPost>? TaggedPosts { get; set; } = new List<SocialMediaPost>();
 
-    public List<SocialMediaUser> SentFriendRequests { get; set; } = new List<SocialMediaUser>();
+    public List<FriendRequest> SentFriendRequests { get; set; } = new List<FriendRequest>();
 
-    public List<SocialMediaUser> ReceivedFriendRequests { get; set; } = new List<SocialMediaUser>();
+    public List<FriendRequest> ReceivedFriendRequests { get; set; } = new List<FriendRequest>();
 
     public bool AcceptedTerms { get; set; }
 

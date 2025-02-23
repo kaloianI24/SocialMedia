@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialMedia.Data;
 
@@ -11,9 +12,11 @@ using SocialMedia.Data;
 namespace SocialMedia.Migrations
 {
     [DbContext(typeof(SocialMediaDbContext))]
-    partial class SocialMediaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250221121312_FriendRequest")]
+    partial class FriendRequest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -193,9 +196,6 @@ namespace SocialMedia.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<bool>("AcceptedTerms")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
@@ -213,9 +213,6 @@ namespace SocialMedia.Migrations
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsPrivate")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -259,6 +256,9 @@ namespace SocialMedia.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
+
+                    b.Property<bool>("isPrivate")
+                        .HasColumnType("tinyint(1)");
 
                     b.HasKey("Id");
 
@@ -357,8 +357,7 @@ namespace SocialMedia.Migrations
                     b.Property<DateTime?>("DeletedOn")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("ParentId")
-                        .IsRequired()
+                    b.Property<string>("SocialMediaCommentId")
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("UpdatedById")
@@ -373,7 +372,7 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("DeletedById");
 
-                    b.HasIndex("ParentId");
+                    b.HasIndex("SocialMediaCommentId");
 
                     b.HasIndex("UpdatedById");
 
@@ -505,9 +504,28 @@ namespace SocialMedia.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DeletedById")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("ReactionId")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("varchar(255)");
@@ -516,7 +534,13 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("CommentId");
 
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("DeletedById");
+
                     b.HasIndex("ReactionId");
+
+                    b.HasIndex("UpdatedById");
 
                     b.HasIndex("UserId");
 
@@ -532,9 +556,28 @@ namespace SocialMedia.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DeletedById")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("PostId")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -544,7 +587,13 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("CommentId");
 
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("DeletedById");
+
                     b.HasIndex("PostId");
+
+                    b.HasIndex("UpdatedById");
 
                     b.HasIndex("UserId");
 
@@ -556,6 +605,19 @@ namespace SocialMedia.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
 
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DeletedById")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("PostId")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
@@ -564,14 +626,26 @@ namespace SocialMedia.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("UserId")
                         .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("DeletedById");
+
                     b.HasIndex("PostId");
 
                     b.HasIndex("ReactionId");
+
+                    b.HasIndex("UpdatedById");
 
                     b.HasIndex("UserId");
 
@@ -779,11 +853,9 @@ namespace SocialMedia.Migrations
                         .WithMany()
                         .HasForeignKey("DeletedById");
 
-                    b.HasOne("SocialMedia.Data.Models.SocialMediaComment", "Parent")
+                    b.HasOne("SocialMedia.Data.Models.SocialMediaComment", null)
                         .WithMany("Replies")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SocialMediaCommentId");
 
                     b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "UpdatedBy")
                         .WithMany()
@@ -792,8 +864,6 @@ namespace SocialMedia.Migrations
                     b.Navigation("CreatedBy");
 
                     b.Navigation("DeletedBy");
-
-                    b.Navigation("Parent");
 
                     b.Navigation("UpdatedBy");
                 });
@@ -862,11 +932,25 @@ namespace SocialMedia.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "DeletedBy")
+                        .WithMany()
+                        .HasForeignKey("DeletedById");
+
                     b.HasOne("SocialMedia.Data.Models.SocialMediaReaction", "Reaction")
                         .WithMany()
                         .HasForeignKey("ReactionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById");
 
                     b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "User")
                         .WithMany()
@@ -874,7 +958,13 @@ namespace SocialMedia.Migrations
 
                     b.Navigation("Comment");
 
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("DeletedBy");
+
                     b.Navigation("Reaction");
+
+                    b.Navigation("UpdatedBy");
 
                     b.Navigation("User");
                 });
@@ -887,11 +977,25 @@ namespace SocialMedia.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "DeletedBy")
+                        .WithMany()
+                        .HasForeignKey("DeletedById");
+
                     b.HasOne("SocialMedia.Data.Models.SocialMediaPost", "Post")
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById");
 
                     b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "User")
                         .WithMany()
@@ -901,13 +1005,29 @@ namespace SocialMedia.Migrations
 
                     b.Navigation("Comment");
 
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("DeletedBy");
+
                     b.Navigation("Post");
+
+                    b.Navigation("UpdatedBy");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.UserPostReaction", b =>
                 {
+                    b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "DeletedBy")
+                        .WithMany()
+                        .HasForeignKey("DeletedById");
+
                     b.HasOne("SocialMedia.Data.Models.SocialMediaPost", "Post")
                         .WithMany("Reactions")
                         .HasForeignKey("PostId")
@@ -920,13 +1040,23 @@ namespace SocialMedia.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById");
+
                     b.HasOne("SocialMedia.Areas.Identity.Data.SocialMediaUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
 
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("DeletedBy");
+
                     b.Navigation("Post");
 
                     b.Navigation("Reaction");
+
+                    b.Navigation("UpdatedBy");
 
                     b.Navigation("User");
                 });

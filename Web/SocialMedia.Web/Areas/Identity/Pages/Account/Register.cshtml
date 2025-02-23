@@ -59,6 +59,15 @@
         <a asp-area="Identity" asp-page="/Terms">Terms and Conditions</a>
     </div>
 
+        <div class="form-floating mb-3">
+            <select asp-for="Input.IsPrivate" class="form-control">
+                <option value="true">Private</option>
+                <option value="false">Public</option>
+            </select>
+            <label asp-for="Input.IsPrivate">Account Type</label>
+            <span asp-validation-for="Input.IsPrivate" class="text-danger"></span>
+        </div>
+
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </form>
         

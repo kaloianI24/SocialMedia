@@ -10,58 +10,71 @@
     ViewData["Title"] = "Tagged Posts";
 }
 <div class="main-content2">
-    @if (Model.Count == 0)
+    @if ((bool)ViewData["IsAccountPrivate"] && !(bool)ViewData["AreFriends"] && !(bool)ViewData["IsOwner"])
     {
-        <h1>You are not tagged in any posts</h1>
+        <h3>This account is private so you cannot see the posts where the user is tagged.</h3>
     }
     else
     {
-        @foreach (var post in @Model.OrderByDescending(p => p.CreatedOn))
+        @if (Model.Count == 0)
         {
-            <div class="post" data-post-id="@post.Id">
-                <div class="post-header">
-                    <a href="/Post/MyPage?userId=@post.CreatedById">
-                        <img src="@post.ProfilePictureUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
-                    </a>
-                    <div class="post-info">
-                        <span class="username">@post.UserName</span>
-                        <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
-                    </div>
-                    @if ((bool)ViewData["IsOwner"])
-                    {
-                        <button type="button" class="btn-untagging-post">Remove me from post</button>
-                    }
-                </div>
-                <div class="carousel">
-                    <div class="carousel-images">
-                        @foreach (var attachmentUrl in post.AttachmentUrls)
+            <h3>You are not tagged in any posts</h3>
+        }
+        else
+        {
+            @foreach (var post in @Model.OrderByDescending(p => p.CreatedOn))
+            {
+                <div class="post" data-post-id="@post.Id">
+                    <div class="post-header">
+                        <a href="/Post/MyPage?userId=@post.CreatedById">
+                            <img src="@post.ProfilePictureUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
+                        </a>
+                        <div class="post-info">
+                            <span class="username">@post.UserName</span>
+                            <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
+                        </div>
+                        @if ((bool)ViewData["IsOwner"])
                         {
-                            <img src=@attachmentUrl.Replace("http://", "https://") alt="Post Image" class="post-image">
+                            <button type="button" class="btn-untagging-post">Remove me from post</button>
                         }
                     </div>
-                    <button type="button" button class="carousel-arrow left-arrow">&lt;</button>
-                    <button type="button" button class="carousel-arrow right-arrow">&gt;</button>
-                    <div class="carousel-indicators">
-                        <span class="dot active"></span>
-                        @for (int i = 0; i < post.AttachmentUrls.Count - 1; i++)
-                        {
-                            <span class="dot"></span>
-                        }
+                    <div class="carousel">
+                        <div class="carousel-images">
+                            @foreach (var attachmentUrl in post.AttachmentUrls)
+                            {
+                                <img src=@attachmentUrl.Replace("http://", "https://") alt="Post Image" class="post-image">
+                            }
+                        </div>
+                        <button type="button" button class="carousel-arrow left-arrow">&lt;</button>
+                        <button type="button" button class="carousel-arrow right-arrow">&gt;</button>
+                        <div class="carousel-indicators">
+                            <span class="dot active"></span>
+                            @for (int i = 0; i < post.AttachmentUrls.Count - 1; i++)
+                            {
+                                <span class="dot"></span>
+                            }
+                        </div>
+                        <div class="image-counter">1 / @post.AttachmentUrls.Count</div>
                     </div>
-                    <div class="image-counter">1 / @post.AttachmentUrls.Count</div>
-                </div>
 
 
                 <div class="post-actions">
                     <div class="post-likes">
                         <div class="likes-count">
-                            <img src="~/images/heart.svg" class="reaction-heart">
-                            <div class="count-likes-number">Reactions.Count</div>
-                            <img src="~/images/comment.svg" class="comment-image">
-                            <div class="count-likes-number">Comments.Count</div>
+                            <img src="@Url.Content("~/images/heart.svg")"
+                                 class="reaction-heart"
+                                 data-liked="false"
+                                 data-post-id="@post.Id" />
+
+                            <div class="count-likes-number">0</div>
+
+                            <img src="@Url.Content("~/images/comment.svg")" class="comment-image">
+                            <div class="count-comment-number">0</div>
                         </div>
                     </div>
                 </div>
+
+
                 <div class="post-caption">
                     <span class="username">@post.UserName</span>
                     <p class="post-description">
@@ -91,13 +104,52 @@
                 </div>
             </div>
 
+            }
         }
+
     }
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("click", function (event) {
+            if (event.target.classList.contains("reaction-heart")) {
+                let image = event.target;
+                let liked = image.getAttribute("data-liked") === "true";
+                let counter = image.parentElement.querySelector(".count-likes-number");
+                let postId = image.getAttribute("data-post-id");
+
+                // Toggle like status
+                if (liked) {
+                    image.src = "@Url.Content("~/images/heart.svg")";
+                    counter.textContent = Math.max(0, parseInt(counter.textContent) - 1);
+                    image.setAttribute("data-liked", "false");
+                    updateLike(postId, false);
+                } else {
+                    image.src = "@Url.Content("~/images/heart.png")";
+                    counter.textContent = parseInt(counter.textContent) + 1;
+                    image.setAttribute("data-liked", "true");
+                    updateLike(postId, true);
+                }
+            }
+        });
+
+        function updateLike(postId, isLiking) {
+            fetch(`/Post/LikePost?postId=${postId}&like=${isLiking}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            }).then(res => {
+                if (!res.ok) {
+                    alert("Error updating like count.");
+                }
+            }).catch(error => console.error(error));
+        }
+    });
+</script>
+
 <script>
     document.querySelectorAll('.btn-untagging-post').forEach(b => b.addEventListener('click', (e) => {
         const postId = e.target.closest('.post').dataset.postId;
-        console.log(postId);
 
         fetch('/Post/RemoveTaggedUser?postId=' + postId, {
             method: 'POST',

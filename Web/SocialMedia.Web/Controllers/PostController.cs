@@ -86,7 +86,15 @@ namespace SocialMedia.Controllers
             var currentUserId = currentUser.Id;
             var targetUserId = userId ?? currentUserId;
             var targetUser = await GetUserById(targetUserId);
+
             ViewData["IsOwner"] = (currentUserId == targetUserId);
+            if(currentUserId != targetUserId)
+            {
+                var areFriends = currentUser.Friends.Any(f => f.Id == targetUser.Id);
+                ViewData["AreFriends"] = areFriends;
+                var isFolowing = currentUser.Following.Any(f => f.Id == targetUser.Id);
+                ViewData["IsFollowing"] = isFolowing;
+            }
             ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
             return View(targetUser.ToModel(UserPostMappingsContext.User));
         }
@@ -98,15 +106,20 @@ namespace SocialMedia.Controllers
             var currentUserId = currentUser.Id;
             var targetUserId = id ?? currentUserId;
             var targetUser = await GetUserById(targetUserId);
+            var areFriends = currentUser.Friends.Any(f => f.Id == targetUser.Id);
 
             switch (type)
             {
                 case "MyPosts":
                     ViewData["IsOwner"] = (currentUserId == targetUserId);
+                   
+                    ViewData["AreFriends"] = areFriends;
                     return PartialView("_MyPosts", user.ToModel(UserPostMappingsContext.User));
 
                 case "TaggedPosts":
                     ViewData["IsOwner"] = (currentUserId == targetUserId);
+                    ViewData["AreFriends"] = areFriends;
+                    ViewData["IsAccountPrivate"] = targetUser.IsPrivate;
                     var webModels = await TaggedPosts(user.Id);
                     return PartialView("_TaggedPosts", webModels);
 
@@ -191,7 +204,13 @@ namespace SocialMedia.Controllers
 
         private async Task<List<TaggedPostWebModel>> TaggedPosts(string userId)
         {
-            var posts = _socialMediaPostService.GetAllTaggedPosts(userId).ToList();
+            var currentUser = await GetUser();
+            var currentUserId = currentUser.Id;
+            var targetUserId = userId ?? currentUserId;
+            var targetUser = await GetUserById(targetUserId);
+
+            bool isOwner = (currentUserId == targetUserId);
+            var posts = _socialMediaPostService.GetAllTaggedPosts(targetUser, isOwner, currentUser).ToList();
             var webModels = posts.Select(p => new TaggedPostWebModel
             {
                 Id = p.Id,
@@ -208,6 +227,7 @@ namespace SocialMedia.Controllers
 
             return webModels;
         }
+
         private async Task<string> UploadPhoto(IFormFile photo)
         {
             var uploadResponse = await _cloudinaryService.UploadFile(photo);
@@ -237,6 +257,7 @@ namespace SocialMedia.Controllers
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.TaggedUsers)
             .Include(u => u.Following)
+            .Include(u => u.Followers)
             .Include(u => u.Friends)
             .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
         }
@@ -258,6 +279,7 @@ namespace SocialMedia.Controllers
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.TaggedUsers)
             .Include(u => u.Following)
+            .Include(u => u.Followers)
             .Include(u => u.Friends)
             .FirstOrDefaultAsync(u => u.Id == id);
         }

@@ -84,14 +84,33 @@ namespace SocialMedia.Service.SocialMediaPost
             return post.ToModel(UserPostMappingsContext.Post);
         }
 
-        public IQueryable<PostServiceModel> GetAllTaggedPosts(string id)
+        public IQueryable<PostServiceModel> GetAllTaggedPosts(SocialMediaUser user, bool isOwner, SocialMediaUser currenUser)
         {
-            return postRepository.GetAll().Where(p => p.TaggedUsers.Any(u => u.Id == id) && p.DeletedBy == null)
+            if(isOwner)
+            {
+                return postRepository.GetAll()
+                .Where(p => p.TaggedUsers.Any(u => u.Id == user.Id) && p.DeletedBy == null)
                 .Include(p => p.Attachments)
                 .Include(p => p.CreatedBy)
                 .ThenInclude(c => c.ProfilePicture)
                 .Include(p => p.Tags)
                 .Select(p => p.ToModel(UserPostMappingsContext.Post));
+            }
+
+            return postRepository.GetAll()
+                .Where(p => p.TaggedUsers.Any(u => u.Id == user.Id)
+                && p.DeletedBy == null &&
+                (
+                    !p.CreatedBy.IsPrivate ||
+                    (p.CreatedBy.IsPrivate && currenUser.Friends.Contains(p.CreatedBy)
+                    ||p.CreatedBy.Id == currenUser.Id)
+                ))
+               .Include(p => p.Attachments)
+               .Include(p => p.CreatedBy)
+               .ThenInclude(c => c.ProfilePicture)
+               .Include(p => p.Tags)
+               .Select(p => p.ToModel(UserPostMappingsContext.Post));
+
         }
         public async Task<PostServiceModel> DeleteAsync(string id)
         {

@@ -39,7 +39,18 @@ namespace SocialMedia.Data.Repositories
             return  _context.Users
                 .Include(u => u.Posts)
                     .ThenInclude(p => p.Attachments)
+                .Include(u => u.ReceivedFriendRequests)
+                .Include(u => u.SentFriendRequests)
+                .Include(u => u.Followers)
+                .Include(u => u.Following)
+                .Include(u => u.Friends)
                 .FirstOrDefault(u => u.Id == id);
+        }
+        public async Task<SocialMediaUser> UpdateAsync(SocialMediaUser user)
+        {
+            this._context.Update(user);
+            await this._context.SaveChangesAsync();
+            return user;
         }
     }
 }

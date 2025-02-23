@@ -16,5 +16,7 @@ namespace SocialMedia.Data.Models
         public List<UserCommentReaction> Reactions { get; set; }
 
         public List<SocialMediaComment> Replies { get; set; }
+
+        public SocialMediaComment Parent { get; set; }
     }
 }
