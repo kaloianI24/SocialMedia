@@ -70,6 +70,14 @@
 
                             <img src="@Url.Content("~/images/comment.svg")" class="comment-image">
                             <div class="count-comment-number">0</div>
+
+                                <div class="comment-input-field">
+                                    <textarea class="form-control" me-1 rows="1" placeholder="Add a comment..."></textarea>
+                                </div>
+                                <div class="comment-button-holder d-none d-flex justify-content-end">
+                                    <button class="btn btn-primary fw-bold comment-submit-button">Post</button>
+                                </div>
+
                         </div>
                     </div>
                 </div>
@@ -145,6 +153,30 @@
             }).catch(error => console.error(error));
         }
     });
+</script>
+
+<script>
+    const autoResizeTextarea = (textarea) => {
+            textarea.style.height = "auto";
+            textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
+    };
+
+    const textarea = document.querySelector(".comment-input-field textarea");
+
+    textarea.addEventListener("input", () => {
+        autoResizeTextarea(textarea);
+
+    document.querySelector(".comment-input-field textarea".addEventListener("focusin", () => {
+        autoResizeTextarea(textarea);
+        document.querySelector(".comment-button-holder").classList.remove("d-none");
+        document.querySelector(".comment-button-holder").classList.add("d-flex");
+    }));
+
+        document.querySelector(".comment-input-field textarea".addEventListener("focusout", () => {
+            document.querySelector(".comment-button-holder").classList.add("d-none");
+            document.querySelector(".comment-button-holder").classList.remove("d-flex");
+        }));
+
 </script>
 
 <script>
