@@ -54,10 +54,7 @@
                 <label asp-for="Input.ConfirmPassword">Confirm Password</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
-    <div class="form-group">
-        <input type="checkbox" id="agreeTerms" name="agreeTerms" required />
-        <a asp-area="Identity" asp-page="/Terms">Terms and Conditions</a>
-    </div>
+    
 
         <div class="form-floating mb-3">
             <select asp-for="Input.IsPrivate" class="form-control">
@@ -67,6 +64,13 @@
             <label asp-for="Input.IsPrivate">Account Type</label>
             <span asp-validation-for="Input.IsPrivate" class="text-danger"></span>
         </div>
+        <center>
+            <div class="form-group">
+            <input type="checkbox" id="agreeTerms" name="agreeTerms" required />
+            <a asp-area="Identity" asp-page="/Terms">Terms and Conditions</a>
+            </div>
+        </center>
+
 
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </form>
