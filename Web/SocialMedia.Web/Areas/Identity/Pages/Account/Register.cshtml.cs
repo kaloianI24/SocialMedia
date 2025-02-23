@@ -117,6 +117,7 @@ namespace SocialMedia.Areas.Identity.Pages.Account
                 user.LastName = Input.LastName;
                 user.UserName = Input.Email; 
                 user.Email = Input.Email;
+                user.IsPrivate = Input.IsPrivate;
                 user.AcceptedTerms = Input.AgreeTerms; 
 
                 if (Input.ProfilePicture is not null)

@@ -152,7 +152,7 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
                 following.Followers.Remove(userDb);
                 await socialMediaUserRepository.UpdateAsync(following);
             }
-            socialMediaUserRepository.UpdateAsync(userDb);
+            await socialMediaUserRepository.UpdateAsync(userDb);
             var result = await _userManager.DeleteAsync(user);
             var userId = await _userManager.GetUserIdAsync(user);
             if (!result.Succeeded)

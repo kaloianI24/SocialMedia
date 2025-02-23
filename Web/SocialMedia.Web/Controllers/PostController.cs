@@ -112,7 +112,10 @@ namespace SocialMedia.Controllers
             {
                 case "MyPosts":
                     ViewData["IsOwner"] = (currentUserId == targetUserId);
-                   
+                    var roles = await _userManager.GetRolesAsync(currentUser);
+                    bool isAdmin = roles.Contains("Admin");
+
+                    ViewData["IsAdmin"] = isAdmin;
                     ViewData["AreFriends"] = areFriends;
                     return PartialView("_MyPosts", user.ToModel(UserPostMappingsContext.User));
 
@@ -185,6 +188,7 @@ namespace SocialMedia.Controllers
                 RemovedAttachmentIds = null,
             };
             var currentUser = await GetUser();
+            ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
             ViewData["Users"] = _userManager.Users.Include(u => u.ProfilePicture).Where(u => u.Id != currentUser.Id).Select(u => new UserWebModel
             {
                 Id = u.Id,

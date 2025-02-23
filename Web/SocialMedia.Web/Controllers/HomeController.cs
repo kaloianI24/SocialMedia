@@ -251,25 +251,26 @@ namespace SocialMedia.Controllers
             .Include(u => u.Following)
                 .ThenInclude(f => f.ProfilePicture)
              .Include(u => u.Following)
-                .ThenInclude(f => f.Posts)
+                .ThenInclude(f => f.Posts.Where(p => p.DeletedOn == null))
                     .ThenInclude(p => p.Attachments)
-                .Include(f => f.Posts)
+                .Include(f => f.Posts.Where(p => p.DeletedOn == null))
                     .ThenInclude(p => p.Tags)
-                .Include(f => f.Posts)
+                .Include(f => f.Posts.Where(p => p.DeletedOn == null))
                     .ThenInclude(p => p.TaggedUsers)
             .Include(u => u.Friends)
                 .ThenInclude(f => f.ProfilePicture)
              .Include(u => u.Friends)
-                .ThenInclude(f => f.Posts)
+                .ThenInclude(f => f.Posts.Where(p => p.DeletedOn == null))
                     .ThenInclude(p => p.Attachments)
-                .Include(f => f.Posts)
+                .Include(f => f.Posts.Where(p => p.DeletedOn == null))
                     .ThenInclude(p => p.Tags)
-                .Include(f => f.Posts)
+                .Include(f => f.Posts.Where(p => p.DeletedOn == null))
                     .ThenInclude(p => p.TaggedUsers)
               .Include(u => u.ReceivedFriendRequests)
                 .ThenInclude(r => r.CreatedBy)
                     .ThenInclude(u => u.ProfilePicture)
             .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
+
         }
     }
 }

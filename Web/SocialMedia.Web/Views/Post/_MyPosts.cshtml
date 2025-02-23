@@ -30,7 +30,7 @@
                             <span class="username">@Model.UserName</span>
                             <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
                         </div>
-                        @if ((bool)ViewData["IsOwner"])
+                        @if ((bool)ViewData["IsOwner"] || (bool)ViewData["IsAdmin"])
                         {
                             <button type="button" class="btn-delete-post">Delete post</button>
                             <button class="btn-update-post"
