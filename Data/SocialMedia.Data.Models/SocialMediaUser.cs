@@ -35,7 +35,8 @@ public class SocialMediaUser : IdentityUser
     public List<FriendRequest> ReceivedFriendRequests { get; set; } = new List<FriendRequest>();
 
     public bool AcceptedTerms { get; set; }
-
+    [NotMapped]
+    public string FullName => $"{FirstName} {LastName}";
 
 }
 

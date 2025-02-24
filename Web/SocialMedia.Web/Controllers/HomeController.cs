@@ -11,8 +11,9 @@ using SocialMedia.Web.Models.Post;
 using System.Threading.Tasks;
 using System;
 using SocialMedia.Service.Reaction;
-
-
+using System.Linq;
+using SocialMedia.Data;
+using System.Collections.Generic;
 
 namespace SocialMedia.Controllers
 {
@@ -24,15 +25,22 @@ namespace SocialMedia.Controllers
         private readonly IEmailSender _emailSender;
         private readonly IFriendRequestService _friendRequestsService;
         private readonly IReactionService _reactionService;
-        public HomeController(ILogger<HomeController> logger, UserManager<SocialMediaUser> userManager, IEmailSender emailSender, IFriendRequestService friendRequestsService, IReactionService reactionService)
+        private readonly SocialMediaDbContext _context; // Add this line
 
+        public HomeController(
+            ILogger<HomeController> logger,
+            UserManager<SocialMediaUser> userManager,
+            IEmailSender emailSender,
+            IFriendRequestService friendRequestsService,
+            IReactionService reactionService,
+            SocialMediaDbContext context) // Add this parameter
         {
             _logger = logger;
             _userManager = userManager;
             _emailSender = emailSender;
             _friendRequestsService = friendRequestsService;
             _reactionService = reactionService;
-
+            _context = context; // Initialize the context
         }
 
         public async Task<IActionResult> Index()
@@ -43,7 +51,6 @@ namespace SocialMedia.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-
             var roles = await _userManager.GetRolesAsync(user);
             bool isAdmin = roles.Contains("Admin");
 
@@ -52,8 +59,9 @@ namespace SocialMedia.Controllers
             ViewData["IsAdmin"] = isAdmin;
             ViewData["ProfilePictureUrl"] = user.ProfilePicture?.CloudUrl;
             ViewData["FriendRequests"] = user.ReceivedFriendRequests.ToList();
-            var posts = user.Friends.SelectMany(f => f.Posts).OrderByDescending(p => p.CreatedOn).ToList();
-            posts.AddRange(user.Following.SelectMany(f => f.Posts).OrderByDescending(p => p.CreatedOn));
+            var friendPosts = user.Friends.SelectMany(f => f.Posts).Where(p => p.DeletedOn == null).OrderByDescending(p => p.CreatedOn).ToList();
+            var followingPosts = user.Following.SelectMany(f => f.Posts).Where(p => p.DeletedOn == null).OrderByDescending(p => p.CreatedOn).ToList();
+            var posts = friendPosts.Concat(followingPosts).ToList();
 
             var postWebModel = posts.Select(p => new TaggedPostWebModel
             {
@@ -67,8 +75,8 @@ namespace SocialMedia.Controllers
                 CreatedById = p.CreatedBy.Id,
                 TaggedUsersId = p.TaggedUsers.Select(u => u.Id).ToList(),
                 TaggedUsersUserNames = p.TaggedUsers.Select(u => u.UserName).ToList(),
-
             }).ToList();
+
             return View(postWebModel);
         }
 
@@ -81,53 +89,52 @@ namespace SocialMedia.Controllers
         private Task<SocialMediaUser> GetUser()
         {
             return _userManager.Users
-            .Include(u => u.ProfilePicture)
-            .Include(u => u.Posts)
-                .ThenInclude(p => p.Attachments)
-             .Include(u => u.Posts)
-                .ThenInclude(p => p.Tags)
-            .Include(u => u.TaggedPosts)
-                .ThenInclude(p => p.Attachments)
-            .Include(u => u.TaggedPosts)
-                .ThenInclude(p => p.TaggedUsers)
-            .Include(u => u.Following)
-            .Include(u => u.Followers)
-            .Include(u => u.Friends)
-            .Include(u => u.ReceivedFriendRequests)
-                .ThenInclude(r => r.CreatedBy)
-                    .ThenInclude(u => u.ProfilePicture)
-            .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
+                .Include(u => u.ProfilePicture)
+                .Include(u => u.Posts)
+                    .ThenInclude(p => p.Attachments)
+                .Include(u => u.Posts)
+                    .ThenInclude(p => p.Tags)
+                .Include(u => u.TaggedPosts)
+                    .ThenInclude(p => p.Attachments)
+                .Include(u => u.TaggedPosts)
+                    .ThenInclude(p => p.TaggedUsers)
+                .Include(u => u.Following)
+                .Include(u => u.Followers)
+                .Include(u => u.Friends)
+                .Include(u => u.ReceivedFriendRequests)
+                    .ThenInclude(r => r.CreatedBy)
+                        .ThenInclude(u => u.ProfilePicture)
+                .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
         }
 
         private Task<SocialMediaUser> GetUserById(string id)
         {
             return _userManager.Users
-            .Include(u => u.ProfilePicture)
-            .Include(u => u.Posts)
-                .ThenInclude(p => p.Attachments)
-             .Include(u => u.Posts)
-                .ThenInclude(p => p.Tags)
-            .Include(u => u.TaggedPosts)
-                .ThenInclude(p => p.Attachments)
-            .Include(u => u.TaggedPosts)
-                .ThenInclude(p => p.TaggedUsers)
-            .Include(u => u.Following)
-            .Include(u => u.Followers)
-            .Include(u => u.Friends)
-            .Include(u => u.ReceivedFriendRequests)
-                .ThenInclude(r => r.CreatedBy)
-                    .ThenInclude(u => u.ProfilePicture)
-            .FirstOrDefaultAsync(u => u.Id == id);
+                .Include(u => u.ProfilePicture)
+                .Include(u => u.Posts)
+                    .ThenInclude(p => p.Attachments)
+                .Include(u => u.Posts)
+                    .ThenInclude(p => p.Tags)
+                .Include(u => u.TaggedPosts)
+                    .ThenInclude(p => p.Attachments)
+                .Include(u => u.TaggedPosts)
+                    .ThenInclude(p => p.TaggedUsers)
+                .Include(u => u.Following)
+                .Include(u => u.Followers)
+                .Include(u => u.Friends)
+                .Include(u => u.ReceivedFriendRequests)
+                    .ThenInclude(r => r.CreatedBy)
+                        .ThenInclude(u => u.ProfilePicture)
+                .FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<IActionResult> Register()
         {
-            var user = new SocialMediaUser { UserName = "newUser", Email = "user@example.com" }; 
+            var user = new SocialMediaUser { UserName = "newUser", Email = "user@example.com" };
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
             var confirmationLink = Url.Action("ConfirmEmail", "Home", new { userId = user.Id, token = token }, protocol: Request.Scheme);
-
 
             string subject = "Email Confirmation";
             string message = $"Please confirm your email by clicking the link below: <a href='{confirmationLink}'>Confirm Email</a>";
@@ -136,7 +143,6 @@ namespace SocialMedia.Controllers
 
             return View();
         }
-
 
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
@@ -204,7 +210,6 @@ namespace SocialMedia.Controllers
                 await _friendRequestsService.RemoveFriend(currentUser, friend);
                 return NoContent();
             }
-            
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
@@ -227,6 +232,7 @@ namespace SocialMedia.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
         [HttpPost]
         [Consumes("application/json")]
         public async Task<IActionResult> Unfollow([FromQuery] string unfollowingId)
@@ -247,30 +253,60 @@ namespace SocialMedia.Controllers
         private async Task<SocialMediaUser> GetUserFeed()
         {
             return await _userManager.Users
-            .Include(u => u.ProfilePicture)
-            .Include(u => u.Following)
-                .ThenInclude(f => f.ProfilePicture)
-             .Include(u => u.Following)
-                .ThenInclude(f => f.Posts.Where(p => p.DeletedOn == null))
-                    .ThenInclude(p => p.Attachments)
+                .Include(u => u.ProfilePicture)
+                .Include(u => u.Following)
+                    .ThenInclude(f => f.ProfilePicture)
+                .Include(u => u.Following)
+                    .ThenInclude(f => f.Posts.Where(p => p.DeletedOn == null))
+                        .ThenInclude(p => p.Attachments)
                 .Include(f => f.Posts.Where(p => p.DeletedOn == null))
                     .ThenInclude(p => p.Tags)
                 .Include(f => f.Posts.Where(p => p.DeletedOn == null))
                     .ThenInclude(p => p.TaggedUsers)
-            .Include(u => u.Friends)
-                .ThenInclude(f => f.ProfilePicture)
-             .Include(u => u.Friends)
-                .ThenInclude(f => f.Posts.Where(p => p.DeletedOn == null))
-                    .ThenInclude(p => p.Attachments)
+                .Include(u => u.Friends)
+                    .ThenInclude(f => f.ProfilePicture)
+                .Include(u => u.Friends)
+                    .ThenInclude(f => f.Posts.Where(p => p.DeletedOn == null))
+                        .ThenInclude(p => p.Attachments)
                 .Include(f => f.Posts.Where(p => p.DeletedOn == null))
                     .ThenInclude(p => p.Tags)
                 .Include(f => f.Posts.Where(p => p.DeletedOn == null))
                     .ThenInclude(p => p.TaggedUsers)
-              .Include(u => u.ReceivedFriendRequests)
-                .ThenInclude(r => r.CreatedBy)
-                    .ThenInclude(u => u.ProfilePicture)
-            .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
-
+                .Include(u => u.ReceivedFriendRequests)
+                    .ThenInclude(r => r.CreatedBy)
+                        .ThenInclude(u => u.ProfilePicture)
+                .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
         }
+
+
+        public async Task<IActionResult> Search(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+               
+                return RedirectToAction("Index");
+            }
+
+            var results = await _context.Posts
+                .Include(p => p.CreatedBy)
+                .Where(p => p.Description.Contains(query) || p.CreatedBy.UserName.Contains(query))
+                .Select(p => new TaggedPostWebModel
+                {
+                    Id = p.Id,
+                    Description = p.Description,
+                    AttachmentUrls = p.Attachments.Select(a => a.CloudUrl).ToList(),
+                    Tags = p.Tags.Select(t => t.Name).ToList(),
+                    UserName = p.CreatedBy.UserName,
+                    ProfilePictureUrl = p.CreatedBy.ProfilePicture != null ? p.CreatedBy.ProfilePicture.CloudUrl : null,
+                    CreatedOn = p.CreatedOn,
+                    CreatedById = p.CreatedBy.Id,
+                    TaggedUsersId = p.TaggedUsers.Select(u => u.Id).ToList(),
+                    TaggedUsersUserNames = p.TaggedUsers.Select(u => u.UserName).ToList(),
+                })
+                .ToListAsync();
+
+            return View("Index", results);
+        }
+
     }
 }

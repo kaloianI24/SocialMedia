@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "Search Results";
+}
+
+<h2>Search Results</h2>
+
+<h3>Posts</h3>
+@if (ViewData["Posts"] != null)
+{
+    var posts = (List<SocialMedia.Data.Models.SocialMediaPost>)ViewData["Posts"];
+    foreach (var post in posts)
+    {
+        <div class="post">
+            <div class="post-header">
+                <span>@post.CreatedBy.UserName</span>
+                <p>@post.Description</p>
+            </div>
+        </div>
+    }
+}
+
+<h3>Users</h3>
+@if (ViewData["Users"] != null)
+{
+    var users = (List<SocialMedia.Areas.Identity.Data.SocialMediaUser>)ViewData["Users"];
+    foreach (var user in users)
+    {
+        <div class="user">
+            <span>@user.UserName</span>
+        </div>
+    }
+}
