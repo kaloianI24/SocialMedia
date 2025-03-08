@@ -36,7 +36,11 @@ namespace SocialMedia.Data
                .HasMany(p => p.TaggedUsers)
                .WithMany(u => u.TaggedPosts)
                .UsingEntity(j => j.ToTable("PostTaggedUsers"));
-                        
+
+            builder.Entity<SocialMediaUser>()
+                .HasMany(u => u.SavedPosts)
+                .WithMany(p => p.SavedByUsers);
+
             builder.Entity<SocialMediaPost>()
                 .HasOne(p => p.UpdatedBy)
                 .WithMany()

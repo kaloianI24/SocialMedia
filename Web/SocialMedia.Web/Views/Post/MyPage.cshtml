@@ -223,6 +223,7 @@
             @if ((bool)ViewData["IsOwner"])
             {
                 <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "DeletedPosts", id = Model.Id })">Deleted posts</button>
+                <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "SavedPosts", id = Model.Id })">Saved posts</button>
             }
         </div>
 

@@ -59,6 +59,7 @@ namespace SocialMedia.Controllers
             ViewData["IsAdmin"] = isAdmin;
             ViewData["ProfilePictureUrl"] = user.ProfilePicture?.CloudUrl;
             ViewData["FriendRequests"] = user.ReceivedFriendRequests.ToList();
+            ViewData["SavedPosts"] = user.SavedPosts.Select(p => p.Id).ToList();
             var friendPosts = user.Friends.SelectMany(f => f.Posts).Where(p => p.DeletedOn == null).OrderByDescending(p => p.CreatedOn).ToList();
             var followingPosts = user.Following.SelectMany(f => f.Posts).Where(p => p.DeletedOn == null).OrderByDescending(p => p.CreatedOn).ToList();
             var posts = friendPosts.Concat(followingPosts).ToList();
@@ -253,29 +254,34 @@ namespace SocialMedia.Controllers
         private async Task<SocialMediaUser> GetUserFeed()
         {
             return await _userManager.Users
-                .Include(u => u.ProfilePicture)
-                .Include(u => u.Following)
-                    .ThenInclude(f => f.ProfilePicture)
-                .Include(u => u.Following)
-                    .ThenInclude(f => f.Posts.Where(p => p.DeletedOn == null))
-                        .ThenInclude(p => p.Attachments)
-                .Include(f => f.Posts.Where(p => p.DeletedOn == null))
+            .Include(u => u.ProfilePicture)
+            .Include(u => u.Following)
+                .ThenInclude(f => f.ProfilePicture)
+             .Include(u => u.Following)
+                .ThenInclude(f => f.Posts.Where(p => p.DeletedOn == null))
+                    .ThenInclude(p => p.Attachments)
+              .Include(u => u.Following)
+                .ThenInclude(f => f.Posts.Where(p => p.DeletedOn == null))
                     .ThenInclude(p => p.Tags)
-                .Include(f => f.Posts.Where(p => p.DeletedOn == null))
+            .Include(u => u.Following)
+                .ThenInclude(f => f.Posts.Where(p => p.DeletedOn == null))
                     .ThenInclude(p => p.TaggedUsers)
-                .Include(u => u.Friends)
-                    .ThenInclude(f => f.ProfilePicture)
-                .Include(u => u.Friends)
-                    .ThenInclude(f => f.Posts.Where(p => p.DeletedOn == null))
-                        .ThenInclude(p => p.Attachments)
-                .Include(f => f.Posts.Where(p => p.DeletedOn == null))
+            .Include(u => u.Friends)
+                .ThenInclude(f => f.ProfilePicture)
+             .Include(u => u.Friends)
+                .ThenInclude(f => f.Posts.Where(p => p.DeletedOn == null))
+                    .ThenInclude(p => p.Attachments)
+             .Include(u => u.Friends)
+                .ThenInclude(f => f.Posts.Where(p => p.DeletedOn == null))
                     .ThenInclude(p => p.Tags)
-                .Include(f => f.Posts.Where(p => p.DeletedOn == null))
+              .Include(u => u.Friends)
+                .ThenInclude(f => f.Posts.Where(p => p.DeletedOn == null))
                     .ThenInclude(p => p.TaggedUsers)
-                .Include(u => u.ReceivedFriendRequests)
-                    .ThenInclude(r => r.CreatedBy)
-                        .ThenInclude(u => u.ProfilePicture)
-                .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
+              .Include(u => u.ReceivedFriendRequests)
+                .ThenInclude(r => r.CreatedBy)
+                    .ThenInclude(u => u.ProfilePicture)
+              .Include(u => u.SavedPosts)
+            .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
         }
 
 

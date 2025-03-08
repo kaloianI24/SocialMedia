@@ -158,6 +158,7 @@ body {
     padding: 10px;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .fa-regular {
@@ -248,6 +249,9 @@ body {
     margin-right: 10px;
 }
 
+.save-image{
+    width:25px;
+}
 .all-requests {
     padding: 5px;
 }
@@ -611,6 +615,21 @@ body {
             cursor: pointer;
         }
 
+
+.btn-save-post {
+    position: absolute;
+    right: 10px;
+    background-color: transparent;
+    border: none;
+}
+
+.btn-unsave-post {
+    position: absolute;
+    right: 10px;
+    background-color: transparent;
+    border: none;
+}
+
 .btn-delete-post {
     margin-left: 160px;
     margin-right: 0px;
@@ -885,6 +904,29 @@ textarea, input[type="text"] {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
+.tags {
+    display: block;
+    flex-direction: row;
+    gap: 10px;
+    margin-left: 2px;
+}
+
+    .tags > * {
+        color: #0000ff;
+        font-size: 13px;
+    }
+
+.taggedUsers {
+    display: block;
+    flex-direction: row;
+    gap: 10px;
+    margin-left: 2px;
+}
+
+.taggedUsers-text {
+    color: #7C3DAA;
+    font-size: 15px;
+}
 
 /* comment */
 

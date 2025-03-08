@@ -78,40 +78,42 @@ namespace SocialMedia.Service.SocialMediaPost
             {
                 post.TaggedUsers = await userRepository.GetUsersByIdsAsync(model.TaggedUsersId);
             }
-            
+
+            // will be changed after the privacy functionality is done
+            post.Visibility = "public";
             await postRepository.CreateAsync(post);
 
             return post.ToModel(UserPostMappingsContext.Post);
         }
 
-        public IQueryable<PostServiceModel> GetAllTaggedPosts(SocialMediaUser user, bool isOwner, SocialMediaUser currenUser)
-        {
-            if(isOwner)
-            {
-                return postRepository.GetAll()
-                .Where(p => p.TaggedUsers.Any(u => u.Id == user.Id) && p.DeletedBy == null)
-                .Include(p => p.Attachments)
-                .Include(p => p.CreatedBy)
-                .ThenInclude(c => c.ProfilePicture)
-                .Include(p => p.Tags)
-                .Select(p => p.ToModel(UserPostMappingsContext.Post));
-            }
+        //public IQueryable<PostServiceModel> GetAllTaggedPosts(SocialMediaUser user, bool isOwner, SocialMediaUser currenUser)
+        //{
+        //    if(isOwner)
+        //    {
+        //        return postRepository.GetAll()
+        //        .Where(p => p.TaggedUsers.Any(u => u.Id == user.Id) && p.DeletedBy == null)
+        //        .Include(p => p.Attachments)
+        //        .Include(p => p.CreatedBy)
+        //        .ThenInclude(c => c.ProfilePicture)
+        //        .Include(p => p.Tags)
+        //        .Select(p => p.ToModel(UserPostMappingsContext.Post));
+        //    }
 
-            return postRepository.GetAll()
-                .Where(p => p.TaggedUsers.Any(u => u.Id == user.Id)
-                && p.DeletedBy == null &&
-                (
-                    !p.CreatedBy.IsPrivate ||
-                    (p.CreatedBy.IsPrivate && currenUser.Friends.Contains(p.CreatedBy)
-                    ||p.CreatedBy.Id == currenUser.Id)
-                ))
-               .Include(p => p.Attachments)
-               .Include(p => p.CreatedBy)
-               .ThenInclude(c => c.ProfilePicture)
-               .Include(p => p.Tags)
-               .Select(p => p.ToModel(UserPostMappingsContext.Post));
+        //    return postRepository.GetAll()
+        //        .Where(p => p.TaggedUsers.Any(u => u.Id == user.Id)
+        //        && p.DeletedBy == null &&
+        //        (
+        //            !p.CreatedBy.IsPrivate ||
+        //            (p.CreatedBy.IsPrivate && currenUser.Friends.Contains(p.CreatedBy)
+        //            ||p.CreatedBy.Id == currenUser.Id)
+        //        ))
+        //       .Include(p => p.Attachments)
+        //       .Include(p => p.CreatedBy)
+        //       .ThenInclude(c => c.ProfilePicture)
+        //       .Include(p => p.Tags)
+        //       .Select(p => p.ToModel(UserPostMappingsContext.Post));
 
-        }
+        //}
         public async Task<PostServiceModel> DeleteAsync(string id)
         {
             var targetPost = await postRepository.GetAll().FirstOrDefaultAsync(p => p.Id == id);
@@ -248,6 +250,42 @@ namespace SocialMedia.Service.SocialMediaPost
             
             await postRepository.UpdateAsync(targetPost);
             return targetPost.ToModel(UserPostMappingsContext.Post);
+        }
+
+        public async Task<PostServiceModel> SavePost(string postId, SocialMediaUser user)
+        {
+            bool userHasAlreadySavedPost = user.SavedPosts.Select(p => p.Id).Contains(postId);
+            if(userHasAlreadySavedPost)
+            {
+                throw new Exception("You have already saved the post!");
+            }
+
+            else
+            {
+                var post = postRepository.GetAll().Include(p => p.Attachments).FirstOrDefault(p => p.Id == postId);
+                user.SavedPosts.Add(post);
+                await userRepository.UpdateAsync(user);
+                await postRepository.UpdateAsync(post);
+                return post.ToModel(UserPostMappingsContext.Post);
+            }
+        }
+
+        public async Task<PostServiceModel> UnsavePost(string postId, SocialMediaUser user)
+        {
+            bool postIsSaved = user.SavedPosts.Select(p => p.Id).Contains(postId);
+            if (postIsSaved)
+            {
+                var post = postRepository.GetAll().Include(p => p.Attachments).FirstOrDefault(p => p.Id == postId);
+                user.SavedPosts.Remove(post);
+                await userRepository.UpdateAsync(user);
+                await postRepository.UpdateAsync(post);
+                return post.ToModel(UserPostMappingsContext.Post);
+            }
+
+            else
+            {
+                throw new Exception("You did not save the post!");
+            }
         }
         public Task<PostServiceModel> InternalCreateAsync(PostServiceModel model)
         {

@@ -77,7 +77,18 @@
                                 <div class="comment-button-holder d-none d-flex justify-content-end">
                                     <button class="btn btn-primary fw-bold comment-submit-button">Post</button>
                                 </div>
-                            
+                                @if (Model.SavedPosts.Select(post => post.Id).Contains(post.Id))
+                                {
+                                    <button type="button" class="btn-unsave-post saved" data-post-id="@post.Id">
+                                        <img src="~/images/savedPost.png" class="save-image">
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn-save-post" data-post-id="@post.Id">
+                                        <img src="~/images/unsavedPost.png" class="save-image">
+                                    </button>
+                                }
                         </div>
                     </div>
                 </div>
@@ -177,6 +188,58 @@
                 alert('Post deleted successfully!');
             } else {
                 alert('Failed to delete the post.');
+            }
+        })
+        .catch((error) => console.error(error));
+    }));
+</script>
+<script>
+    document.querySelectorAll('.btn-save-post').forEach(b => b.addEventListener('click', (e) => {
+        const button = e.target.closest('.btn-save-post');
+        const postId = button.dataset.postId;
+
+        fetch('/Post/SavePost?postId=' + postId, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then((res) => {
+            if (res.ok) {
+                if (!button.classList.contains('saved')) {
+                button.classList.add('saved');
+                button.querySelector('.save-image').src = '/images/savedPost.png';
+                }
+                alert('Post saved successfully!');
+            }
+            else {
+                alert('Failed to save the post.');
+            }
+        })
+        .catch((error) => console.error(error));
+    }));
+</script>
+
+<script>
+    document.querySelectorAll('.btn-unsave-post').forEach(b => b.addEventListener('click', (e) => {
+        const button = e.target.closest('.btn-unsave-post');
+        const postId = button.dataset.postId;
+
+        fetch('/Post/UnsavePost?postId=' + postId, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then((res) => {
+            if (res.ok) {
+                if (button.classList.contains('saved')) {
+                button.classList.remove('saved');
+                button.querySelector('.save-image').src = '/images/unsavedPost.png';
+            }
+            alert('Post unsaved successfully!');
+            } else {
+                alert('Failed to unsave the post.');
             }
         })
         .catch((error) => console.error(error));

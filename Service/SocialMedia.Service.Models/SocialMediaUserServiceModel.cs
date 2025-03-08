@@ -27,6 +27,8 @@ public class SocialMediaUserServiceModel : IdentityUser
     public List<SocialMediaUserBasicServiceModel>? Following { get; set; } = new List<SocialMediaUserBasicServiceModel>();
 
     public List<PostServiceModel>? Posts { get; set; } = new List<PostServiceModel>();
+    public List<PostServiceModel>? SavedPosts { get; set; } = new List<PostServiceModel>();
+    public List<PostServiceModel>? TaggedPosts { get; set; } = new List<PostServiceModel>();
 
     public List<SocialMediaUserServiceModel> TaggedUsers { get; set; } = new List<SocialMediaUserServiceModel>();
 }

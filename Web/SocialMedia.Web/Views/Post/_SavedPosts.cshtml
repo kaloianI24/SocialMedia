@@ -1,0 +1,216 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@using SocialMedia.Areas.Identity.Data
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@model SocialMediaUserServiceModel
+<div class="main-content2">
+        @if (!Model.SavedPosts.Any(p => p.DeletedOn == null))
+        {
+            <h3>You don't have saved posts</h3>
+        }
+        else
+        {
+            @foreach (var post in @Model.SavedPosts.Where(p => p.DeletedOn == null).OrderByDescending(p => p.CreatedOn))
+            {
+                <div class="post" data-post-id="@post.Id">
+                    <div class="post-header">
+                        <a href="/Post/MyPage?userId=@Model.Id">
+                            <img src="@post.CreatedBy.ProfilePicture.CloudUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
+                        </a>
+                        <div class="post-info">
+                        <span class="username">@post.CreatedBy.UserName</span>
+                        <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
+                        </div>
+                    </div>
+                    <div class="carousel">
+                        <div class="carousel-images">
+                            @foreach (var photo in post.Attachments)
+                            {
+                                <img src=@photo.CloudUrl.Replace("http://", "https://") alt="Post Image" class="post-image">
+                            }
+                        </div>
+                        <button type="button" button class="carousel-arrow left-arrow">&lt;</button>
+                        <button type="button" button class="carousel-arrow right-arrow">&gt;</button>
+                        <div class="carousel-indicators">
+                            <span class="dot active"></span>
+                            @for (int i = 0; i < post.Attachments.Count - 1; i++)
+                            {
+                                <span class="dot"></span>
+                            }
+                        </div>
+                        <div class="image-counter">1 / @post.Attachments.Count</div>
+                    </div>
+
+
+                    <div class="post-actions">
+                        <div class="post-likes">
+                            <div class="likes-count">
+                                <img src="@Url.Content("~/images/heart.svg")"
+                                     class="reaction-heart"
+                                     data-liked="false"
+                                     data-post-id="@post.Id" />
+
+                                <div class="count-likes-number">0</div>
+                                <img src="@Url.Content("~/images/comment.svg")" class="comment-image">
+                                <div class="count-comment-number">0</div>
+
+                                <div class="comment-input-field">
+                                    <textarea class="form-control" me-1 rows="1" placeholder="Add a comment..."></textarea>
+                                </div>
+                                <div class="comment-button-holder d-none d-flex justify-content-end">
+                                    <button class="btn btn-primary fw-bold comment-submit-button">Post</button>
+                                </div>
+                            @if (Model.SavedPosts.Select(post => post.Id).Contains(post.Id))
+                            {
+                                <button type="button" class="btn-unsave-post saved" data-post-id="@post.Id">
+                                    <img src="~/images/savedPost.png" class="save-image">
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn-save-post" data-post-id="@post.Id">
+                                    <img src="~/images/unsavedPost.png" class="save-image">
+                                </button>
+                            }
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="post-caption">
+                        <span class="username">@post.CreatedBy.UserName</span>
+                        <p class="post-description">
+                            @string.Join(" ", @post.Description.Split(" ").Take(10))
+                            <span class="post-description-hidden-text">
+                                @string.Join(" ", @post.Description.Split(" ").Skip(10))
+                            </span>
+                            @if (post.Description.Split(" ").Length > 10)
+                            {
+                                <button type="button" class="toggle-btn">Read more</button>
+                            }
+                        </p>
+                        <div class="tags">
+                            @foreach (var tag in @post.Tags)
+                            {
+                                <span>#@tag.Name</span>
+                            }
+                        </div>
+
+                        <div class="taggedUsers">
+                            @for (int i = 0; i < post.TaggedUsersId.Count; i++)
+                            {
+                                <a class="links" href="/Post/MyPage?userId=@post.TaggedUsersId.ElementAt(i)">
+                                    <span class="taggedUsers-text">@('@')@post.TaggedUsersUserName.ElementAt(i)</span>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+            }
+        }
+</div>
+<script>
+        document.addEventListener("click", function (event) {
+        if (event.target.classList.contains("reaction-heart")) {
+            let image = event.target;
+            let liked = image.getAttribute("data-liked") === "true";
+            let counter = image.parentElement.querySelector(".count-likes-number");
+
+            if (liked) {
+                image.src = "/images/heart.svg";
+                counter.textContent = Math.max(0, parseInt(counter.textContent) - 1);
+                image.setAttribute("data-liked", "false");
+            } else {
+                image.src = "/images/heart.png";
+                counter.textContent = parseInt(counter.textContent) + 1;
+                image.setAttribute("data-liked", "true");
+            }
+        }
+    });
+</script>
+
+<script>
+    const autoResizeTextarea = (textarea) => {
+            textarea.style.height = "auto";
+            textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
+    };
+
+    const textarea = document.querySelector(".comment-input-field textarea");
+
+    textarea.addEventListener("input", () => {
+        autoResizeTextarea(textarea);
+
+    document.querySelector(".comment-input-field textarea".addEventListener("focusin", () => {
+        autoResizeTextarea(textarea);
+        document.querySelector(".comment-button-holder").classList.remove("d-none");
+        document.querySelector(".comment-button-holder").classList.add("d-flex");
+    }));
+
+        document.querySelector(".comment-input-field textarea".addEventListener("focusout", () => {
+            document.querySelector(".comment-button-holder").classList.add("d-none");
+            document.querySelector(".comment-button-holder").classList.remove("d-flex");
+        }));
+
+</script>
+
+
+<script>
+    document.querySelectorAll('.btn-save-post').forEach(b => b.addEventListener('click', (e) => {
+        const button = e.target.closest('.btn-save-post');
+        const postId = button.dataset.postId;
+
+        fetch('/Post/SavePost?postId=' + postId, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then((res) => {
+            if (res.ok) {
+                if (!button.classList.contains('saved')) {
+                button.classList.add('saved');
+                button.querySelector('.save-image').src = '/images/savedPost.png';
+                }
+                alert('Post saved successfully!');
+            }
+            else {
+                alert('Failed to save the post.');
+            }
+        })
+        .catch((error) => console.error(error));
+    }));
+</script>
+
+<script>
+    document.querySelectorAll('.btn-unsave-post').forEach(b => b.addEventListener('click', (e) => {
+        const button = e.target.closest('.btn-unsave-post');
+        const postId = button.dataset.postId;
+
+        fetch('/Post/UnsavePost?postId=' + postId, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then((res) => {
+            if (res.ok) {
+                if (button.classList.contains('saved')) {
+                document.querySelector(`.post[data-post-id="${postId}"]`).remove();
+            }
+            alert('Post unsaved successfully!');
+            } else {
+                alert('Failed to unsave the post.');
+            }
+        })
+        .catch((error) => console.error(error));
+    }));
+</script>

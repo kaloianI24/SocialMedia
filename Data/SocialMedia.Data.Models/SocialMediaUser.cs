@@ -29,6 +29,7 @@ public class SocialMediaUser : IdentityUser
 
     public List<SocialMediaPost>? Posts { get; set; } = new List<SocialMediaPost>();
     public List<SocialMediaPost>? TaggedPosts { get; set; } = new List<SocialMediaPost>();
+    public List<SocialMediaPost>? SavedPosts { get; set; } = new List<SocialMediaPost>();
 
     public List<FriendRequest> SentFriendRequests { get; set; } = new List<FriendRequest>();
 

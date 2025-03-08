@@ -1,61 +1,46 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
-
-@model List<SocialMedia.Web.Models.Post.TaggedPostWebModel>
-
-@{
-    ViewData["Title"] = "Tagged Posts";
-}
+﻿@using SocialMedia.Areas.Identity.Data
+@model SocialMediaUserServiceModel
 <div class="main-content2">
-    @if ((bool)ViewData["IsAccountPrivate"] && !(bool)ViewData["AreFriends"] && !(bool)ViewData["IsOwner"])
+    @if (!Model.TaggedPosts.Any(p => p.DeletedOn == null))
     {
-        <h3>This account is private so you cannot see the posts where the user is tagged.</h3>
+        <h3>You don't have saved posts</h3>
     }
     else
     {
-        @if (Model.Count == 0)
+        @foreach (var post in @Model.TaggedPosts.Where(p => p.DeletedOn == null).OrderByDescending(p => p.CreatedOn))
         {
-            <h3>You are not tagged in any posts</h3>
-        }
-        else
-        {
-            @foreach (var post in @Model.OrderByDescending(p => p.CreatedOn))
-            {
-                <div class="post" data-post-id="@post.Id">
-                    <div class="post-header">
-                        <a href="/Post/MyPage?userId=@post.CreatedById">
-                            <img src="@post.ProfilePictureUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
-                        </a>
-                        <div class="post-info">
-                            <span class="username">@post.UserName</span>
-                            <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
-                        </div>
-                        @if ((bool)ViewData["IsOwner"])
+            <div class="post" data-post-id="@post.Id">
+                <div class="post-header">
+                    <a href="/Post/MyPage?userId=@Model.Id">
+                        <img src="@post.CreatedBy.ProfilePicture.CloudUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
+                    </a>
+                    <div class="post-info">
+                        <span class="username">@post.CreatedBy.UserName</span>
+                        <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
+                    </div>
+                    @if ((bool)ViewData["IsOwner"])
+                    {
+                        <button type="button" class="btn-untagging-post">Remove me from post</button>
+                    }
+                </div>
+                <div class="carousel">
+                    <div class="carousel-images">
+                        @foreach (var photo in post.Attachments)
                         {
-                            <button type="button" class="btn-untagging-post">Remove me from post</button>
+                            <img src=@photo.CloudUrl.Replace("http://", "https://") alt="Post Image" class="post-image">
                         }
                     </div>
-                    <div class="carousel">
-                        <div class="carousel-images">
-                            @foreach (var attachmentUrl in post.AttachmentUrls)
-                            {
-                                <img src=@attachmentUrl.Replace("http://", "https://") alt="Post Image" class="post-image">
-                            }
-                        </div>
-                        <button type="button" button class="carousel-arrow left-arrow">&lt;</button>
-                        <button type="button" button class="carousel-arrow right-arrow">&gt;</button>
-                        <div class="carousel-indicators">
-                            <span class="dot active"></span>
-                            @for (int i = 0; i < post.AttachmentUrls.Count - 1; i++)
-                            {
-                                <span class="dot"></span>
-                            }
-                        </div>
-                        <div class="image-counter">1 / @post.AttachmentUrls.Count</div>
+                    <button type="button" button class="carousel-arrow left-arrow">&lt;</button>
+                    <button type="button" button class="carousel-arrow right-arrow">&gt;</button>
+                    <div class="carousel-indicators">
+                        <span class="dot active"></span>
+                        @for (int i = 0; i < post.Attachments.Count - 1; i++)
+                        {
+                            <span class="dot"></span>
+                        }
                     </div>
+                    <div class="image-counter">1 / @post.Attachments.Count</div>
+                </div>
 
 
                 <div class="post-actions">
@@ -67,24 +52,34 @@
                                  data-post-id="@post.Id" />
 
                             <div class="count-likes-number">0</div>
-
                             <img src="@Url.Content("~/images/comment.svg")" class="comment-image">
                             <div class="count-comment-number">0</div>
 
-                                <div class="comment-input-field">
-                                    <textarea class="form-control" me-1 rows="1" placeholder="Add a comment..."></textarea>
-                                </div>
-                                <div class="comment-button-holder d-none d-flex justify-content-end">
-                                    <button class="btn btn-primary fw-bold comment-submit-button">Post</button>
-                                </div>
-
+                            <div class="comment-input-field">
+                                <textarea class="form-control" me-1 rows="1" placeholder="Add a comment..."></textarea>
+                            </div>
+                            <div class="comment-button-holder d-none d-flex justify-content-end">
+                                <button class="btn btn-primary fw-bold comment-submit-button">Post</button>
+                            </div>
+                            @if (Model.SavedPosts.Select(post => post.Id).Contains(post.Id))
+                            {
+                                <button type="button" class="btn-unsave-post saved" data-post-id="@post.Id">
+                                    <img src="~/images/savedPost.png" class="save-image">
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn-save-post" data-post-id="@post.Id">
+                                    <img src="~/images/unsavedPost.png" class="save-image">
+                                </button>
+                            }
                         </div>
                     </div>
                 </div>
 
 
                 <div class="post-caption">
-                    <span class="username">@post.UserName</span>
+                    <span class="username">@post.CreatedBy.UserName</span>
                     <p class="post-description">
                         @string.Join(" ", @post.Description.Split(" ").Take(10))
                         <span class="post-description-hidden-text">
@@ -98,26 +93,24 @@
                     <div class="tags">
                         @foreach (var tag in @post.Tags)
                         {
-                            <span>#@tag</span>
+                            <span>#@tag.Name</span>
                         }
                     </div>
+
                     <div class="taggedUsers">
                         @for (int i = 0; i < post.TaggedUsersId.Count; i++)
                         {
                             <a class="links" href="/Post/MyPage?userId=@post.TaggedUsersId.ElementAt(i)">
-                                <span class="taggedUsers-text">@('@')@post.TaggedUsersUserNames.ElementAt(i)</span>
+                                <span class="taggedUsers-text">@('@')@post.TaggedUsersUserName.ElementAt(i)</span>
                             </a>
                         }
                     </div>
                 </div>
             </div>
 
-            }
         }
-
     }
 </div>
-
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         document.addEventListener("click", function (event) {
@@ -195,6 +188,58 @@
                 alert('You are successfully removed from the post!');
             } else {
                 alert('Failed to remove you from the post.');
+            }
+        })
+        .catch((error) => console.error(error));
+    }));
+</script>
+<script>
+    document.querySelectorAll('.btn-save-post').forEach(b => b.addEventListener('click', (e) => {
+        const button = e.target.closest('.btn-save-post');
+        const postId = button.dataset.postId;
+
+        fetch('/Post/SavePost?postId=' + postId, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then((res) => {
+            if (res.ok) {
+                if (!button.classList.contains('saved')) {
+                button.classList.add('saved');
+                button.querySelector('.save-image').src = '/images/savedPost.png';
+                }
+                alert('Post saved successfully!');
+            }
+            else {
+                alert('Failed to save the post.');
+            }
+        })
+        .catch((error) => console.error(error));
+    }));
+</script>
+
+<script>
+    document.querySelectorAll('.btn-unsave-post').forEach(b => b.addEventListener('click', (e) => {
+        const button = e.target.closest('.btn-unsave-post');
+        const postId = button.dataset.postId;
+
+        fetch('/Post/UnsavePost?postId=' + postId, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then((res) => {
+            if (res.ok) {
+                if (button.classList.contains('saved')) {
+                button.classList.remove('saved');
+                button.querySelector('.save-image').src = '/images/unsavedPost.png';
+            }
+            alert('Post unsaved successfully!');
+            } else {
+                alert('Failed to unsave the post.');
             }
         })
         .catch((error) => console.error(error));

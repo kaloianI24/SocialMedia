@@ -123,12 +123,16 @@ namespace SocialMedia.Controllers
                     ViewData["IsOwner"] = (currentUserId == targetUserId);
                     ViewData["AreFriends"] = areFriends;
                     ViewData["IsAccountPrivate"] = targetUser.IsPrivate;
-                    var webModels = await TaggedPosts(user.Id);
-                    return PartialView("_TaggedPosts", webModels);
+                    //var webModels = await TaggedPosts(user.Id);
+                    return PartialView("_TaggedPosts", user.ToModel(UserPostMappingsContext.User));
 
                 case "DeletedPosts":
                     ViewData["IsOwner"] = (currentUserId == targetUserId);
                     return PartialView("_DeletedPosts", user.ToModel(UserPostMappingsContext.User));
+
+                case "SavedPosts":
+                    ViewData["IsOwner"] = (currentUserId == targetUserId);
+                    return PartialView("_SavedPosts", user.ToModel(UserPostMappingsContext.User));
 
                 default:
                     return BadRequest();
@@ -171,7 +175,7 @@ namespace SocialMedia.Controllers
 
             return NoContent();
         }
-
+              
         [HttpGet]
         [Consumes("application/json")]
         public async Task<IActionResult> Update([FromQuery] string postId)
@@ -206,30 +210,67 @@ namespace SocialMedia.Controllers
             return Redirect("MyPage");
         }
 
-        private async Task<List<TaggedPostWebModel>> TaggedPosts(string userId)
+        //private async Task<List<TaggedPostWebModel>> TaggedPosts(string userId)
+        //{
+        //    var currentUser = await GetUser();
+        //    var currentUserId = currentUser.Id;
+        //    var targetUserId = userId ?? currentUserId;
+        //    var targetUser = await GetUserById(targetUserId);
+
+        //    bool isOwner = (currentUserId == targetUserId);
+        //    //var posts = _socialMediaPostService.GetAllTaggedPosts(targetUser, isOwner, currentUser).ToList();
+        //    var posts = currentUser.TaggedPosts;
+        //    var webModels = posts.Select(p => new TaggedPostWebModel
+        //    {
+        //        Id = p.Id,
+        //        Description = p.Description,
+        //        AttachmentUrls = p.Attachments.Select(a => a.CloudUrl).ToList(),
+        //        Tags = p.Tags.Select(t => t.Name).ToList(),
+        //        UserName = p.CreatedBy.UserName,
+        //        ProfilePictureUrl = p.CreatedBy.ProfilePicture?.CloudUrl,
+        //        CreatedOn = p.CreatedOn,
+        //        CreatedById = p.CreatedBy.Id,
+        //        TaggedUsersId = p.TaggedUsers.Select(p => p.Id).ToList(),
+        //        TaggedUsersUserNames = p.TaggedUsers.Select(p => p.UserName).ToList(),
+        //    }).ToList();
+
+        //    return webModels;
+        //}
+
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> SavePost([FromQuery] string postId)
         {
-            var currentUser = await GetUser();
-            var currentUserId = currentUser.Id;
-            var targetUserId = userId ?? currentUserId;
-            var targetUser = await GetUserById(targetUserId);
-
-            bool isOwner = (currentUserId == targetUserId);
-            var posts = _socialMediaPostService.GetAllTaggedPosts(targetUser, isOwner, currentUser).ToList();
-            var webModels = posts.Select(p => new TaggedPostWebModel
+            try
             {
-                Id = p.Id,
-                Description = p.Description,
-                AttachmentUrls = p.Attachments.Select(a => a.CloudUrl).ToList(),
-                Tags = p.Tags.Select(t => t.Name).ToList(),
-                UserName = p.CreatedBy.UserName,
-                ProfilePictureUrl = p.CreatedBy.ProfilePicture?.CloudUrl,
-                CreatedOn = p.CreatedOn,
-                CreatedById = p.CreatedBy.Id,
-                TaggedUsersId = p.TaggedUsersId.ToList(),
-                TaggedUsersUserNames = p.TaggedUsersUserName.ToList(),
-            }).ToList();
+                var currentUser = await GetUser();
+                var post = await _socialMediaPostService.SavePost(postId, currentUser);
 
-            return webModels;
+                return NoContent();
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+                        
+        }
+
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> UnsavePost([FromQuery] string postId)
+        {
+            try
+            {
+                var currentUser = await GetUser();
+                var post = await _socialMediaPostService.UnsavePost(postId, currentUser);
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         private async Task<string> UploadPhoto(IFormFile photo)
@@ -260,9 +301,21 @@ namespace SocialMedia.Controllers
                 .ThenInclude(p => p.Attachments)
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.TaggedUsers)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(p => p.CreatedBy)
+                .ThenInclude(u => u.ProfilePicture)
             .Include(u => u.Following)
             .Include(u => u.Followers)
             .Include(u => u.Friends)
+            .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.Attachments)
+            .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.TaggedUsers)
+            .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.Tags)
+            .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.ProfilePicture)
             .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
         }
 
@@ -285,6 +338,15 @@ namespace SocialMedia.Controllers
             .Include(u => u.Following)
             .Include(u => u.Followers)
             .Include(u => u.Friends)
+            .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.Attachments)
+            .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.TaggedUsers)
+            .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.Tags)
+             .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.ProfilePicture)
             .FirstOrDefaultAsync(u => u.Id == id);
         }
     }

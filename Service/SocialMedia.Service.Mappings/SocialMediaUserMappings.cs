@@ -33,6 +33,8 @@ namespace SocialMedia.Service.Mappings
                 ProfilePicture = entity.ProfilePicture.ToModel(),
                 IsPrivate = entity.IsPrivate,
                 Posts = ShouldMapPost(context) ? entity.Posts?.Select(post => post.ToModel(UserPostMappingsContext.User)).ToList() : null,
+                SavedPosts = ShouldMapPost(context) ? entity.SavedPosts?.Select(post => post.ToModel(UserPostMappingsContext.Post)).ToList() : null,
+                TaggedPosts = ShouldMapPost(context) ? entity.TaggedPosts?.Select(post => post.ToModel(UserPostMappingsContext.Post)).ToList() : null,
                 Friends = entity.Friends?.Select(friend => friend.ToModelBasic()).ToList(),
                 Followers = entity.Followers?.Select(f => f.ToModelBasic()).ToList(),
                 Following = entity.Following?.Select(f => f.ToModelBasic()).ToList(),

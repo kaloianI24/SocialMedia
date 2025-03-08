@@ -21,5 +21,9 @@ namespace SocialMedia.Data.Models
         public List<SocialMediaUser>? TaggedUsers { get; set; } = new List<SocialMediaUser>();
 
         public List<SocialMediaTag>? Tags { get; set; } = new List<SocialMediaTag>();
+
+        public string Visibility { get; set; }
+
+        public List<SocialMediaUser> SavedByUsers { get; set; } = new List<SocialMediaUser>();
     }
 }
