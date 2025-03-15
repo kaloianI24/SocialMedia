@@ -1,21 +1,24 @@
 ﻿@using SocialMedia.Areas.Identity.Data
-@model SocialMediaUserServiceModel
+@{
+    List<string> savedPostsIds = (List<string>)ViewData["SavedPostsId"];
+}
+@model List<SocialMedia.Web.Models.Post.TaggedPostWebModel>
 <div class="main-content2">
-    @if (!Model.TaggedPosts.Any(p => p.DeletedOn == null))
+    @if (Model is null || Model.Count == 0 || (bool)ViewData["IsAccountPrivate"] && !(bool)ViewData["AreFriends"] && !(bool)ViewData["IsOwner"])
     {
-        <h3>You don't have saved posts</h3>
+        <h3>You are not tagged in any post or cannot see them due to the visibility level of the posts</h3>
     }
     else
     {
-        @foreach (var post in @Model.TaggedPosts.Where(p => p.DeletedOn == null).OrderByDescending(p => p.CreatedOn))
+        @foreach (var post in @Model.OrderByDescending(p => p.CreatedOn))
         {
             <div class="post" data-post-id="@post.Id">
                 <div class="post-header">
-                    <a href="/Post/MyPage?userId=@Model.Id">
-                        <img src="@post.CreatedBy.ProfilePicture.CloudUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
+                    <a href="/Post/MyPage?userId=@post.CreatedById">
+                        <img src="@post.ProfilePictureUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
                     </a>
                     <div class="post-info">
-                        <span class="username">@post.CreatedBy.UserName</span>
+                        <span class="username">@post.UserName</span>
                         <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
                     </div>
                     @if ((bool)ViewData["IsOwner"])
@@ -25,21 +28,21 @@
                 </div>
                 <div class="carousel">
                     <div class="carousel-images">
-                        @foreach (var photo in post.Attachments)
+                        @foreach (var photo in post.AttachmentUrls)
                         {
-                            <img src=@photo.CloudUrl.Replace("http://", "https://") alt="Post Image" class="post-image">
+                            <img src=@photo.Replace("http://", "https://") alt="Post Image" class="post-image">
                         }
                     </div>
                     <button type="button" button class="carousel-arrow left-arrow">&lt;</button>
                     <button type="button" button class="carousel-arrow right-arrow">&gt;</button>
                     <div class="carousel-indicators">
                         <span class="dot active"></span>
-                        @for (int i = 0; i < post.Attachments.Count - 1; i++)
+                        @for (int i = 0; i < post.AttachmentUrls.Count - 1; i++)
                         {
                             <span class="dot"></span>
                         }
                     </div>
-                    <div class="image-counter">1 / @post.Attachments.Count</div>
+                    <div class="image-counter">1 / @post.AttachmentUrls.Count</div>
                 </div>
 
 
@@ -61,7 +64,7 @@
                             <div class="comment-button-holder d-none d-flex justify-content-end">
                                 <button class="btn btn-primary fw-bold comment-submit-button">Post</button>
                             </div>
-                            @if (Model.SavedPosts.Select(post => post.Id).Contains(post.Id))
+                            @if (savedPostsIds is not null && savedPostsIds.Contains(post.Id))
                             {
                                 <button type="button" class="btn-unsave-post saved" data-post-id="@post.Id">
                                     <img src="~/images/savedPost.png" class="save-image">
@@ -79,7 +82,7 @@
 
 
                 <div class="post-caption">
-                    <span class="username">@post.CreatedBy.UserName</span>
+                    <span class="username">@post.UserName</span>
                     <p class="post-description">
                         @string.Join(" ", @post.Description.Split(" ").Take(10))
                         <span class="post-description-hidden-text">
@@ -93,7 +96,7 @@
                     <div class="tags">
                         @foreach (var tag in @post.Tags)
                         {
-                            <span>#@tag.Name</span>
+                            <span>#@tag</span>
                         }
                     </div>
 
@@ -101,7 +104,7 @@
                         @for (int i = 0; i < post.TaggedUsersId.Count; i++)
                         {
                             <a class="links" href="/Post/MyPage?userId=@post.TaggedUsersId.ElementAt(i)">
-                                <span class="taggedUsers-text">@('@')@post.TaggedUsersUserName.ElementAt(i)</span>
+                                <span class="taggedUsers-text">@('@')@post.TaggedUsersUserNames.ElementAt(i)</span>
                             </a>
                         }
                     </div>
