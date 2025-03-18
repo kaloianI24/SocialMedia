@@ -11,230 +11,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Update Post</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
         }
 
         .create-post-page {
-            max-width: 600px;
-            margin: 50px auto;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+        max-width: 600px;
+        margin: 50px auto;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
         }
 
         h1 {
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 20px;
-            color: #0056b3;
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+        color: #0056b3;
         }
 
         .post-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+        box-sizing: border-box;
         }
 
         label {
-            font-size: 16px;
-            margin-bottom: 5px;
+        font-size: 16px;
+        margin-bottom: 5px;
         }
 
-        textarea, input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            transition: border-color 0.3s ease;
-            box-sizing: border-box;
+        .form-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
         }
 
-            textarea:focus, input:focus {
-                border-color: #0056b3;
-                outline: none;
-            }
-        /* Tags Input */
-        .tags-input-wrapper {
-            width: 100%;
-            flex-wrap: wrap;
-            align-items: center;
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            gap: 5px;
-            background: #f8f9fa;
-            box-sizing: border-box;
-            display: flex;
+        .common-field-container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 5px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        width: 100%;
+        background-color: #fff;
+        box-sizing: border-box;
+        }
+
+        .common-field-container input,
+        .common-field-container textarea {
+        border: none;
+        outline: none;
+        font-size: 14px;
+        flex: 1;
+        background: inherit;
+        box-sizing: border-box;
+        min-height: 30px;
+        }
+
+        .tags-input-wrapper,
+        .user-tags-input-container {
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
         }
 
         .tag {
-            background: #0056b3;
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 12px;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
+        background: #0056b3;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 12px;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
         }
 
-            .tag a {
-                margin-left: 5px;
-                color: #fff;
-                text-decoration: none;
-                font-weight: bold;
-                cursor: pointer;
-            }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-        }
-
-        .image-previews {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .image-container {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            overflow: hidden;
-            border-radius: 8px;
-            border: 2px solid #ddd;
-        }
-
-            .image-container img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-
-            .image-container button {
-                position: absolute;
-                top: -5px;
-                right: -5px;
-                background: #ff4d4d;
-                border: none;
-                color: white;
-                font-size: 12px;
-                border-radius: 50%;
-                cursor: pointer;
-                width: 20px;
-                height: 20px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            }
-
-        .submit-btn {
-            background-color: #0056b3;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            font-size: 16px;
-            text-align: center;
-        }
-
-            .submit-btn:hover {
-                background-color: #004494;
-            }
-
-        .text-danger {
-            font-size: 12px;
-            color: #e74c3c;
-        }
-
-        #newImageCounter {
-            font-size: 14px;
-            color: #555;
-        }
-        /* Tagged Users */
-        .user-tags-input-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            padding: 5px;
-            border-radius: 5px;
-            width: 100%;
+        .tag a {
+        margin-left: 5px;
+        color: #fff;
+        text-decoration: none;
+        font-weight: bold;
+        cursor: pointer;
         }
 
         .user-tag {
-            background-color: #0056b3;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 3px;
-            display: flex;
-            align-items: center;
+        background-color: #0056b3;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
         }
 
-            .user-tag .remove-tag {
-                margin-left: 5px;
-                cursor: pointer;
-                font-weight: bold;
-            }
+        .user-tag .remove-tag {
+        margin-left: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        }
 
-        .users-search-bar {
-            flex: 1;
-            border: none;
-            outline: none;
-            padding: 5px;
+        .image-previews {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        }
+
+        .image-container {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        overflow: hidden;
+        border-radius: 8px;
+        border: 2px solid #ddd;
+        }
+
+        .image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        }
+
+        .image-container button {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #ff4d4d;
+        border: none;
+        color: white;
+        font-size: 12px;
+        border-radius: 50%;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .submit-btn {
+        background-color: #0056b3;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-size: 16px;
+        text-align: center;
+        }
+
+        .submit-btn:hover {
+        background-color: #004494;
+        }
+
+        .text-danger {
+        font-size: 12px;
+        color: #e74c3c;
         }
 
         .dropdown {
-            position: relative;
+        position: relative;
         }
 
         .dropdown-menu {
-            position: absolute;
-            width: 100%;
-            max-height: 120px;
-            overflow-y: auto;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            display: none;
-            z-index: 10;
+        position: absolute;
+        width: 100%;
+        max-height: 120px;
+        overflow-y: auto;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        display: none;
+        z-index: 10;
         }
 
-            .dropdown-menu.visible {
-                display: block;
-            }
+        .dropdown-menu.visible {
+        display: block;
+        }
 
         .dropdown-item {
-            padding: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
+        padding: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
         }
 
-            .dropdown-item:hover {
-                background-color: #f0f0f0;
-            }
+        .dropdown-item:hover {
+        background-color: #f0f0f0;
+        }
 
-            .dropdown-item img {
-                width: 30px;
-                height: 30px;
-                margin-right: 10px;
-                border-radius: 50%;
-            }
+        .dropdown-item img {
+        width: 30px;
+        height: 30px;
+        margin-right: 10px;
+        border-radius: 50%;
+        }
     </style>
 </head>
 <body>
@@ -243,20 +227,26 @@
         <form asp-controller="Post" asp-action="UpdateConfirm" method="post" enctype="multipart/form-data" class="post-form">
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="Attachments" />
+
             <div class="form-group">
                 <label asp-for="Description">Description</label>
-                <textarea asp-for="Description" placeholder="Edit your description here..."></textarea>
+                <div class="common-field-container">
+                    <textarea asp-for="Description"
+                    placeholder="Edit your description here..."></textarea>
+                </div>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label for="tag-input">Tags</label>
-                <input type="text" id="tag-input" name="Tags" value="@Model.Tags" />
+                <div class="common-field-container">
+                    <input type="text" id="tag-input" name="Tags" value="@Model.Tags" />
+                </div>
             </div>
 
             <div class="form-group">
                 <label>Tagged Users</label>
-                <div class="user-tags-input-container" id="userTagsInputContainer">
+                <div class="common-field-container" id="userTagsInputContainer">
                     @if (Model.TaggedUsersId != null && Model.TaggedUsersUserName != null)
                     {
                         for (int i = 0; i < Model.TaggedUsersId.Count; i++)
@@ -267,8 +257,9 @@
                             </div>
                         }
                     }
-                    <input type="text" id="user-searchBar" class="users-search-bar" placeholder="Search users...">
-                    <input type="hidden" id="taggedUsers" name="TaggedUsersId" value="@((Model.TaggedUsersId != null) ? string.Join(",", Model.TaggedUsersId) : "")">
+                    <input type="text" id="user-searchBar" class="users-search-bar" placeholder="Search users..." />
+                    <input type="hidden" id="taggedUsers" name="TaggedUsersId"
+                    value="@((Model.TaggedUsersId != null) ? string.Join(",", Model.TaggedUsersId) : "")" />
                 </div>
                 <div class="dropdown">
                     <div id="dropdownMenu" class="dropdown-menu"></div>
@@ -289,275 +280,284 @@
                         }
                     }
                 </div>
-                <input type="hidden" id="removedAttachments" name="RemovedAttachmentIds" value="">
+                <input type="hidden" id="removedAttachments" name="RemovedAttachmentIds" value="" />
             </div>
 
+            @if (!(bool)ViewData["IsAccountPrivate"])
+            {
+                <div class="form-group">
+                    <label asp-for="@Model.Visibility">Select the visibility for your post:</label>
+                <select class="common-field-container" asp-for="@Model.Visibility">
+                    <option value="friends">Friends only</option>
+                    <option value="followers">Friends and followers</option>
+                    <option value="all">Everybody can see your post</option>
+                </select>
+            </div>
+            }
             <button type="submit" class="submit-btn">Update Post</button>
+
             <div id="error-message" class="text-danger" style="display: none;">
                 Please keep at least one image.
             </div>
         </form>
     </div>
-</body>
-</html>
 
-<script>
-    (function(){
-        "use strict";
+    <script>
+        (function(){
+            "use strict";
 
-        var TagsInput = function(opts){
-            this.options = Object.assign(TagsInput.defaults, opts);
-            this.init();
-        }
+            var TagsInput = function(opts){
+                this.options = Object.assign(TagsInput.defaults, opts);
+                this.init();
+            }
 
-        TagsInput.prototype.init = function(opts){
-            this.options = opts ? Object.assign(this.options, opts) : this.options;
+            TagsInput.prototype.init = function(opts){
+                this.options = opts ? Object.assign(this.options, opts) : this.options;
+                if(this.initialized) this.destroy();
 
-            if(this.initialized) this.destroy();
+                this.orignal_input = document.getElementById(this.options.selector);
+                if(!this.orignal_input){
+                    console.error("TagsInput couldn't find an element with ID: " + this.options.selector);
+                    return this;
+                }
 
-            this.orignal_input = document.getElementById(this.options.selector);
-            if(!this.orignal_input){
-                console.error("TagsInput couldn't find an element with ID: " + this.options.selector);
+                this.arr = [];
+                this.wrapper = document.createElement('div');
+                this.input = document.createElement('input');
+
+                init(this);
+                initEvents(this);
+
+                this.initialized = true;
                 return this;
             }
 
-            this.arr = [];
-            this.wrapper = document.createElement('div');
-            this.input = document.createElement('input');
+            TagsInput.prototype.addTag = function(string){
+                if(!string || this.anyErrors(string)) return;
+                this.arr.push(string);
 
-            init(this);
-            initEvents(this);
+                var tag = document.createElement('span');
+                tag.className = this.options.tagClass;
+                tag.appendChild(document.createTextNode(string));
 
-            this.initialized = true;
-            return this;
-        }
-
-        TagsInput.prototype.addTag = function(string){
-            if(!string || this.anyErrors(string)) return;
-
-            this.arr.push(string);
-
-            var tag = document.createElement('span');
-            tag.className = this.options.tagClass;
-            tag.appendChild(document.createTextNode(string));
-
-            var closeIcon = document.createElement('a');
-            closeIcon.innerHTML = '&times;';
-            closeIcon.addEventListener('click', (e) => {
-                e.preventDefault();
-                var index = this.arr.indexOf(string);
-                if(index !== -1){
-                    this.deleteTag(tag, index);
-                }
-            });
-
-            tag.appendChild(closeIcon);
-
-            this.wrapper.insertBefore(tag, this.input);
-
-            refreshOriginalInput(this);
-            return this;
-        }
-
-        TagsInput.prototype.deleteTag = function(tagElem, i){
-            tagElem.remove();
-            this.arr.splice(i, 1);
-            refreshOriginalInput(this);
-            return this;
-        }
-
-        TagsInput.prototype.anyErrors = function(string){
-            if(this.options.max != null && this.arr.length >= this.options.max){
-                console.log('Max tags limit reached');
-                return true;
-            }
-            if(!this.options.duplicate && this.arr.indexOf(string) !== -1){
-                console.log('Duplicate tag: "' + string + '"');
-                return true;
-            }
-            return false;
-        }
-
-        TagsInput.prototype.addData = function(array){
-            array.forEach((str) => {
-                this.addTag(str.trim());
-            });
-            return this;
-        }
-
-        TagsInput.prototype.getInputString = function(){
-            return this.arr.join(',');
-        }
-
-        TagsInput.prototype.destroy = function(){
-            this.orignal_input.removeAttribute('hidden');
-            delete this.orignal_input;
-
-            let self = this;
-            Object.keys(this).forEach((key) => {
-                if(self[key] instanceof HTMLElement) self[key].remove();
-                if(key !== 'options') delete self[key];
-            });
-
-            this.initialized = false;
-        }
-
-        function init(tags){
-            tags.wrapper.append(tags.input);
-            tags.wrapper.classList.add(tags.options.wrapperClass);
-
-            tags.orignal_input.setAttribute('hidden', 'true');
-            tags.orignal_input.parentNode.insertBefore(tags.wrapper, tags.orignal_input);
-        }
-
-        function initEvents(tags){
-            tags.wrapper.addEventListener('click', function(){
-                tags.input.focus();
-            });
-
-            tags.input.addEventListener('keydown', function(e){
-                if([9, 13, 188, 32].indexOf(e.keyCode) !== -1){
+                var closeIcon = document.createElement('a');
+                closeIcon.innerHTML = '&times;';
+                closeIcon.addEventListener('click', (e) => {
                     e.preventDefault();
-                    let str = tags.input.value.trim();
-                    tags.input.value = "";
-                    let splitted = str.split(/\s+/);
-                    splitted.forEach(word => {
-                        if(word) tags.addTag(word);
-                    });
+                    var index = this.arr.indexOf(string);
+                    if(index !== -1){
+                        this.deleteTag(tag, index);
+                    }
+                });
+
+                tag.appendChild(closeIcon);
+                this.wrapper.insertBefore(tag, this.input);
+                refreshOriginalInput(this);
+                return this;
+            }
+
+            TagsInput.prototype.deleteTag = function(tagElem, i){
+                tagElem.remove();
+                this.arr.splice(i, 1);
+                refreshOriginalInput(this);
+                return this;
+            }
+
+            TagsInput.prototype.anyErrors = function(string){
+                if(this.options.max != null && this.arr.length >= this.options.max){
+                    console.log('Max tags limit reached');
+                    return true;
                 }
+                if(!this.options.duplicate && this.arr.indexOf(string) !== -1){
+                    console.log('Duplicate tag: "' + string + '"');
+                    return true;
+                }
+                return false;
+            }
+
+            TagsInput.prototype.addData = function(array){
+                array.forEach((str) => {
+                    this.addTag(str.trim());
+                });
+                return this;
+            }
+
+            TagsInput.prototype.getInputString = function(){
+                return this.arr.join(',');
+            }
+
+            TagsInput.prototype.destroy = function(){
+                this.orignal_input.removeAttribute('hidden');
+                delete this.orignal_input;
+                let self = this;
+                Object.keys(this).forEach((key) => {
+                    if(self[key] instanceof HTMLElement) self[key].remove();
+                    if(key !== 'options') delete self[key];
+                });
+                this.initialized = false;
+            }
+
+            function init(tags){
+                tags.wrapper.append(tags.input);
+                tags.wrapper.classList.add(tags.options.wrapperClass);
+                tags.orignal_input.setAttribute('hidden', 'true');
+                tags.orignal_input.parentNode.insertBefore(tags.wrapper, tags.orignal_input);
+            }
+
+            function initEvents(tags){
+                tags.wrapper.addEventListener('click', function(){
+                    tags.input.focus();
+                });
+                tags.input.addEventListener('keydown', function(e){
+                    if([9, 13, 188, 32].indexOf(e.keyCode) !== -1){
+                        e.preventDefault();
+                        let str = tags.input.value.trim();
+                        tags.input.value = "";
+                        let splitted = str.split(/\s+/);
+                        splitted.forEach(word => {
+                            if(word) tags.addTag(word);
+                        });
+                    }
+                });
+            }
+
+            function refreshOriginalInput(tags){
+                tags.orignal_input.value = tags.arr.join(',');
+            }
+
+            TagsInput.defaults = {
+                selector: '',
+                wrapperClass: 'tags-input-wrapper',
+                tagClass: 'tag',
+                max: null,
+                duplicate: false
+            }
+
+            window.TagsInput = TagsInput;
+        })();
+
+        let removedAttachments = [];
+        document.querySelectorAll('.remove-existing-image').forEach(button => {
+            button.addEventListener('click', function () {
+                const container = this.parentElement;
+                const attachmentId = container.getAttribute('data-id');
+                removedAttachments.push(attachmentId);
+                container.remove();
+                updateRemovedAttachmentsField();
+            });
+        });
+        function updateRemovedAttachmentsField() {
+            document.getElementById('removedAttachments').value = removedAttachments.join(',');
+        }
+
+        const allUsers = @Html.Raw(Json.Serialize(users));
+        const searchBar = document.getElementById("user-searchBar");
+        const dropdownMenu = document.getElementById("dropdownMenu");
+        const tagsInputContainer = document.getElementById("userTagsInputContainer");
+        const hiddenInput = document.getElementById("taggedUsers");
+        const selectedUsers = new Set();
+
+        document.querySelectorAll('.user-tag').forEach(tag => {
+            const id = tag.getAttribute('data-id');
+            selectedUsers.add(id);
+            tag.querySelector('.remove-tag').addEventListener('click', () => {
+                selectedUsers.delete(id);
+                tag.remove();
+                updateTaggedUsersField();
+            });
+        });
+
+        function renderDropdownItems(filteredUsers) {
+            dropdownMenu.innerHTML = "";
+            filteredUsers.slice(0, 3).forEach(user => {
+                const item = document.createElement("div");
+                item.classList.add("dropdown-item");
+                item.innerHTML = `<img src="${user.profilePictureUrl}" alt="profile-picture"> ${user.userName}`;
+                item.addEventListener("click", () => {
+                    addUserTag(user);
+                });
+                dropdownMenu.appendChild(item);
             });
         }
 
-        function refreshOriginalInput(tags){
-            tags.orignal_input.value = tags.arr.join(',');
+        function addUserTag(user) {
+            if (selectedUsers.has(user.id)) return;
+            selectedUsers.add(user.id);
+
+            const tag = document.createElement("div");
+            tag.classList.add("user-tag");
+            tag.setAttribute("data-id", user.id);
+            tag.innerHTML = `${user.userName} <span class="remove-tag">&times;</span>`;
+            tag.querySelector(".remove-tag").addEventListener("click", () => {
+                selectedUsers.delete(user.id);
+                tag.remove();
+                updateTaggedUsersField();
+            });
+
+            tagsInputContainer.insertBefore(tag, searchBar);
+            searchBar.value = "";
+            dropdownMenu.classList.remove("visible");
+            updateTaggedUsersField();
         }
 
-        TagsInput.defaults = {
-            selector: '',
-            wrapperClass: 'tags-input-wrapper',
-            tagClass: 'tag',
-            max: null,
-            duplicate: false
+        searchBar.addEventListener("input", () => {
+            const query = searchBar.value.toLowerCase();
+            if (query === "") {
+                dropdownMenu.classList.remove("visible");
+                return;
+            }
+            const filteredUsers = allUsers.filter(user =>
+                user.userName.toLowerCase().startsWith(query)
+            );
+            if (filteredUsers.length > 0) {
+                renderDropdownItems(filteredUsers);
+                dropdownMenu.classList.add("visible");
+            } else {
+                dropdownMenu.classList.remove("visible");
+            }
+        });
+
+        document.addEventListener("click", (event) => {
+            if (!tagsInputContainer.contains(event.target)) {
+                dropdownMenu.classList.remove("visible");
+            }
+        });
+
+        searchBar.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") e.preventDefault();
+        });
+
+        function updateTaggedUsersField() {
+            hiddenInput.value = Array.from(selectedUsers).join(",");
+            console.log("Updated TaggedUsersId value:", hiddenInput.value);
         }
 
-        window.TagsInput = TagsInput;
-
-    })();
-
-
-    let removedAttachments = [];
-    document.querySelectorAll('.remove-existing-image').forEach(button => {
-        button.addEventListener('click', function () {
-            const container = this.parentElement;
-            const attachmentId = container.getAttribute('data-id');
-            removedAttachments.push(attachmentId);
-            container.remove();
+        document.querySelector('form').addEventListener('submit', function (e) {
+            updateTaggedUsersField();
             updateRemovedAttachmentsField();
         });
-    });
-    function updateRemovedAttachmentsField() {
-        document.getElementById('removedAttachments').value = removedAttachments.join(',');
-    }
 
-    const allUsers = @Html.Raw(Json.Serialize(users));
-    const searchBar = document.getElementById("user-searchBar");
-    const dropdownMenu = document.getElementById("dropdownMenu");
-    const tagsInputContainer = document.getElementById("userTagsInputContainer");
-    const hiddenInput = document.getElementById("taggedUsers");
-    const selectedUsers = new Set();
-    document.querySelectorAll('.user-tag').forEach(tag => {
-        const id = tag.getAttribute('data-id');
-        selectedUsers.add(id);
-        tag.querySelector('.remove-tag').addEventListener('click', () => {
-            selectedUsers.delete(id);
-            tag.remove();
-            updateTaggedUsersField();
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const existingImages = document.querySelectorAll('#existingImagePreviews .image-container');
+            const errorMessage = document.getElementById('error-message');
+            if (existingImages.length === 0) {
+                e.preventDefault();
+                errorMessage.style.display = 'block';
+            } else {
+                errorMessage.style.display = 'none';
+            }
         });
-    });
-    function renderDropdownItems(filteredUsers) {
-        dropdownMenu.innerHTML = "";
-        filteredUsers.slice(0, 3).forEach(user => {
-            const item = document.createElement("div");
-            item.classList.add("dropdown-item");
-            item.innerHTML = `<img src="${user.profilePictureUrl}" alt="profile-picture"> ${user.userName}`;
-            item.addEventListener("click", () => {
-                addUserTag(user);
-            });
-            dropdownMenu.appendChild(item);
+
+        var tagInput1 = new TagsInput({
+            selector: 'tag-input',
+            duplicate: false,
+            max: null
         });
-    }
-    function addUserTag(user) {
-        if (selectedUsers.has(user.id)) return;
-        selectedUsers.add(user.id);
-        const tag = document.createElement("div");
-        tag.classList.add("user-tag");
-        tag.setAttribute("data-id", user.id);
-        tag.innerHTML = `${user.userName} <span class="remove-tag">&times;</span>`;
-        tag.querySelector(".remove-tag").addEventListener("click", () => {
-            selectedUsers.delete(user.id);
-            tag.remove();
-            updateTaggedUsersField();
-        });
-        tagsInputContainer.insertBefore(tag, searchBar);
-        searchBar.value = "";
-        dropdownMenu.classList.remove("visible");
-        updateTaggedUsersField();
-    }
-    searchBar.addEventListener("input", () => {
-        const query = searchBar.value.toLowerCase();
-        if (query === "") {
-            dropdownMenu.classList.remove("visible");
-            return;
+        var tagInputEl = document.getElementById('tag-input');
+        if (tagInputEl.value.trim() !== "") {
+            var initialTags = tagInputEl.value.split(',');
+            tagInput1.addData(initialTags);
         }
-        const filteredUsers = allUsers.filter(user =>
-            user.userName.toLowerCase().startsWith(query)
-        );
-        if (filteredUsers.length > 0) {
-            renderDropdownItems(filteredUsers);
-            dropdownMenu.classList.add("visible");
-        } else {
-            dropdownMenu.classList.remove("visible");
-        }
-    });
-    document.addEventListener("click", (event) => {
-        if (!tagsInputContainer.contains(event.target)) {
-            dropdownMenu.classList.remove("visible");
-        }
-    });
-    searchBar.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") e.preventDefault();
-    });
-    function updateTaggedUsersField() {
-        hiddenInput.value = Array.from(selectedUsers).join(",");
-        console.log("Updated TaggedUsersId value:", hiddenInput.value);
-    }
-    document.querySelector('form').addEventListener('submit', function (e) {
-        updateTaggedUsersField();
-        updateRemovedAttachmentsField();
-    });
-
-    document.querySelector('form').addEventListener('submit', function (e) {
-    const existingImages = document.querySelectorAll('#existingImagePreviews .image-container');
-    const errorMessage = document.getElementById('error-message');
-
-    if (existingImages.length === 0) {
-        e.preventDefault();
-        errorMessage.style.display = 'block';
-    } else {
-        errorMessage.style.display = 'none';
-    }
-    });
-</script>
-<script>
-    var tagInput1 = new TagsInput({
-        selector: 'tag-input',
-        duplicate: false,
-        max: null
-    });
-
-    var tagInputEl = document.getElementById('tag-input');
-    if (tagInputEl.value.trim() !== "") {
-        var initialTags = tagInputEl.value.split(',');
-        tagInput1.addData(initialTags);
-    }
-</script>
+    </script>
+</body>
+</html>

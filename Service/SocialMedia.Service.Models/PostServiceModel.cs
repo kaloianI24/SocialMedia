@@ -24,5 +24,6 @@ namespace SocialMedia.Service.Models
         public List<UserPostCommentServiceModel> Comments { get; set; }
 
         public List<UserPostReactionServiceModel> Reactions { get; set; }
+        public string Visibility { get; set; }
     }
 }

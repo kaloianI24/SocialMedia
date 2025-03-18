@@ -13,6 +13,8 @@ using System.Globalization;
 using SocialMedia.Web.Models;
 using SocialMedia.Web.Models.User;
 using SocialMedia.Service.SocialMediaPost;
+using SocialMedia.Data.Models;
+using Microsoft.Extensions.Hosting;
 
 namespace SocialMedia.Controllers
 {
@@ -47,6 +49,7 @@ namespace SocialMedia.Controllers
             })
             .ToList();
             ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
+            ViewData["IsAccountPrivate"] = currentUser.IsPrivate;
             return View();
         }
 
@@ -75,6 +78,7 @@ namespace SocialMedia.Controllers
                 Attachments = attachments,
                 Tags = createPostModel.Tags.Select(tag => new TagServiceModel { Name = tag }).ToList(),
                 TaggedUsersId = taggedUsersIds,
+                Visibility = createPostModel.Visibility ?? "friends"
             });
 
             return Redirect("MyPage");
@@ -107,6 +111,8 @@ namespace SocialMedia.Controllers
             var targetUserId = id ?? currentUserId;
             var targetUser = await GetUserById(targetUserId);
             var areFriends = currentUser.Friends.Any(f => f.Id == targetUser.Id);
+            var isFollowing = currentUser.Following.Any(f => f.Id == targetUser.Id);
+            List<TaggedPostWebModel> posts;
 
             switch (type)
             {
@@ -114,25 +120,65 @@ namespace SocialMedia.Controllers
                     ViewData["IsOwner"] = (currentUserId == targetUserId);
                     var roles = await _userManager.GetRolesAsync(currentUser);
                     bool isAdmin = roles.Contains("Admin");
-
+                    ViewData["IsAccountPrivate"] = targetUser.IsPrivate;
                     ViewData["IsAdmin"] = isAdmin;
                     ViewData["AreFriends"] = areFriends;
-                    return PartialView("_MyPosts", user.ToModel(UserPostMappingsContext.User));
+                    ViewData["IsFollowing"] = isFollowing;
+                    ViewData["SavedPostsId"] = currentUser.SavedPosts.Select(p => p.Id).ToList();
+                    
+                    if(currentUserId == targetUserId || areFriends)
+                    {
+                        posts = ConvertFromServiceModelToWebModel(user.Posts.Where(p => p.DeletedOn == null).ToList());
+                    }
+
+                    else if(isFollowing)
+                    {
+                        posts = ConvertFromServiceModelToWebModel(user.Posts.Where(p => p.Visibility.Equals("all") || p.Visibility.Equals("followers") && p.DeletedOn == null).ToList());
+                    }
+                    else
+                    {
+                        posts = ConvertFromServiceModelToWebModel(user.Posts.Where(p => p.Visibility.Equals("all") && p.DeletedOn == null).ToList());
+                    }                        
+
+                    return PartialView("_MyPosts", posts);
 
                 case "TaggedPosts":
                     ViewData["IsOwner"] = (currentUserId == targetUserId);
                     ViewData["AreFriends"] = areFriends;
                     ViewData["IsAccountPrivate"] = targetUser.IsPrivate;
-                    //var webModels = await TaggedPosts(user.Id);
-                    return PartialView("_TaggedPosts", user.ToModel(UserPostMappingsContext.User));
+                    ViewData["SavedPostsId"] = currentUser.SavedPosts.Select(p => p.Id).ToList();
+
+                    if (currentUserId == targetUserId)
+                    {
+                        posts = ConvertFromServiceModelToWebModel(targetUser.TaggedPosts.Where(p => p.DeletedOn == null).ToList());
+                    }
+                    else
+                    {
+                        posts = ConvertFromServiceModelToWebModel(targetUser.TaggedPosts.Where(
+                            p => p.DeletedOn == null &&
+                            p.Visibility.Equals("all") ||
+                            p.Visibility.Equals("friends") && p.CreatedBy.Friends.Contains(currentUser) ||
+                            p.Visibility.Equals("followers") && p.CreatedBy.Followers.Contains(currentUser) || p.CreatedBy.Friends.Contains(currentUser) ||
+                            p.CreatedBy.Id == currentUser.Id)
+                        .ToList());
+                    }
+                    return PartialView("_TaggedPosts", posts);
 
                 case "DeletedPosts":
                     ViewData["IsOwner"] = (currentUserId == targetUserId);
-                    return PartialView("_DeletedPosts", user.ToModel(UserPostMappingsContext.User));
+                    return PartialView("_DeletedPosts", ConvertFromServiceModelToWebModel(currentUser.Posts.Where(p => p.DeletedOn != null).ToList()).ToList());
 
                 case "SavedPosts":
                     ViewData["IsOwner"] = (currentUserId == targetUserId);
-                    return PartialView("_SavedPosts", user.ToModel(UserPostMappingsContext.User));
+                    ViewData["AreFriends"] = areFriends;
+                    ViewData["IsFollowing"] = isFollowing;
+                    ViewData["SavedPostsId"] = currentUser.SavedPosts.Select(p => p.Id).ToList();
+                    return PartialView("_SavedPosts", ConvertFromServiceModelToWebModel(currentUser.SavedPosts.Where(
+                        p => p.DeletedOn == null &&
+                        p.Visibility.Equals("all") ||
+                        p.Visibility.Equals("friends") && p.CreatedBy.Friends.Contains(currentUser) ||
+                        p.Visibility.Equals("followers") && p.CreatedBy.Followers.Contains(currentUser) || p.CreatedBy.Friends.Contains(currentUser) ||
+                        p.CreatedBy.Id == currentUser.Id).ToList()));
 
                 default:
                     return BadRequest();
@@ -190,9 +236,11 @@ namespace SocialMedia.Controllers
                 TaggedUsersUserName = post.TaggedUsersUserName,
                 Tags = string.Join(",",post.Tags.Select(t => t.Name)),
                 RemovedAttachmentIds = null,
+                Visibility = post.Visibility
             };
             var currentUser = await GetUser();
             ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
+            ViewData["IsAccountPrivate"] = currentUser.IsPrivate;
             ViewData["Users"] = _userManager.Users.Include(u => u.ProfilePicture).Where(u => u.Id != currentUser.Id).Select(u => new UserWebModel
             {
                 Id = u.Id,
@@ -348,6 +396,23 @@ namespace SocialMedia.Controllers
                 .ThenInclude(sp => sp.CreatedBy)
                     .ThenInclude(crb => crb.ProfilePicture)
             .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        private List<TaggedPostWebModel> ConvertFromServiceModelToWebModel(List<SocialMediaPost> posts)
+        {
+            return posts.Select(p => new TaggedPostWebModel
+            {
+                Id = p.Id,
+                Description = p.Description,
+                AttachmentUrls = p.Attachments.Select(a => a.CloudUrl).ToList(),
+                UserName = p.CreatedBy.UserName,
+                ProfilePictureUrl = p.CreatedBy.ProfilePicture.CloudUrl,
+                CreatedOn = p.CreatedOn,
+                CreatedById = p.CreatedBy.Id,
+                Tags = p.Tags.Select(t => t.Name).ToList(),
+                TaggedUsersId = p.TaggedUsers.Select(u => u.Id).ToList(),
+                TaggedUsersUserNames = p.TaggedUsers.Select(u => u.UserName).ToList(),
+            }).ToList();
         }
     }
 }

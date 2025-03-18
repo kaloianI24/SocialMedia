@@ -20,5 +20,6 @@ namespace SocialMedia.Web.Models.Post
 
         public string? RemovedAttachmentIds { get; set; }
         public string? Tags { get; set; }
+        public string? Visibility { get; set; }
     }
 }

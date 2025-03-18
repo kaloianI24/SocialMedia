@@ -3,7 +3,6 @@
 
 @model CreatePostModel
 
-
 @{
     ViewData["Title"] = "Create a new post";
     var users = (List<UserWebModel>)this.ViewData["Users"];
@@ -16,229 +15,227 @@
     <title>Create a new post</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
         }
 
         .create-post-page {
-            max-width: 600px;
-            margin: 50px auto;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+        width: 600px;
+        margin: 50px auto;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
         }
 
         h1 {
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 20px;
-            color: #0056b3;
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+        color: #0056b3;
         }
 
         .post-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 550px;
         }
 
         label {
-            font-size: 16px;
-            margin-bottom: 5px;
+        font-size: 16px;
+        margin-bottom: 5px;
         }
-
-        textarea, input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            transition: border-color 0.3s ease;
-            box-sizing: border-box;
-        }
-
-            textarea:focus, input:focus {
-                border-color: #0056b3;
-                outline: none;
-            }
-
-        #tag-input {
-         }   
-
-         .tags-input-wrapper { 
-            width: 100%;
-              flex-wrap: wrap;   
-              align-items: center;   
-              padding: 5px;   
-              border: 1px solid #ccc;   
-              border-radius: 8px;   
-              gap: 5px;   
-              background: #f8f9fa;
-            box-sizing: border-box;
-            display: flex;
-          }   
-
-          .tag {   
-              background: #0056b3;   
-              color: #fff;   
-              padding: 5px 10px;   
-              border-radius: 12px;   
-              font-size: 14px;   
-              display: inline-flex;   
-              align-items: center;   
-          } 
-
-             .tag a { 
-                 margin-left: 5px; 
-                 color: #fff; 
-                 text-decoration: none; 
-                 font-weight: bold; 
-                 cursor: pointer; 
-             }
 
         .form-group {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        }
+
+        .common-field-container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 5px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        width: 100%;
+        background-color: #fff;
+        box-sizing: border-box;
+        }
+        .common-field-container input,
+        .common-field-container textarea {
+        border: none;
+        outline: none;
+        font-size: 14px;
+        flex: 1;
+        resize: none;
+        text-decoration:none;
+        background: inherit;
+        box-sizing: border-box;
+        min-height: 30px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .common-field-container textarea{
+        text-decoration:none;
+        }
+        .description-input,
+        .tags-input-wrapper,
+        .user-tags-input-container {
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        }
+
+        .tag {
+        background: #0056b3;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 12px;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        }
+
+        .tag a {
+        margin-left: 5px;
+        color: #fff;
+        text-decoration: none;
+        font-weight: bold;
+        cursor: pointer;
         }
 
         #imagePreviews {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
         }
 
         .image-container {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            overflow: hidden;
-            border-radius: 8px;
-            border: 2px solid #ddd;
+        position: relative;
+        width: 80px;
+        height: 80px;
+        overflow: hidden;
+        border-radius: 8px;
+        border: 2px solid #ddd;
         }
 
-            .image-container img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
+        .image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        }
 
-            .image-container button {
-                position: absolute;
-                top: -5px;
-                right: -5px;
-                background: #ff4d4d;
-                border: none;
-                color: white;
-                font-size: 12px;
-                border-radius: 50%;
-                cursor: pointer;
-                width: 20px;
-                height: 20px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            }
+        .image-container button {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #ff4d4d;
+        border: none;
+        color: white;
+        font-size: 12px;
+        border-radius: 50%;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
 
         .submit-btn {
-            background-color: #0056b3;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            font-size: 16px;
-            text-align: center;
+        background-color: #0056b3;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-size: 16px;
+        text-align: center;
         }
 
-            .submit-btn:hover {
-                background-color: #004494;
-            }
+        .submit-btn:hover {
+        background-color: #004494;
+        }
 
         .text-danger {
-            font-size: 12px;
-            color: #e74c3c;
+        font-size: 12px;
+        color: #e74c3c;
         }
 
         #imageCounter {
-            font-size: 14px;
-            color: #555;
-        }
-
-      
-        .user-tags-input-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            padding: 5px;
-            border-radius: 5px;
-            width:100%;
+        font-size: 14px;
+        color: #555;
         }
 
         .user-tag {
-            background-color: #0056b3;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 3px;
-            display: flex;
-            align-items: center;
+        background-color: #0056b3;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
         }
 
-            .user-tag .remove-tag {
-                margin-left: 5px;
-                cursor: pointer;
-                font-weight: bold;
-            }
+        .user-tag .remove-tag {
+        margin-left: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        }
 
         .users-search-bar {
-            flex: 1;
-            border: none;
-            outline: none;
-            padding: 5px;
+        flex: 1;
+        border: none;
+        outline: none;
+        padding: 5px;
+        background: inherit;
         }
 
         .dropdown {
-            position: relative;
+        position: relative;
         }
 
         .dropdown-menu {
-            position: absolute;
-            width: 100%;
-            max-height: 120px;
-            overflow-y: auto;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            display: none;
-            z-index: 10;
+        position: absolute;
+        width: 100%;
+        max-height: 120px;
+        overflow-y: auto;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        display: none;
+        z-index: 10;
         }
 
-            .dropdown-menu.visible {
-                display: block;
-            }
+        .dropdown-menu.visible {
+        display: block;
+        }
 
         .dropdown-item {
-            padding: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
+        padding: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
         }
 
-            .dropdown-item:hover {
-                background-color: #f0f0f0;
-            }
+        .dropdown-item:hover {
+        background-color: #f0f0f0;
+        }
 
-            .dropdown-item img {
-                width: 30px;
-                height: 30px;
-                margin-right: 10px;
-                border-radius: 50%;
-            }
+        .dropdown-item img {
+        width: 30px;
+        height: 30px;
+        margin-right: 10px;
+        border-radius: 50%;
+        }
     </style>
 </head>
 <body>
@@ -247,18 +244,28 @@
         <form asp-controller="Post" asp-action="CreateConfirm" method="post" enctype="multipart/form-data" class="post-form">
             <div class="form-group">
                 <label asp-for="@Model.Description">Description</label>
-                <textarea asp-for="@Model.Description" placeholder="Write your description here..."></textarea>
+                <div class="common-field-container">
+                    <textarea rows="2"
+                    asp-for="@Model.Description"
+                    placeholder="Write your description here..."></textarea>
+                </div>
                 <span asp-validation-for="@Model.Description" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="@Model.Tags">Tags</label>
-                <input asp-for="@Model.Tags" id="tag-input"></input>
+                <div class="common-field-container">
+                    <input asp-for="@Model.Tags" id="tag-input" placeholder="Add tags...">
+                </div>
             </div>
 
             <div class="form-group">
                 <label asp-for="@Model.TaggedUsersId">Tag users</label>
-                <div class="user-tags-input-container" id="userTagsInputContainer">
-                    <input type="text" id="user-searchBar" class="users-search-bar" placeholder="Search users...">
+                <div class="common-field-container" id="userTagsInputContainer">
+                    <input type="text"
+                    id="user-searchBar"
+                    class="users-search-bar"
+                    placeholder="Search users...">
                     <input type="hidden" id="taggedUsers" name="TaggedUsersId" value="">
                 </div>
                 <div class="dropdown">
@@ -273,330 +280,309 @@
                 <button type="button" id="addImageBtn" class="submit-btn" style="margin-top: 10px;">Add Image</button>
                 <div id="imageCounter">0/10 images added</div>
             </div>
+
+            @if(!(bool)ViewData["IsAccountPrivate"])
+            {
+                <div class="form-group">
+                    <label asp-for="@Model.Visibility">Select the visibility for your post:</label>
+                    <select class="common-field-container" asp-for="@Model.Visibility">
+                        <option value="friends">Friends only</option>
+                        <option value="followers">Friends and followers</option>
+                        <option value="all">Everybody can see your post</option>
+                    </select>
+                </div>
+            }
             <button type="submit" class="submit-btn">Create Post</button>
         </form>
     </div>
-    </body>
-</html>
 
-<script>
-           
-       let selectedFiles = [];
+    <script>
+        let selectedFiles = [];
 
-    document.getElementById('addImageBtn').addEventListener('click', function () {
-        document.getElementById('imageUpload').click();
-    });
-
-    document.getElementById('imageUpload').addEventListener('change', function (event) {
-        const files = Array.from(event.target.files);
-        const imagePreviews = document.getElementById('imagePreviews');
-
-        if (selectedFiles.length + files.length > 10) {
-            alert('You can upload up to 10 images.');
-            return;
-        }
-
-        files.forEach(file => {
-            if (file.type.startsWith('image/')) {
-                selectedFiles.push(file);
-            }
+        document.getElementById('addImageBtn').addEventListener('click', function () {
+            document.getElementById('imageUpload').click();
         });
 
-        updateFileInput();
+        document.getElementById('imageUpload').addEventListener('change', function (event) {
+            const files = Array.from(event.target.files);
+            const imagePreviews = document.getElementById('imagePreviews');
 
-        files.forEach((file, index) => {
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const container = document.createElement('div');
-                    container.classList.add('image-container');
+            if (selectedFiles.length + files.length > 10) {
+                alert('You can upload up to 10 images.');
+                return;
+            }
 
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
+            files.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    selectedFiles.push(file);
+                }
+            });
 
-                    const removeBtn = document.createElement('button');
-                    removeBtn.innerHTML = '&times;';
-                    removeBtn.addEventListener('click', function () {
-                        const fileIndex = selectedFiles.findIndex(f => f.name === file.name);
-                        if (fileIndex !== -1) {
-                            selectedFiles.splice(fileIndex, 1);
-                        }
-                        container.remove();
-                        updateFileInput();
+            updateFileInput();
+
+            files.forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const container = document.createElement('div');
+                        container.classList.add('image-container');
+
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+
+                        const removeBtn = document.createElement('button');
+                        removeBtn.innerHTML = '&times;';
+                        removeBtn.addEventListener('click', function () {
+                            const fileIndex = selectedFiles.findIndex(f => f.name === file.name);
+                            if (fileIndex !== -1) {
+                                selectedFiles.splice(fileIndex, 1);
+                            }
+                            container.remove();
+                            updateFileInput();
+                            updateImageCounter();
+                        });
+
+                        container.appendChild(img);
+                        container.appendChild(removeBtn);
+                        imagePreviews.appendChild(container);
                         updateImageCounter();
-                    });
-
-                    container.appendChild(img);
-                    container.appendChild(removeBtn);
-                    imagePreviews.appendChild(container);
-                    updateImageCounter();
-                };
-                reader.readAsDataURL(file);
-            }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
         });
-    });
 
-    function updateFileInput() {
-        const dataTransfer = new DataTransfer();
-        selectedFiles.forEach(file => dataTransfer.items.add(file));
-        document.getElementById('imageUpload').files = dataTransfer.files;
-    }
-
-
-    function updateImageCounter() {
-        const imagePreviews = document.getElementById('imagePreviews');
-        const imageCounter = document.getElementById('imageCounter');
-        imageCounter.textContent = `${imagePreviews.querySelectorAll('img').length}/10 images added`;
-    }
-
-          (function(){
-
-        "use strict"
-
-        var TagsInput = function(opts){
-            this.options = Object.assign(TagsInput.defaults , opts);
-            this.init();
+        function updateFileInput() {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            document.getElementById('imageUpload').files = dataTransfer.files;
         }
 
-        TagsInput.prototype.init = function(opts){
-            this.options = opts ? Object.assign(this.options, opts) : this.options;
+        function updateImageCounter() {
+            const imagePreviews = document.getElementById('imagePreviews');
+            const imageCounter = document.getElementById('imageCounter');
+            imageCounter.textContent = `${imagePreviews.querySelectorAll('img').length}/10 images added`;
+        }
 
-            if(this.initialized)
-                this.destroy();
+        (function(){
+            "use strict"
+            var TagsInput = function(opts){
+                this.options = Object.assign(TagsInput.defaults , opts);
+                this.init();
+            }
 
-            if(!(this.orignal_input = document.getElementById(this.options.selector)) ){
-                console.error("tags-input couldn't find an element with the specified ID");
+            TagsInput.prototype.init = function(opts){
+                this.options = opts ? Object.assign(this.options, opts) : this.options;
+                if(this.initialized) this.destroy();
+
+                if(!(this.orignal_input = document.getElementById(this.options.selector))){
+                    console.error("tags-input couldn't find an element with the specified ID");
+                    return this;
+                }
+
+                this.arr = [];
+                this.wrapper = document.createElement('div');
+                this.input = document.createElement('input');
+                init(this);
+                initEvents(this);
+
+                this.initialized = true;
                 return this;
             }
 
-            this.arr = [];
-            this.wrapper = document.createElement('div');
-            this.input = document.createElement('input');
-            init(this);
-            initEvents(this);
+            TagsInput.prototype.addTag = function(string){
+                if(this.anyErrors(string)) return;
 
-            this.initialized =  true;
-            return this;
-        }
+                this.arr.push(string);
+                var tagInput = this;
 
-        TagsInput.prototype.addTag = function(string){
+                var tag = document.createElement('span');
+                tag.className = this.options.tagClass;
+                tag.innerText = string;
 
-            if(this.anyErrors(string))
-                return ;
-
-            this.arr.push(string);
-            var tagInput = this;
-
-            var tag = document.createElement('span');
-            tag.className = this.options.tagClass;
-            tag.innerText = string;
-
-            var closeIcon = document.createElement('a');
-            closeIcon.innerHTML = '&times;';
-
-            closeIcon.addEventListener('click' , function(e){
-                e.preventDefault();
-                var tag = this.parentNode;
-
-                for(var i =0 ;i < tagInput.wrapper.childNodes.length ; i++){
-                    if(tagInput.wrapper.childNodes[i] == tag)
-                        tagInput.deleteTag(tag , i);
-                }
-            })
-
-
-            tag.appendChild(closeIcon);
-            this.wrapper.insertBefore(tag , this.input);
-            this.orignal_input.value = this.arr.join(',');
-
-            return this;
-        }
-
-        TagsInput.prototype.deleteTag = function(tag , i){
-            tag.remove();
-            this.arr.splice( i , 1);
-            this.orignal_input.value =  this.arr.join(',');
-            return this;
-        }
-
-        TagsInput.prototype.anyErrors = function(string){
-            if( this.options.max != null && this.arr.length >= this.options.max ){
-                console.log('max tags limit reached');
-                return true;
-            }
-
-            if(!this.options.duplicate && this.arr.indexOf(string) != -1 ){
-                console.log('duplicate found " '+string+' " ')
-                return true;
-            }
-
-            return false;
-        }
-
-        TagsInput.prototype.addData = function(array){
-            var plugin = this;
-
-            array.forEach(function(string){
-                plugin.addTag(string);
-            })
-            return this;
-        }
-
-        TagsInput.prototype.getInputString = function(){
-            return this.arr.join(',');
-        }
-
-        TagsInput.prototype.destroy = function(){
-            this.orignal_input.removeAttribute('hidden');
-
-            delete this.orignal_input;
-            var self = this;
-
-            Object.keys(this).forEach(function(key){
-                if(self[key] instanceof HTMLElement)
-                    self[key].remove();
-
-                if(key != 'options')
-                    delete self[key];
-            });
-
-            this.initialized = false;
-        }
-
-        function init(tags){
-            tags.wrapper.append(tags.input);
-            tags.wrapper.classList.add(tags.options.wrapperClass);
-            tags.orignal_input.setAttribute('hidden' , 'true');
-            tags.orignal_input.parentNode.insertBefore(tags.wrapper , tags.orignal_input);
-        }
-
-        function initEvents(tags){
-            tags.wrapper.addEventListener('click' ,function(){
-                tags.input.focus();
-            });
-
-
-            tags.input.addEventListener('keydown' , function(e){
-                var str = tags.input.value.trim();
-
-                if( !!(~[9 , 13 , 188].indexOf( e.keyCode ))  )
-                {
+                var closeIcon = document.createElement('a');
+                closeIcon.innerHTML = '&times;';
+                closeIcon.addEventListener('click' , function(e){
                     e.preventDefault();
-                    tags.input.value = "";
-                    if(str != "")
-                        tags.addTag(str);
+                    var tagElem = this.parentNode;
+                    for(var i=0; i < tagInput.wrapper.childNodes.length; i++){
+                        if(tagInput.wrapper.childNodes[i] == tagElem)
+                            tagInput.deleteTag(tagElem , i);
+                    }
+                });
+
+                tag.appendChild(closeIcon);
+                this.wrapper.insertBefore(tag , this.input);
+                this.orignal_input.value = this.arr.join(',');
+
+                return this;
+            }
+
+            TagsInput.prototype.deleteTag = function(tag , i){
+                tag.remove();
+                this.arr.splice(i, 1);
+                this.orignal_input.value = this.arr.join(',');
+                return this;
+            }
+
+            TagsInput.prototype.anyErrors = function(string){
+                if(this.options.max != null && this.arr.length >= this.options.max ){
+                    console.log('max tags limit reached');
+                    return true;
                 }
+                if(!this.options.duplicate && this.arr.indexOf(string) != -1 ){
+                    console.log('duplicate found "'+string+'"');
+                    return true;
+                }
+                return false;
+            }
 
+            TagsInput.prototype.addData = function(array){
+                var plugin = this;
+                array.forEach(function(string){
+                    plugin.addTag(string);
+                });
+                return this;
+            }
+
+            TagsInput.prototype.getInputString = function(){
+                return this.arr.join(',');
+            }
+
+            TagsInput.prototype.destroy = function(){
+                this.orignal_input.removeAttribute('hidden');
+                delete this.orignal_input;
+                var self = this;
+                Object.keys(this).forEach(function(key){
+                    if(self[key] instanceof HTMLElement) self[key].remove();
+                    if(key != 'options') delete self[key];
+                });
+                this.initialized = false;
+            }
+
+            function init(tags){
+                tags.wrapper.append(tags.input);
+                tags.wrapper.classList.add(tags.options.wrapperClass);
+                tags.orignal_input.setAttribute('hidden', 'true');
+                tags.orignal_input.parentNode.insertBefore(tags.wrapper, tags.orignal_input);
+            }
+
+            function initEvents(tags){
+                tags.wrapper.addEventListener('click',function(){
+                    tags.input.focus();
+                });
+                tags.input.addEventListener('keydown', function(e){
+                    var str = tags.input.value.trim();
+                    if( !!(~[9 , 13 , 188].indexOf( e.keyCode )) ){
+                        e.preventDefault();
+                        tags.input.value = "";
+                        if(str != "") tags.addTag(str);
+                    }
+                });
+            }
+
+            TagsInput.defaults = {
+                selector: '',
+                wrapperClass: 'tags-input-wrapper',
+                tagClass: 'tag',
+                max: null,
+                duplicate: false
+            }
+
+            window.TagsInput = TagsInput;
+        })();
+
+        var tagInput1 = new TagsInput({
+            selector: 'tag-input',
+            duplicate : false
+        });
+
+        const users = @Html.Raw(Json.Serialize(users));
+        const searchBar = document.getElementById("user-searchBar");
+        const dropdownMenu = document.getElementById("dropdownMenu");
+        const tagsInputContainer = document.getElementById("userTagsInputContainer");
+        const hiddenInput = document.getElementById("taggedUsers");
+        const selectedUsers = new Set();
+
+        function renderDropdownItems(filteredUsers) {
+            dropdownMenu.innerHTML = "";
+            filteredUsers.slice(0, 3).forEach(user => {
+                const item = document.createElement("div");
+                item.classList.add("dropdown-item");
+                item.innerHTML = `<img src="${user.profilePictureUrl}" alt="profile-picture"> ${user.userName}`;
+                item.addEventListener("click", () => {
+                    addUserTag(user);
+                });
+                dropdownMenu.appendChild(item);
             });
         }
 
+        function addUserTag(user) {
+            if (selectedUsers.has(user.id)) return;
+            selectedUsers.add(user.id);
 
-        TagsInput.defaults = {
-            selector : '',
-            wrapperClass : 'tags-input-wrapper',
-            tagClass : 'tag',
-            max : null,
-            duplicate: false
-        }
-
-        window.TagsInput = TagsInput;
-
-    })();
-
-     var tagInput1 = new TagsInput({
-                selector: 'tag-input',
-                duplicate : false,
-     });
-
-    const users = @Html.Raw(Json.Serialize(users));
-            console.log(users);
-    const searchBar = document.getElementById("user-searchBar");
-    const dropdownMenu = document.getElementById("dropdownMenu");
-    const tagsInputContainer = document.getElementById("userTagsInputContainer");
-    const hiddenInput = document.getElementById("taggedUsers");
-    const selectedUsers = new Set();
-
-    function renderDropdownItems(filteredUsers) {
-        dropdownMenu.innerHTML = "";
-        filteredUsers.slice(0, 3).forEach(user => {
-            const item = document.createElement("div");
-            item.classList.add("dropdown-item");
-            item.innerHTML = `<img src="${user.profilePictureUrl}" alt="profile-picture"> ${user.userName}`;
-            item.addEventListener("click", () => {
-                addUserTag(user);
+            const tag = document.createElement("div");
+            tag.classList.add("user-tag");
+            tag.innerHTML = `${user.userName} <span class="remove-tag">&times;</span>`;
+            tag.querySelector(".remove-tag").addEventListener("click", () => {
+                selectedUsers.delete(user.id);
+                tagsInputContainer.removeChild(tag);
+                updateHiddenField();
             });
-            dropdownMenu.appendChild(item);
+
+            tagsInputContainer.insertBefore(tag, searchBar);
+            searchBar.value = "";
+            dropdownMenu.classList.remove("visible");
+
+            updateHiddenField();
+        }
+
+        searchBar.addEventListener("input", () => {
+            const query = searchBar.value.toLowerCase();
+            if (query === "") {
+                dropdownMenu.classList.remove("visible");
+                return;
+            }
+            const filteredUsers = users.filter(user =>
+                user.userName.toLowerCase().startsWith(query)
+            );
+            if (filteredUsers.length > 0) {
+                renderDropdownItems(filteredUsers);
+                dropdownMenu.classList.add("visible");
+            } else {
+                dropdownMenu.classList.remove("visible");
+            }
         });
-    }
 
-    function addUserTag(user) {
-        if (selectedUsers.has(user.id)) return;
-        selectedUsers.add(user.id);
+        document.addEventListener("click", (event) => {
+            if (!tagsInputContainer.contains(event.target)) {
+                dropdownMenu.classList.remove("visible");
+            }
+        });
 
-        const tag = document.createElement("div");
-        tag.classList.add("user-tag");
-        tag.innerHTML = `${user.userName} <span class="remove-tag">&times;</span>`;
-        tag.querySelector(".remove-tag").addEventListener("click", () => {
-            selectedUsers.delete(user.id);
-            tagsInputContainer.removeChild(tag);
+        searchBar.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") e.preventDefault();
+        });
+
+        function updateHiddenField() {
+            hiddenInput.value = Array.from(selectedUsers).join(",");
+            console.log("Updated TaggedUsersId value:", hiddenInput.value);
+        }
+
+        document.querySelector('form').addEventListener('submit', function (e) {
             updateHiddenField();
         });
 
-        tagsInputContainer.insertBefore(tag, searchBar);
-        searchBar.value = "";
-        dropdownMenu.classList.remove("visible");
-
-        updateHiddenField();
-    }
-
-    searchBar.addEventListener("input", () => {
-        const query = searchBar.value.toLowerCase();
-        if (query === "") {
-            dropdownMenu.classList.remove("visible");
-            return;
-        }
-
-        const filteredUsers = users.filter(user =>
-            user.userName.toLowerCase().startsWith(query)
-        );
-
-        if (filteredUsers.length > 0) {
-            renderDropdownItems(filteredUsers);
-            dropdownMenu.classList.add("visible");
-        } else {
-            dropdownMenu.classList.remove("visible");
-        }
-    });
-
-    document.addEventListener("click", (event) => {
-        if (!tagsInputContainer.contains(event.target)) {
-            dropdownMenu.classList.remove("visible");
-        }
-    });
-
-    searchBar.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") e.preventDefault();
-    });
-
-    function updateHiddenField() {
-        hiddenInput.value = Array.from(selectedUsers).join(",");
-        console.log("Updated TaggedUsersId value:", hiddenInput.value);
-    }
-
-
         document.querySelector('form').addEventListener('submit', function (e) {
-        updateHiddenField();
-    });
-
-        document.querySelector('form').addEventListener('submit', function (e) {
-        const imageUpload = document.getElementById('imageUpload');
-        const imagePreviews = document.getElementById('imagePreviews');
-
-        if (imageUpload.files.length === 0 && imagePreviews.querySelectorAll('img').length === 0) {
-            e.preventDefault();
-            alert('Please upload at least one image.');
-        } else {
-            updateHiddenField();
-        }
-    });
-</script>
+            const imageUpload = document.getElementById('imageUpload');
+            const imagePreviews = document.getElementById('imagePreviews');
+            if (imageUpload.files.length === 0 && imagePreviews.querySelectorAll('img').length === 0) {
+                e.preventDefault();
+                alert('Please upload at least one image.');
+            } else {
+                updateHiddenField();
+            }
+        });
+    </script>
+</body>
+</html>

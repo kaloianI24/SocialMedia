@@ -18,6 +18,7 @@ namespace SocialMedia.Service.Mappings
             {
                 Description = model.Description,
                 Attachments = model.Attachments.Select(attachment => attachment.ToEntity()).ToList(),
+                Visibility = model.Visibility,
                 Tags = model.Tags?.Select(tag => tag.ToEntity()).ToList(),
             };
         }
@@ -36,6 +37,7 @@ namespace SocialMedia.Service.Mappings
                 TaggedUsersUserName = entity.TaggedUsers?.Select(u => u.UserName).ToList(),
                 Reactions = entity.Reactions?.Select(reaction => reaction.ToModel(UserPostReactionMappingsContext.Post)).ToList(),
                 Comments = entity.Comments?.Select(comment => comment.ToModel(UserPostCommentMappingsContext.Post)).ToList(),
+                Visibility = entity.Visibility,
                 CreatedOn = entity.CreatedOn,
                 UpdatedOn = entity.UpdatedOn,
                 DeletedOn = entity.DeletedOn,

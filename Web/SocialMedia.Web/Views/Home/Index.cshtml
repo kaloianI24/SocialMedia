@@ -117,7 +117,7 @@
                                     <button class="btn btn-primary fw-bold comment-submit-button">Post</button>
                                 </div>
                                 <div class="details-posted-comment"></div>
-                                @if (savedPosts.Contains(post.Id))
+                                @if (savedPosts is not null && savedPosts.Contains(post.Id))
                                 {
                                     <button type="button" class="btn-unsave-post saved" data-post-id="@post.Id">
                                         <img src="~/images/savedPost.png" class="save-image">

@@ -61,7 +61,7 @@ namespace SocialMedia.Controllers
             ViewData["FriendRequests"] = user.ReceivedFriendRequests.ToList();
             ViewData["SavedPosts"] = user.SavedPosts.Select(p => p.Id).ToList();
             var friendPosts = user.Friends.SelectMany(f => f.Posts).Where(p => p.DeletedOn == null).OrderByDescending(p => p.CreatedOn).ToList();
-            var followingPosts = user.Following.SelectMany(f => f.Posts).Where(p => p.DeletedOn == null).OrderByDescending(p => p.CreatedOn).ToList();
+            var followingPosts = user.Following.SelectMany(f => f.Posts).Where(p => p.DeletedOn == null && p.Visibility.Equals("all") || p.Visibility.Equals("followers")).OrderByDescending(p => p.CreatedOn).ToList();
             var posts = friendPosts.Concat(followingPosts).ToList();
 
             var postWebModel = posts.Select(p => new TaggedPostWebModel

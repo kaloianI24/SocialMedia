@@ -36,14 +36,6 @@ namespace SocialMedia.Service.SocialMediaPost
         {
             Data.Models.SocialMediaPost post = model.ToEntity();
 
-            //post.Attachments = post.Attachments.Select(async attachment =>
-            //{
-            //    return (await this.cloudResourceRepository.CreateAsync(attachment));
-            //}).Select(a => a.Result).ToList();
-            //post.Attachments = (await Task.WhenAll(post.Attachments.Select(async attachment =>
-            //await this.cloudResourceRepository.CreateAsync(attachment)
-            //))).ToList();
-
             var processedAttachments = new List<CloudResource>();
 
             foreach (var attachment in post.Attachments.Where(a => a != null))
@@ -68,8 +60,7 @@ namespace SocialMedia.Service.SocialMediaPost
                     {
                         tags.Add(tagRepository.getTagByName(tag.Name));
                     }
-                }
-                
+                }                
             }
 
             post.Tags = tags;            
@@ -79,8 +70,7 @@ namespace SocialMedia.Service.SocialMediaPost
                 post.TaggedUsers = await userRepository.GetUsersByIdsAsync(model.TaggedUsersId);
             }
 
-            // will be changed after the privacy functionality is done
-            post.Visibility = "public";
+            post.Visibility = model.Visibility;
             await postRepository.CreateAsync(post);
 
             return post.ToModel(UserPostMappingsContext.Post);
@@ -244,9 +234,9 @@ namespace SocialMedia.Service.SocialMediaPost
                 targetPost.TaggedUsers = null;
             }
 
-                targetPost.Description = model.Description;
+            targetPost.Description = model.Description;
             targetPost.Tags = tags;
-            
+            targetPost.Visibility = model.Visibility ?? "friends";
             
             await postRepository.UpdateAsync(targetPost);
             return targetPost.ToModel(UserPostMappingsContext.Post);

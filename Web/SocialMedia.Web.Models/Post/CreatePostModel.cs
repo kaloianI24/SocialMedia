@@ -14,6 +14,7 @@ namespace SocialMedia.Web.Models.Post
         public List<string> Tags { get; set; }
 
         public string TaggedUsersId { get; set; }
+        public string Visibility { get; set; }
 
     }
 }

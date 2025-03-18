@@ -3,127 +3,129 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
+    List<string> savedPostsIds = (List<string>)ViewData["SavedPostsId"];
 }
 
-@model SocialMediaUserServiceModel
+@model List<SocialMedia.Web.Models.Post.TaggedPostWebModel>
 <div class="main-content2">
-    @if (Model.IsPrivate && !(bool)ViewData["AreFriends"] && !(bool)ViewData["IsOwner"])
+    @if ((bool)ViewData["IsAccountPrivate"] && !(bool)ViewData["AreFriends"] && !(bool)ViewData["IsOwner"])
     {
         <h3>This account is private so you cannot see the posts.</h3>
     }
     else
     {
-        @if (!Model.Posts.Any(p => p.DeletedOn == null))
+        @if (Model.Count == 0)
         {
             <h3>You don't have posts</h3>
         }
         else
         {        
-            @foreach (var post in @Model.Posts.Where(p => p.DeletedOn == null).OrderByDescending(p => p.CreatedOn))
+            @foreach (var post in Model.OrderByDescending(p => p.CreatedOn))
             {
-                <div class="post" data-post-id="@post.Id">
-                    <div class="post-header">
-                        <a href="/Post/MyPage?userId=@Model.Id">
-                            <img src="@Model.ProfilePicture.CloudUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
-                        </a>
-                        <div class="post-info">
-                            <span class="username">@Model.UserName</span>
-                            <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
-                        </div>
-                        @if ((bool)ViewData["IsOwner"] || (bool)ViewData["IsAdmin"])
-                        {
-                            <button type="button" class="btn-delete-post">Delete post</button>
-                            <button class="btn-update-post"
-                                    onclick="window.location.href='/Post/Update?postId=@post.Id'">
-                                Update post
-                            </button>
-                        }
-                    </div>
-                    <div class="carousel">
-                        <div class="carousel-images">
-                            @foreach (var photo in post.Attachments)
-                            {
-                                <img src=@photo.CloudUrl.Replace("http://", "https://") alt="Post Image" class="post-image">
-                            }
-                        </div>
-                        <button type="button" button class="carousel-arrow left-arrow">&lt;</button>
-                        <button type="button" button class="carousel-arrow right-arrow">&gt;</button>
-                        <div class="carousel-indicators">
-                            <span class="dot active"></span>
-                            @for (int i = 0; i < post.Attachments.Count - 1; i++)
-                            {
-                                <span class="dot"></span>
-                            }
-                        </div>
-                        <div class="image-counter">1 / @post.Attachments.Count</div>
-                    </div>
-
-
-                <div class="post-actions">
-                    <div class="post-likes">
-                        <div class="likes-count">
-                            <img src="@Url.Content("~/images/heart.svg")"
-                                 class="reaction-heart"
-                                 data-liked="false"
-                                 data-post-id="@post.Id" />
-
-                            <div class="count-likes-number">0</div>
-                            <img src="@Url.Content("~/images/comment.svg")" class="comment-image">
-								<div class="count-comment-number">0</div>
-
-                                <div class="comment-input-field">
-                                    <textarea class="form-control" me-1 rows="1" placeholder="Add a comment..."></textarea>
-                                </div>
-                                <div class="comment-button-holder d-none d-flex justify-content-end">
-                                    <button class="btn btn-primary fw-bold comment-submit-button">Post</button>
-                                </div>
-                                @if (Model.SavedPosts.Select(post => post.Id).Contains(post.Id))
-                                {
-                                    <button type="button" class="btn-unsave-post saved" data-post-id="@post.Id">
-                                        <img src="~/images/savedPost.png" class="save-image">
-                                    </button>
-                                }
-                                else
-                                {
-                                    <button type="button" class="btn-save-post" data-post-id="@post.Id">
-                                        <img src="~/images/unsavedPost.png" class="save-image">
-                                    </button>
-                                }
-                        </div>
-                    </div>
-                </div>
-				
-                 
-                <div class="post-caption">
-                    <span class="username">@Model.UserName</span>
-                    <p class="post-description">
-                        @string.Join(" ", @post.Description.Split(" ").Take(10))
-                        <span class="post-description-hidden-text">
-                            @string.Join(" ", @post.Description.Split(" ").Skip(10))
-                        </span>
-                        @if (post.Description.Split(" ").Length > 10)
-                        {
-                            <button type="button" class="toggle-btn">Read more</button>
-                        }
-                    </p>
-                    <div class="tags">
-                        @foreach (var tag in @post.Tags)
-                        {
-                            <span>#@tag.Name</span>
-                        }
-                    </div>
-					
-                    <div class="taggedUsers">
-                        @for (int i = 0; i < post.TaggedUsersId.Count; i++)
-                        {
-                            <a class="links" href="/Post/MyPage?userId=@post.TaggedUsersId.ElementAt(i)">
-                                <span class="taggedUsers-text">@('@')@post.TaggedUsersUserName.ElementAt(i)</span>
+                {
+                    <div class="post" data-post-id="@post.Id">
+                        <div class="post-header">
+                            <a href="/Post/MyPage?userId=@post.CreatedById">
+                                <img src="@post.ProfilePictureUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
                             </a>
-                        }
-                    </div>
-                </div>
-            </div>
+                            <div class="post-info">
+                                <span class="username">@post.UserName</span>
+                                <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
+                            </div>
+                            @if ((bool)ViewData["IsOwner"] || (bool)ViewData["IsAdmin"])
+                            {
+                                <button type="button" class="btn-delete-post">Remove post</button>
+                                <button class="btn-update-post"
+                                onclick="window.location.href='/Post/Update?postId=@post.Id'">
+                                    Update post
+                                </button>
+                            }
+                        </div>
+                        <div class="carousel">
+                            <div class="carousel-images">
+                                @foreach (var photo in post.AttachmentUrls)
+                                {
+                                    <img src=@photo.Replace("http://", "https://") alt="Post Image" class="post-image">
+                                }
+                            </div>
+                            <button type="button" button class="carousel-arrow left-arrow">&lt;</button>
+                            <button type="button" button class="carousel-arrow right-arrow">&gt;</button>
+                            <div class="carousel-indicators">
+                                <span class="dot active"></span>
+                                @for (int i = 0; i < post.AttachmentUrls.Count - 1; i++)
+                                {
+                                    <span class="dot"></span>
+                                }
+                            </div>
+                            <div class="image-counter">1 / @post.AttachmentUrls.Count</div>
+                        </div>
 
+
+                        <div class="post-actions">
+                            <div class="post-likes">
+                                <div class="likes-count">
+                                    <img src="@Url.Content("~/images/heart.svg")"
+                                    class="reaction-heart"
+                                    data-liked="false"
+                                    data-post-id="@post.Id" />
+
+                                    <div class="count-likes-number">0</div>
+                                    <img src="@Url.Content("~/images/comment.svg")" class="comment-image">
+                                    <div class="count-comment-number">0</div>
+
+                                    <div class="comment-input-field">
+                                        <textarea class="form-control" me-1 rows="1" placeholder="Add a comment..."></textarea>
+                                    </div>
+                                    <div class="comment-button-holder d-none d-flex justify-content-end">
+                                        <button class="btn btn-primary fw-bold comment-submit-button">Post</button>
+                                    </div>
+                                    @if (savedPostsIds is not null && savedPostsIds.Contains(post.Id))
+                                    {
+                                        <button type="button" class="btn-unsave-post saved" data-post-id="@post.Id">
+                                            <img src="~/images/savedPost.png" class="save-image">
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn-save-post" data-post-id="@post.Id">
+                                            <img src="~/images/unsavedPost.png" class="save-image">
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="post-caption">
+                            <span class="username">@post.UserName</span>
+                            <p class="post-description">
+                                @string.Join(" ", @post.Description.Split(" ").Take(10))
+                                <span class="post-description-hidden-text">
+                                    @string.Join(" ", @post.Description.Split(" ").Skip(10))
+                                </span>
+                                @if (post.Description.Split(" ").Length > 10)
+                                {
+                                    <button type="button" class="toggle-btn">Read more</button>
+                                }
+                            </p>
+                            <div class="tags">
+                                @foreach (var tag in @post.Tags)
+                                {
+                                    <span>#@tag</span>
+                                }
+                            </div>
+
+                            <div class="taggedUsers">
+                                @for (int i = 0; i < post.TaggedUsersId.Count; i++)
+                                {
+                                    <a class="links" href="/Post/MyPage?userId=@post.TaggedUsersId.ElementAt(i)">
+                                        <span class="taggedUsers-text">@('@')@post.TaggedUsersUserNames.ElementAt(i)</span>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
             }
         }
     }
