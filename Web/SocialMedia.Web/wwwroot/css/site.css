@@ -365,7 +365,8 @@ body {
 
 
 .links {
-    text-decoration: none;
+    text-decoration: none !important;
+    color: black;
 }
 
 .sidebar-links {

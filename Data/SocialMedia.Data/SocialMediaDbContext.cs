@@ -88,6 +88,18 @@ namespace SocialMedia.Data
                       .HasForeignKey("FollowerId")
                       .OnDelete(DeleteBehavior.Cascade)
             );
+            builder.Entity<SocialMediaUser>()
+            .HasMany(u => u.BlockedUsers)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>(
+                "BlockedUser",
+                j => j.HasOne<SocialMediaUser>().WithMany().HasForeignKey("BlockedUserId").OnDelete(DeleteBehavior.Restrict),
+                j => j.HasOne<SocialMediaUser>().WithMany().HasForeignKey("UserId").OnDelete(DeleteBehavior.Cascade),
+                j =>
+                {
+                    j.HasKey("UserId", "BlockedUserId");
+                    j.ToTable("BlockedUsers");
+                });
 
             builder.Entity<FriendRequest>()
             .HasOne(fr => fr.CreatedBy)

@@ -31,10 +31,11 @@ public class SocialMediaUser : IdentityUser
     public List<SocialMediaPost>? TaggedPosts { get; set; } = new List<SocialMediaPost>();
     public List<SocialMediaPost>? SavedPosts { get; set; } = new List<SocialMediaPost>();
 
-    public List<FriendRequest> SentFriendRequests { get; set; } = new List<FriendRequest>();
+    public List<FriendRequest>? SentFriendRequests { get; set; } = new List<FriendRequest>();
 
-    public List<FriendRequest> ReceivedFriendRequests { get; set; } = new List<FriendRequest>();
+    public List<FriendRequest>? ReceivedFriendRequests { get; set; } = new List<FriendRequest>();
 
+    public List<SocialMediaUser>? BlockedUsers { get; set; } = new List<SocialMediaUser>();
     public bool AcceptedTerms { get; set; }
     [NotMapped]
     public string FullName => $"{FirstName} {LastName}";

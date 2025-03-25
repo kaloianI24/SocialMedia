@@ -105,6 +105,7 @@ namespace SocialMedia.Controllers
                 .Include(u => u.ReceivedFriendRequests)
                     .ThenInclude(r => r.CreatedBy)
                         .ThenInclude(u => u.ProfilePicture)
+                .Include(u => u.BlockedUsers)
                 .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
         }
 
@@ -126,6 +127,7 @@ namespace SocialMedia.Controllers
                 .Include(u => u.ReceivedFriendRequests)
                     .ThenInclude(r => r.CreatedBy)
                         .ThenInclude(u => u.ProfilePicture)
+                .Include(u => u.BlockedUsers)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
 
@@ -243,6 +245,40 @@ namespace SocialMedia.Controllers
                 var unfollowing = await GetUserById(unfollowingId);
                 var currentUser = await GetUser();
                 await _friendRequestsService.Unfollow(currentUser, unfollowing);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> Block([FromQuery] string blockingId)
+        {
+            try
+            {
+                var blocking = await GetUserById(blockingId);
+                var currentUser = await GetUser();
+                await _friendRequestsService.Block(currentUser, blocking);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> Unblock([FromQuery] string unblockingId)
+        {
+            try
+            {
+                var unblocking = await GetUserById(unblockingId);
+                var currentUser = await GetUser();
+                await _friendRequestsService.Unblock(currentUser, unblocking);
                 return NoContent();
             }
             catch (Exception ex)

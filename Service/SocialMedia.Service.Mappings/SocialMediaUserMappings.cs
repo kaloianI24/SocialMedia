@@ -38,6 +38,7 @@ namespace SocialMedia.Service.Mappings
                 Friends = entity.Friends?.Select(friend => friend.ToModelBasic()).ToList(),
                 Followers = entity.Followers?.Select(f => f.ToModelBasic()).ToList(),
                 Following = entity.Following?.Select(f => f.ToModelBasic()).ToList(),
+                BlockedUsers = entity.BlockedUsers?.Select(f => f.ToModelBasic()).ToList()
             };
         }
 

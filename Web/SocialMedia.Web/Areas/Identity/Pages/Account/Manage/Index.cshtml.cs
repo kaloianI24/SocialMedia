@@ -9,7 +9,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using SocialMedia.Areas.Identity.Data;
+using SocialMedia.Service.Cloud;
+using SocialMedia.Service.Models;
+using SocialMedia.Service.Mappings;
+
 
 namespace SocialMedia.Areas.Identity.Pages.Account.Manage
 {
@@ -17,13 +22,17 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<SocialMediaUser> _userManager;
         private readonly SignInManager<SocialMediaUser> _signInManager;
+        private readonly ICloudinaryService _cloudinaryService;
+
 
         public IndexModel(
             UserManager<SocialMediaUser> userManager,
-            SignInManager<SocialMediaUser> signInManager)
+            SignInManager<SocialMediaUser> signInManager,
+            ICloudinaryService cloudinaryService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _cloudinaryService = cloudinaryService;
         }
 
         /// <summary>
@@ -59,6 +68,13 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+            public bool IsPrivate { get; set; }
+
+            [Display(Name = "Profile Picture")]
+            public IFormFile ProfilePictureFile { get; set; }
+
+            public string CurrentProfilePicture { get; set; }
+            public bool RemoveProfilePicture { get; set; }
         }
 
         private async Task LoadAsync(SocialMediaUser user)
@@ -70,13 +86,18 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                IsPrivate = user.IsPrivate,
+                CurrentProfilePicture = user.ProfilePicture?.CloudUrl
             };
         }
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.Users
+                .Include(u => u.ProfilePicture)
+                .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
+
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -88,7 +109,7 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.Users.Include(u => u.ProfilePicture).Include(u => u.Followers).ThenInclude(f => f.Following).FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -110,10 +131,48 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
                     return RedirectToPage();
                 }
             }
+            if (Input.IsPrivate != user.IsPrivate)
+            {
+                user.IsPrivate = Input.IsPrivate;
+                if(Input.IsPrivate)
+                {
+                    var followers = user.Followers;
+                    foreach (var follower in followers)
+                    {
+                        follower.Following.Remove(user);
+                        await _userManager.UpdateAsync(follower);
+                    }
+                    user.Followers.Clear();
+                }
+                await _userManager.UpdateAsync(user);
+            }
 
+            if (Input.ProfilePictureFile != null && Input.ProfilePictureFile.Length > 0)
+            {
+                string profilePhotoUrl = await UploadPhoto(Input.ProfilePictureFile);
+                user.ProfilePicture = new CloudResourceServiceModel { CloudUrl = profilePhotoUrl }.ToEntity();
+            }
+
+            if (Input.RemoveProfilePicture)
+            {
+                user.ProfilePicture = new CloudResourceServiceModel { CloudUrl = "https://res.cloudinary.com/socialmedia-itcareer/image/upload/v1739556301/User_pfp_simple_qggx4n.jpg" }.ToEntity();
+            }
+            await _userManager.UpdateAsync(user);
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();
+        }
+
+        private async Task<string> UploadPhoto(IFormFile photo)
+        {
+            var uploadResponse = await this._cloudinaryService.UploadFile(photo);
+
+            if (uploadResponse == null)
+            {
+                return null;
+            }
+
+            return uploadResponse["url"].ToString();
         }
     }
 }

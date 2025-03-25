@@ -9,7 +9,7 @@
 <partial name="_StatusMessage" for="StatusMessage" />
 <div class="row">
     <div class="col-md-6">
-        <form id="profile-form" method="post">
+        <form id="profile-form" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
                 <input asp-for="Username" class="form-control" placeholder="Please choose your username." disabled />
@@ -19,6 +19,30 @@
                 <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number."/>
                 <label asp-for="Input.PhoneNumber" class="form-label"></label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                @if (!string.IsNullOrEmpty(Model.Input.CurrentProfilePicture))
+                {
+                    <img src="@Model.Input.CurrentProfilePicture"
+                         class="img-thumbnail mb-2"
+                         style="max-width: 200px" />
+                }
+                <input asp-for="Input.ProfilePictureFile" class="form-control" type="file" />
+            </div>
+
+            <div class="form-check mb-3">
+                <input asp-for="Input.RemoveProfilePicture" class="form-check-input" />
+                <label class="form-check-label">Use default picture</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <select asp-for="Input.IsPrivate" class="form-control">
+                    <option value="true">Private</option>
+                    <option value="false">Public</option>
+                </select>
+                <label asp-for="Input.IsPrivate">Account Type</label>
+                <span asp-validation-for="Input.IsPrivate" class="text-danger"></span>
             </div>
             <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
         </form>

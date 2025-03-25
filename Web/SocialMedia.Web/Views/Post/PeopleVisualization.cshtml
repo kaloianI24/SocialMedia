@@ -1,0 +1,107 @@
+﻿@using SocialMedia.Web.Models.User
+@model List<UserWebModel>
+@{
+    ViewData["Title"] = ViewBag.Title;
+}
+
+<style>
+    .connections-container {
+        margin: 2rem auto;
+        max-width: 800px;
+        padding: 0 15px;
+    }
+
+    .connections-header {
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #dee2e6;
+        padding-bottom: 1rem;
+    }
+
+    .stats {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+        .stats a {
+            text-decoration: none;
+            color: #007bff;
+            transition: color 0.3s;
+        }
+
+            .stats a:hover {
+                color: #0056b3;
+            }
+
+    .user-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .user-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .profile-pic {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .back-button {
+        margin-top: 2rem;
+        padding: 0.5rem 1.5rem;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+        .back-button:hover {
+            background: #e9ecef;
+        }
+</style>
+
+<div class="connections-container">
+    <div class="connections-header">
+        <h2>@ViewBag.Title</h2>
+    </div>
+
+    <div class="user-list">
+        @if (Model?.Any() == true)
+        {
+            @foreach (var user in Model)
+            {
+                <a class="links" asp-controller="Post"
+                           asp-action="MyPage"
+                           asp-route-userId="@user.Id">
+                    <div class="user-item">
+                    <img src="@user.ProfilePictureUrl"
+                         class="profile-pic"
+                         alt="@user.UserName's profile picture">
+                    <div>
+                        <h2>@user.UserName</h2>
+                    </div>
+                </div>
+                </a>
+
+            }
+        }
+        else
+        {
+            <div class="alert alert-info">
+                No @ViewBag.Title.ToLower() found
+            </div>
+        }
+    </div>
+    <button class="back-button" onclick="window.history.back()">Back to Previous Page</button>
+</div>

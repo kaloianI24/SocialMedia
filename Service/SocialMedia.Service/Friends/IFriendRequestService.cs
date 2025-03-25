@@ -16,5 +16,7 @@ namespace SocialMedia.Service.Friends
         public Task<bool> RemoveFriend(SocialMediaUser user, SocialMediaUser friend);
         public Task<bool> Follow(SocialMediaUser user, SocialMediaUser following);
         public Task<bool> Unfollow(SocialMediaUser user, SocialMediaUser unfollowing);
+        public Task<bool> Block(SocialMediaUser user, SocialMediaUser blocking);
+        public Task<bool> Unblock(SocialMediaUser user, SocialMediaUser unblocking);
     }
 }

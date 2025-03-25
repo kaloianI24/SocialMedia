@@ -23,7 +23,8 @@
         }
 
         profile-page-user-information {
-        margin-left: 250px;
+        justify-content: center;
+        display: flex;
         margin-top: 50px;
         flex: 1;
         padding: 20px;
@@ -150,7 +151,6 @@
         border-radius: 20px;
         margin-left: 250px;
         height: 35px;
-        width: 100px;
         margin-bottom: 30px;
         }
 
@@ -173,22 +173,73 @@
         width: 100px;
         margin-bottom: 30px;
         }
+
+        .btn-block {
+        background-color:indianred;
+        font-size: 15px;
+        border-radius: 20px;
+        margin-left: 20px;
+        height: 35px;
+        width: 100px;
+        margin-bottom: 30px;
+        }
+
+        .btn-unblock {
+        background-color: indianred;
+        font-size: 15px;
+        border-radius: 20px;
+        margin-left: 20px;
+        height: 35px;
+        width: 100px;
+        margin-bottom: 30px;
+        }
     </style>
 </head>
 <body>
     <div class="profile-page-user-information">
-        <div class="profile-header">
+        <div class="profile-header">            
             <img class="profile-pic" src="@Model.ProfilePicture.CloudUrl"></img>
             <div class="profile-info">
                 <h1>@Model.UserName</h1>
                 <div class="stats">
                     <span>@Model.Posts.Where(p => p.DeletedOn == null).Count() posts</span>
-                    <span>@Model.Friends.Count Friends</span>
+                    @if (!Model.IsPrivate || (bool)ViewData["IsOwner"] || (bool)ViewData["AreFriends"])
+                    {
+                        <a class="links" asp-controller="Post"
+                        asp-action="PeopleVisualization"
+                        asp-route-userId="@Model.Id"
+                        asp-route-type="friends">
+                            <span>@Model.Friends.Count Friends</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <span>@Model.Friends.Count Friends</span>
+                    }
+
+
                     @if(!Model.IsPrivate)
                     {
-                        <span>@Model.Followers.Count Followers</span>                        
+                        <a class="links" asp-controller="Post"
+                        asp-action="PeopleVisualization"
+                        asp-route-userId="@Model.Id"
+                        asp-route-type="followers">
+                            <span>@Model.Followers.Count Followers</span>   
+                        </a>
                     }
-                    <span>@Model.Following.Count Following</span>
+                    @if (!Model.IsPrivate || (bool)ViewData["IsOwner"] || (bool)ViewData["AreFriends"])
+                    {
+                        <a class="links" asp-controller="Post"
+                        asp-action="PeopleVisualization"
+                        asp-route-userId="@Model.Id"
+                        asp-route-type="following">
+                            <span>@Model.Following.Count Following</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <span>@Model.Following.Count Following</span>
+                    }
                 </div>
             </div>
         </div>
@@ -198,40 +249,54 @@
                 @TempData["ErrorMessage"]
             </div>
         }
-        @if (!(bool)ViewData["IsOwner"])
+        @if (!(bool)ViewData["IsCurrentUserBlocked"])
         {
-            if(!(bool)ViewData["AreFriends"])
+            if(!(bool)ViewData["IsOwner"])
             {
-                <button class="btn-add-friend-request" id="@Model.Id">Add friend</button>
-                if (!(bool)ViewData["IsFollowing"] && !Model.IsPrivate)
+                if (!(bool)ViewData["AreFriends"])
                 {
-                    <button class="btn-follow" id="@Model.Id">Follow</button>
-                }
-                else if ((bool)ViewData["IsFollowing"])
-                {
-                    <button class="btn-unfollow" id="@Model.Id">Unfollow</button>
-                }
+                    <button class="btn-add-friend-request" id="@Model.Id">Add friend</button>
+                    if (!(bool)ViewData["IsFollowing"] && !Model.IsPrivate)
+                    {
+                        <button class="btn-follow" id="@Model.Id">Follow</button>
+                    }
+                    else if ((bool)ViewData["IsFollowing"])
+                    {
+                        <button class="btn-unfollow" id="@Model.Id">Unfollow</button>
+                    }
 
-            }
-            else
-            {
-                <button class="btn-remove-friend-request" id="@Model.Id">Remove friend</button>
+                }
+                else
+                {
+                    <button class="btn-remove-friend-request" id="@Model.Id">Remove friend</button>
+                }
+                @if (!(bool)ViewData["IsCurrentUserHaveBlockedTargetUser"] && !(bool)ViewData["IsOwner"])
+                {
+                    <button class="btn-block" id="@Model.Id">Block</button>
+                }
+                @if ((bool)ViewData["IsCurrentUserHaveBlockedTargetUser"] && !(bool)ViewData["IsOwner"])
+                {
+                    <button class="btn-unblock" id="@Model.Id">Unblock</button>
+                }
             }
            
-        }
-        
-        <div class="tabs">
-            <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "MyPosts", id = Model.Id })">Posts</button>
-            <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "TaggedPosts", id = Model.Id })">Tagged posts</button>
-            @if ((bool)ViewData["IsOwner"])
-            {
-                <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "DeletedPosts", id = Model.Id })">Deleted posts</button>
-                <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "SavedPosts", id = Model.Id })">Saved posts</button>
-            }
-        </div>
+            <div class="tabs">
+                <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "MyPosts", id = Model.Id })">Posts</button>
+                <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "TaggedPosts", id = Model.Id })">Tagged posts</button>
+                @if ((bool)ViewData["IsOwner"])
+                {
+                    <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "DeletedPosts", id = Model.Id })">Deleted posts</button>
+                    <button class="load-content" data-url="@Url.Action("LoadPartial", "Post", new { type = "SavedPosts", id = Model.Id })">Saved posts</button>
+                }
+            </div>
 
-        <div id="partialContainer">
-        </div>
+            <div id="partialContainer">
+            </div>
+        }
+        else
+        {
+            <h3>You cannot see this account</h3>
+        }
     </div>
     </body>
     </html>
@@ -347,6 +412,58 @@
             .then((res) => {
                 if (res.ok) {
                     alert('You successfully unfollowed the user!');
+                    window.location.reload();
+                } else {
+                    return res.text();
+                }
+            })
+            .then((errorMessage) => {
+                if (errorMessage) {
+                    alert(errorMessage);
+                }
+            })
+            .catch((error) => console.error(error));
+        });
+    </script>
+    <script>
+          document.querySelector('.btn-block').addEventListener('click', (e) => {
+            var blockingId = e.target.id;
+
+            fetch('/Home/Block?blockingId=' + blockingId, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then((res) => {
+                if (res.ok) {
+                    alert('You successfully blocked the user!');
+                    window.location.reload();
+                } else {
+                    return res.text();
+                }
+            })
+            .then((errorMessage) => {
+                if (errorMessage) {
+                    alert(errorMessage);
+                }
+            })
+            .catch((error) => console.error(error));
+        });
+    </script>
+    <script>
+          document.querySelector('.btn-unblock').addEventListener('click', (e) => {
+            var unblockingId = e.target.id;
+
+            fetch('/Home/Unblock?unblockingId=' + unblockingId, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then((res) => {
+                if (res.ok) {
+                    alert('You successfully unblocked the user!');
                     window.location.reload();
                 } else {
                     return res.text();

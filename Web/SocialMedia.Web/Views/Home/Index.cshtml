@@ -50,7 +50,7 @@
                         @TempData["ErrorMessage"]
                     </div>
                 }
-                @if (requests != null)
+                @if (requests.Any(r => r.Status.Equals("Pending")))
                 {
                     @foreach (var request in requests.Where(r => r.Status.Equals("Pending")))
                     {

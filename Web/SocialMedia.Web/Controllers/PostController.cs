@@ -92,7 +92,11 @@ namespace SocialMedia.Controllers
             var targetUser = await GetUserById(targetUserId);
 
             ViewData["IsOwner"] = (currentUserId == targetUserId);
-            if(currentUserId != targetUserId)
+            var isCurrentUserBlocked = targetUser.BlockedUsers.Select(bu => bu.Id).Contains(currentUser.Id);
+            ViewData["IsCurrentUserBlocked"] = isCurrentUserBlocked;
+            var currentUserHaveBlockedTargetUser = currentUser.BlockedUsers.Select(bu => bu.Id).Contains(targetUserId);
+            ViewData["IsCurrentUserHaveBlockedTargetUser"] = currentUserHaveBlockedTargetUser;
+            if (currentUserId != targetUserId)
             {
                 var areFriends = currentUser.Friends.Any(f => f.Id == targetUser.Id);
                 ViewData["AreFriends"] = areFriends;
@@ -155,7 +159,7 @@ namespace SocialMedia.Controllers
                     else
                     {
                         posts = ConvertFromServiceModelToWebModel(targetUser.TaggedPosts.Where(
-                            p => p.DeletedOn == null &&
+                            p => p.DeletedOn == null && !p.CreatedBy.BlockedUsers.Select(bu => bu.Id).Contains(currentUserId) &&
                             p.Visibility.Equals("all") ||
                             p.Visibility.Equals("friends") && p.CreatedBy.Friends.Contains(currentUser) ||
                             p.Visibility.Equals("followers") && p.CreatedBy.Followers.Contains(currentUser) || p.CreatedBy.Friends.Contains(currentUser) ||
@@ -174,7 +178,7 @@ namespace SocialMedia.Controllers
                     ViewData["IsFollowing"] = isFollowing;
                     ViewData["SavedPostsId"] = currentUser.SavedPosts.Select(p => p.Id).ToList();
                     return PartialView("_SavedPosts", ConvertFromServiceModelToWebModel(currentUser.SavedPosts.Where(
-                        p => p.DeletedOn == null &&
+                        p => p.DeletedOn == null && !p.CreatedBy.BlockedUsers.Select(bu => bu.Id).Contains(currentUserId) &&
                         p.Visibility.Equals("all") ||
                         p.Visibility.Equals("friends") && p.CreatedBy.Friends.Contains(currentUser) ||
                         p.Visibility.Equals("followers") && p.CreatedBy.Followers.Contains(currentUser) || p.CreatedBy.Friends.Contains(currentUser) ||
@@ -321,6 +325,52 @@ namespace SocialMedia.Controllers
 
         }
 
+        [HttpGet]
+        public async Task<IActionResult> PeopleVisualization(string userId, string type)
+        {
+            var currentUser = await GetUser();
+            var targetUser = await GetUserById(userId);
+
+            if (targetUser == null)
+            {
+                return NotFound();
+            }
+
+            List<UserWebModel> model = new();
+            string title = "Connections";
+
+            switch (type?.ToLower())
+            {
+                case "friends":
+                    model = targetUser.Friends.Select(f => MapToWebModel(f)).ToList();
+                    title = "Friends";
+                    break;
+                case "followers":
+                    model = targetUser.Followers.Select(f => MapToWebModel(f)).ToList();
+                    title = "Followers";
+                    break;
+                case "following":
+                    model = targetUser.Following.Select(f => MapToWebModel(f)).ToList();
+                    title = "Following";
+                    break;
+                default:
+                    return BadRequest("Invalid connection type");
+            }
+            ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
+            ViewBag.Title = title;
+            return View(model);
+        }
+
+        private UserWebModel MapToWebModel(SocialMediaUser user)
+        {
+            return new UserWebModel
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                ProfilePictureUrl = user.ProfilePicture?.CloudUrl ?? "/images/default-profile.png"
+            };
+        }
+
         private async Task<string> UploadPhoto(IFormFile photo)
         {
             var uploadResponse = await _cloudinaryService.UploadFile(photo);
@@ -352,6 +402,18 @@ namespace SocialMedia.Controllers
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.CreatedBy)
                 .ThenInclude(u => u.ProfilePicture)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(p => p.CreatedBy)
+                .ThenInclude(u => u.BlockedUsers)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.Friends)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.Followers)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.Following)
             .Include(u => u.Following)
             .Include(u => u.Followers)
             .Include(u => u.Friends)
@@ -364,6 +426,19 @@ namespace SocialMedia.Controllers
             .Include(u => u.SavedPosts)
                 .ThenInclude(sp => sp.CreatedBy)
                     .ThenInclude(crb => crb.ProfilePicture)
+             .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.BlockedUsers)
+            .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.Friends)
+            .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.Followers)
+            .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.Following)
+            .Include(u => u.BlockedUsers)
             .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
         }
 
@@ -376,25 +451,56 @@ namespace SocialMedia.Controllers
              .Include(u => u.Posts)
                 .ThenInclude(p => p.Tags)
              .Include(u => u.Posts)
-                .ThenInclude(p => p.DeletedBy)
-            .Include(u => u.Posts)
                 .ThenInclude(p => p.TaggedUsers)
+             .Include(u => u.Posts)
+                .ThenInclude(p => p.DeletedBy)
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.Attachments)
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.TaggedUsers)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(p => p.CreatedBy)
+                .ThenInclude(u => u.ProfilePicture)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(p => p.CreatedBy)
+                .ThenInclude(u => u.BlockedUsers)
+                 .Include(u => u.TaggedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.Friends)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.Followers)
+            .Include(u => u.TaggedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.Following)
             .Include(u => u.Following)
+                .ThenInclude(f => f.ProfilePicture)
             .Include(u => u.Followers)
+                .ThenInclude(f => f.ProfilePicture)
             .Include(u => u.Friends)
+                .ThenInclude(f => f.ProfilePicture)
             .Include(u => u.SavedPosts)
                 .ThenInclude(sp => sp.Attachments)
             .Include(u => u.SavedPosts)
                 .ThenInclude(sp => sp.TaggedUsers)
             .Include(u => u.SavedPosts)
                 .ThenInclude(sp => sp.Tags)
-             .Include(u => u.SavedPosts)
+            .Include(u => u.SavedPosts)
                 .ThenInclude(sp => sp.CreatedBy)
                     .ThenInclude(crb => crb.ProfilePicture)
+             .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.BlockedUsers)
+            .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.Friends)
+            .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.Followers)
+            .Include(u => u.SavedPosts)
+                .ThenInclude(sp => sp.CreatedBy)
+                    .ThenInclude(crb => crb.Following)
+            .Include(u => u.BlockedUsers)
             .FirstOrDefaultAsync(u => u.Id == id);
         }
 

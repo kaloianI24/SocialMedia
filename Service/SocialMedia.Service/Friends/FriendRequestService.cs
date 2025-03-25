@@ -40,22 +40,32 @@ namespace SocialMedia.Service.Friends
                  .Any(r => r.CreatedById == receiver.Id && r.ReceiverId == sender.Id || r.CreatedById == sender.Id && r.ReceiverId == receiver.Id);
 
             var isRequestValid = receiver.Id != sender.Id;
-                      
-            if (!ifRequestExists && isRequestValid)
+
+            if (receiver.BlockedUsers.Select(bu => bu.Id).Contains(sender.Id))
+            {
+                throw new Exception("You cannot send a friend request to a user who has blocked you.");
+            }
+
+            else if (sender.BlockedUsers.Select(bu => bu.Id).Contains(receiver.Id))
+            {
+                throw new Exception("You cannot send a friend request to a user you have blocked.");
+            }
+            else if (!ifRequestExists && isRequestValid)
             {
                 var request = await friendRequestRepository.CreateAsync(new FriendRequest { Receiver = receiver, Status = "Pending" });
                 return request.ToModel();
             }
 
-            else if(ifRequestExists)
+            else if (ifRequestExists)
             {
                 throw new Exception("A friend request already exists between these users.");
             }
 
-            else if(!isRequestValid)
+            else if (!isRequestValid)
             {
                 throw new Exception("You cannot be friend with yourself.");
             }
+
 
             else
             {
@@ -163,10 +173,16 @@ namespace SocialMedia.Service.Friends
                 throw new Exception("You cannot follow a user how is already your friend");
             }
 
-            if(following.IsPrivate)
+            else if (following.IsPrivate)
             {
                 throw new Exception("You cannot follow a user whose account is private.");
             }
+
+            else if(following.BlockedUsers.Select(bu => bu.Id).Contains(user.Id))
+            {
+                throw new Exception("You cannot follow a user who has blocked you.");
+            }
+
             else
             {
                 user.Following.Add(following);
@@ -206,6 +222,64 @@ namespace SocialMedia.Service.Friends
             
             await socialMediaUserRepository.UpdateAsync(user);
             await socialMediaUserRepository.UpdateAsync(unfollowing);
+            return true;
+        }
+
+        public async Task<bool> Block(SocialMediaUser user, SocialMediaUser blocking)
+        {
+            if (user is null || blocking is null)
+            {
+                throw new Exception("User cannot be null");
+            }
+
+            if(user.BlockedUsers.Select(u => u.Id).Contains(blocking.Id))
+            {
+                throw new Exception("Ypu have already blocked the user");
+            }
+            if(user.Friends.Select(f => f.Id).Contains(blocking.Id))
+            {
+                user.Friends.Remove(blocking);
+                blocking.Friends.Remove(user);
+            }
+
+            if (user.Followers.Select(f => f.Id).Contains(blocking.Id))
+            {
+                user.Followers.Remove(blocking);
+                blocking.Following.Remove(user);
+            }
+
+            var request = user.ReceivedFriendRequests.FirstOrDefault(fr => fr.CreatedById == blocking.Id);
+            user.ReceivedFriendRequests.Remove(request);
+            blocking.SentFriendRequests.Remove(request);
+            if(request is not null)
+            {
+                await friendRequestRepository.HardDeleteAsync(request);
+            }
+            
+            user.BlockedUsers.Add(blocking);
+            await socialMediaUserRepository.UpdateAsync(user);
+            await socialMediaUserRepository.UpdateAsync(blocking);
+            return true;
+        }
+
+        public async Task<bool> Unblock(SocialMediaUser user, SocialMediaUser unblocking)
+        {
+            if (user is null || unblocking is null)
+            {
+                throw new Exception("User cannot be null");
+            }
+
+            if (user.BlockedUsers.Select(f => f.Id).Contains(unblocking.Id))
+            {
+                user.BlockedUsers.Remove(unblocking);
+            }
+
+            else
+            {
+                throw new Exception("You have not blocked the target user!");
+            }
+            await socialMediaUserRepository.UpdateAsync(user);
+            await socialMediaUserRepository.UpdateAsync(unblocking);
             return true;
         }
     }
