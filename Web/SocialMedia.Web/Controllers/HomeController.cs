@@ -14,6 +14,7 @@ using SocialMedia.Service.Reaction;
 using System.Linq;
 using SocialMedia.Data;
 using System.Collections.Generic;
+using SocialMedia.Service.SocialMediaPost;
 
 namespace SocialMedia.Controllers
 {
@@ -25,7 +26,7 @@ namespace SocialMedia.Controllers
         private readonly IEmailSender _emailSender;
         private readonly IFriendRequestService _friendRequestsService;
         private readonly IReactionService _reactionService;
-        private readonly SocialMediaDbContext _context; // Add this line
+        private readonly ISocialMediaPostService _postService;
 
         public HomeController(
             ILogger<HomeController> logger,
@@ -33,14 +34,14 @@ namespace SocialMedia.Controllers
             IEmailSender emailSender,
             IFriendRequestService friendRequestsService,
             IReactionService reactionService,
-            SocialMediaDbContext context) // Add this parameter
+            ISocialMediaPostService postService)
         {
             _logger = logger;
             _userManager = userManager;
             _emailSender = emailSender;
             _friendRequestsService = friendRequestsService;
             _reactionService = reactionService;
-            _context = context; // Initialize the context
+            _postService = postService;
         }
 
         public async Task<IActionResult> Index()
@@ -323,16 +324,24 @@ namespace SocialMedia.Controllers
 
         public async Task<IActionResult> Search(string query)
         {
+            var user = await GetUser();
             if (string.IsNullOrWhiteSpace(query))
             {
                
                 return RedirectToAction("Index");
             }
 
-            var results = await _context.Posts
-                .Include(p => p.CreatedBy)
+            var results = _postService.GetAll().ToList()
                 .Where(p => p.Description.Contains(query) || p.CreatedBy.UserName.Contains(query))
-                .Select(p => new TaggedPostWebModel
+                .Where(
+                        p => p.DeletedOn == null && !p.CreatedBy.BlockedUsers.Select(bu => bu.Id).Contains(user.Id) &&
+                        p.Visibility.Equals("all") && !p.CreatedBy.IsPrivate ||
+                        p.Visibility.Equals("friends") && p.CreatedBy.Friends.Select(f => f.Id).ToList().Contains(user.Id) ||
+                        p.Visibility.Equals("followers") && p.CreatedBy.Followers.Select(f => f.Id).ToList().Contains(user.Id) || p.CreatedBy.Friends.Select(f => f.Id).ToList().Contains(user.Id) ||
+                        p.CreatedBy.IsPrivate && p.CreatedBy.Friends.Select(f => f.Id).ToList().Contains(user.Id) ||
+                        p.CreatedBy.Id == user.Id)
+                .ToList()
+                .Select(p => new SearchedPostsWebModel
                 {
                     Id = p.Id,
                     Description = p.Description,
@@ -342,12 +351,16 @@ namespace SocialMedia.Controllers
                     ProfilePictureUrl = p.CreatedBy.ProfilePicture != null ? p.CreatedBy.ProfilePicture.CloudUrl : null,
                     CreatedOn = p.CreatedOn,
                     CreatedById = p.CreatedBy.Id,
-                    TaggedUsersId = p.TaggedUsers.Select(u => u.Id).ToList(),
-                    TaggedUsersUserNames = p.TaggedUsers.Select(u => u.UserName).ToList(),
+                    TaggedUsersId = p.TaggedUsersId.ToList(),
+                    TaggedUsersUserNames = p.TaggedUsersUserName.ToList(),
+                    IsUserDeleted = p.CreatedBy.IsDeleted
                 })
-                .ToListAsync();
+                .ToList();
 
-            return View("Index", results);
+            ViewData["ProfilePictureUrl"] = user.ProfilePicture?.CloudUrl;
+            ViewData["FriendRequests"] = user.ReceivedFriendRequests.ToList();
+
+            return View("SearchPosts", results);
         }
 
     }

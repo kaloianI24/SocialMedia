@@ -40,5 +40,6 @@ public class SocialMediaUser : IdentityUser
     [NotMapped]
     public string FullName => $"{FirstName} {LastName}";
 
+    public bool IsDeleted { get; set; }
 }
 

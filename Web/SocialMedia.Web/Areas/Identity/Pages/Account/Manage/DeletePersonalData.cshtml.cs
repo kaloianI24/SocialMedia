@@ -12,7 +12,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Data.Repositories;
+using SocialMedia.Service.Models;
 using SocialMedia.Service.SocialMediaPost;
+using SocialMedia.Service.Mappings;
+
 
 namespace SocialMedia.Areas.Identity.Pages.Account.Manage
 {
@@ -64,6 +67,8 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
             [Required]
             [DataType(DataType.Password)]
             public string Password { get; set; }
+
+            public bool ConditionalDeletion { get; set; }
         }
 
         /// <summary>
@@ -103,15 +108,23 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
                 }
             }
 
-            var posts =  postRepository.GetAll().Include(p => p.Attachments).Where(p => p.CreatedById == user.Id).ToList();
+            var posts =  postRepository.GetAll().Include(p => p.Attachments).Include(p => p.CreatedBy).ThenInclude(crb => crb.ProfilePicture).Where(p => p.CreatedById == user.Id).ToList();
             var taggedPosts = await postRepository.UserTaggedPosts(user.Id);
 
             if (posts != null)
             {
-                foreach(var post in posts)
+                if(Input.ConditionalDeletion)
+                {                    
+                    posts.FirstOrDefault().CreatedBy.IsDeleted = true;
+                }
+                else
                 {
-                    await socialMediaPostService.DeletePermanentlyAsync(post.Id);
-                }               
+                    foreach (var post in posts)
+                    {
+                        await socialMediaPostService.DeletePermanentlyAsync(post.Id);
+                    }
+                }
+                                 
             }
 
             if(taggedPosts.Count != 0)
@@ -153,12 +166,27 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
                 await socialMediaUserRepository.UpdateAsync(following);
             }
             await socialMediaUserRepository.UpdateAsync(userDb);
-            var result = await _userManager.DeleteAsync(user);
             var userId = await _userManager.GetUserIdAsync(user);
-            if (!result.Succeeded)
+
+            if (Input.ConditionalDeletion)
             {
-                throw new InvalidOperationException($"Unexpected error occurred deleting user.");
+                var result = await _userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    throw new InvalidOperationException($"Unexpected error occurred deleting user.");
+                }
             }
+            else
+            {
+                var result = await _userManager.DeleteAsync(user);
+                
+                if (!result.Succeeded)
+                {
+                    throw new InvalidOperationException($"Unexpected error occurred deleting user.");
+                }
+            }
+                
 
             await _signInManager.SignOutAsync();
 

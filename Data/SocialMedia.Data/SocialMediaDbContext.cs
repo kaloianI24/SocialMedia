@@ -138,6 +138,9 @@ namespace SocialMedia.Data
                 .HasForeignKey(fr => fr.DeletedById)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<SocialMediaUser>().HasQueryFilter(u => !u.IsDeleted);
+
             base.OnModelCreating(builder);
             // Customize the ASP.NET Identity model and override the defaults if needed.
             // For example, you can rename the ASP.NET Identity table names and more.

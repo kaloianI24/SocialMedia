@@ -32,5 +32,7 @@ public class SocialMediaUserServiceModel : IdentityUser
 
     public List<SocialMediaUserServiceModel> TaggedUsers { get; set; } = new List<SocialMediaUserServiceModel>();
     public List<SocialMediaUserBasicServiceModel> BlockedUsers { get; set; } = new List<SocialMediaUserBasicServiceModel>();
+
+    public bool IsDeleted { get; set; }
 }
 

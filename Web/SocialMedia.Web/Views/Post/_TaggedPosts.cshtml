@@ -2,7 +2,7 @@
 @{
     List<string> savedPostsIds = (List<string>)ViewData["SavedPostsId"];
 }
-@model List<SocialMedia.Web.Models.Post.TaggedPostWebModel>
+@model List<SocialMedia.Web.Models.Post.SearchedPostsWebModel>
 <div class="main-content2">
     @if (Model is null || Model.Count == 0 || (bool)ViewData["IsAccountPrivate"] && !(bool)ViewData["AreFriends"] && !(bool)ViewData["IsOwner"])
     {
@@ -14,13 +14,24 @@
         {
             <div class="post" data-post-id="@post.Id">
                 <div class="post-header">
-                    <a href="/Post/MyPage?userId=@post.CreatedById">
+                    @if (post.IsUserDeleted)
+                    {
                         <img src="@post.ProfilePictureUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
-                    </a>
-                    <div class="post-info">
-                        <span class="username">@post.UserName</span>
-                        <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span> <span class="location"></span>
-                    </div>
+                        <div class="post-info">
+                            <span class="username">Anonymous</span>
+                            <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <a href="/Post/MyPage?userId=@post.CreatedById">
+                            <img src="@post.ProfilePictureUrl.Replace("http://", "https://")" alt="Profile Picture" class="profile-pic">
+                        </a>
+                        <div class="post-info">
+                            <span class="username">@post.UserName</span>
+                            <span class="location">@post.CreatedOn.ToString("MM/dd/yyyy")</span>
+                        </div>
+                    }
                     @if ((bool)ViewData["IsOwner"])
                     {
                         <button type="button" class="btn-untagging-post">Remove me from post</button>
@@ -82,7 +93,14 @@
 
 
                 <div class="post-caption">
-                    <span class="username">@post.UserName</span>
+                    @if (post.IsUserDeleted)
+                    {
+                        <span class="username">Anonymous</span>
+                    }
+                    else
+                    {
+                        <span class="username">@post.UserName</span>
+                    }
                     <p class="post-description">
                         @string.Join(" ", @post.Description.Split(" ").Take(10))
                         <span class="post-description-hidden-text">

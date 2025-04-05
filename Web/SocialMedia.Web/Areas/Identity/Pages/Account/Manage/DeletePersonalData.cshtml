@@ -24,6 +24,12 @@
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
         }
+
+        <div class="form-group">
+            <label asp-for="Input.ConditionalDeletion">Do you want your posts to be conditionally deleted?</label>
+            <input asp-for="Input.ConditionalDeletion" type="checkbox" />
+            <br>
+        </div>
         <button class="w-100 btn btn-lg btn-danger" type="submit">Delete data and close my account</button>
     </form>
 </div>

@@ -151,22 +151,23 @@ namespace SocialMedia.Controllers
                     ViewData["AreFriends"] = areFriends;
                     ViewData["IsAccountPrivate"] = targetUser.IsPrivate;
                     ViewData["SavedPostsId"] = currentUser.SavedPosts.Select(p => p.Id).ToList();
-
+                    List<SearchedPostsWebModel> allPosts;
                     if (currentUserId == targetUserId)
                     {
-                        posts = ConvertFromServiceModelToWebModel(targetUser.TaggedPosts.Where(p => p.DeletedOn == null).ToList());
+                        allPosts = ConvertFromServiceModelToWebModelWithIsDeleted(targetUser.TaggedPosts.Where(p => p.DeletedOn == null).ToList());
                     }
                     else
                     {
-                        posts = ConvertFromServiceModelToWebModel(targetUser.TaggedPosts.Where(
+                        allPosts = ConvertFromServiceModelToWebModelWithIsDeleted(targetUser.TaggedPosts.Where(
                             p => p.DeletedOn == null && !p.CreatedBy.BlockedUsers.Select(bu => bu.Id).Contains(currentUserId) &&
-                            p.Visibility.Equals("all") ||
+                            p.Visibility.Equals("all") && !p.CreatedBy.IsPrivate ||
                             p.Visibility.Equals("friends") && p.CreatedBy.Friends.Contains(currentUser) ||
                             p.Visibility.Equals("followers") && p.CreatedBy.Followers.Contains(currentUser) || p.CreatedBy.Friends.Contains(currentUser) ||
+                            p.CreatedBy.IsPrivate && p.CreatedBy.Friends.Contains(currentUser) ||
                             p.CreatedBy.Id == currentUser.Id)
                         .ToList());
                     }
-                    return PartialView("_TaggedPosts", posts);
+                    return PartialView("_TaggedPosts", allPosts);
 
                 case "DeletedPosts":
                     ViewData["IsOwner"] = (currentUserId == targetUserId);
@@ -177,11 +178,12 @@ namespace SocialMedia.Controllers
                     ViewData["AreFriends"] = areFriends;
                     ViewData["IsFollowing"] = isFollowing;
                     ViewData["SavedPostsId"] = currentUser.SavedPosts.Select(p => p.Id).ToList();
-                    return PartialView("_SavedPosts", ConvertFromServiceModelToWebModel(currentUser.SavedPosts.Where(
+                    return PartialView("_SavedPosts", ConvertFromServiceModelToWebModelWithIsDeleted(currentUser.SavedPosts.Where(
                         p => p.DeletedOn == null && !p.CreatedBy.BlockedUsers.Select(bu => bu.Id).Contains(currentUserId) &&
-                        p.Visibility.Equals("all") ||
+                        p.Visibility.Equals("all") && !p.CreatedBy.IsPrivate ||
                         p.Visibility.Equals("friends") && p.CreatedBy.Friends.Contains(currentUser) ||
                         p.Visibility.Equals("followers") && p.CreatedBy.Followers.Contains(currentUser) || p.CreatedBy.Friends.Contains(currentUser) ||
+                        p.CreatedBy.IsPrivate && p.CreatedBy.Friends.Contains(currentUser) ||
                         p.CreatedBy.Id == currentUser.Id).ToList()));
 
                 default:
@@ -402,6 +404,7 @@ namespace SocialMedia.Controllers
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.CreatedBy)
                 .ThenInclude(u => u.ProfilePicture)
+            .IgnoreQueryFilters()
             .Include(u => u.TaggedPosts)
                 .ThenInclude(p => p.CreatedBy)
                 .ThenInclude(u => u.BlockedUsers)
@@ -423,6 +426,7 @@ namespace SocialMedia.Controllers
                 .ThenInclude(sp => sp.TaggedUsers)
             .Include(u => u.SavedPosts)
                 .ThenInclude(sp => sp.Tags)
+            .IgnoreQueryFilters()
             .Include(u => u.SavedPosts)
                 .ThenInclude(sp => sp.CreatedBy)
                     .ThenInclude(crb => crb.ProfilePicture)
@@ -518,6 +522,24 @@ namespace SocialMedia.Controllers
                 Tags = p.Tags.Select(t => t.Name).ToList(),
                 TaggedUsersId = p.TaggedUsers.Select(u => u.Id).ToList(),
                 TaggedUsersUserNames = p.TaggedUsers.Select(u => u.UserName).ToList(),
+            }).ToList();
+        }
+
+        private List<SearchedPostsWebModel> ConvertFromServiceModelToWebModelWithIsDeleted(List<SocialMediaPost> posts)
+        {
+            return posts.Select(p => new SearchedPostsWebModel
+            {
+                Id = p.Id,
+                Description = p.Description,
+                AttachmentUrls = p.Attachments.Select(a => a.CloudUrl).ToList(),
+                UserName = p.CreatedBy.UserName,
+                ProfilePictureUrl = p.CreatedBy.ProfilePicture.CloudUrl,
+                CreatedOn = p.CreatedOn,
+                CreatedById = p.CreatedBy.Id,
+                Tags = p.Tags.Select(t => t.Name).ToList(),
+                TaggedUsersId = p.TaggedUsers.Select(u => u.Id).ToList(),
+                TaggedUsersUserNames = p.TaggedUsers.Select(u => u.UserName).ToList(),
+                IsUserDeleted = p.CreatedBy.IsDeleted
             }).ToList();
         }
     }

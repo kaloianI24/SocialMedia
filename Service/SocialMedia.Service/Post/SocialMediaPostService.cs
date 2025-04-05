@@ -151,7 +151,25 @@ namespace SocialMedia.Service.SocialMediaPost
         }
         public IQueryable<PostServiceModel> GetAll()
         {
-            throw new NotImplementedException();
+            return postRepository.GetAll()
+                .IgnoreQueryFilters()
+                .Include(p => p.TaggedUsers)
+                .ThenInclude(u => u.ProfilePicture)
+                .Include(p => p.Tags)
+                .Include(p => p.Attachments)
+                .Include(p => p.CreatedBy)
+                .ThenInclude(u => u.ProfilePicture)
+                .Include(p => p.CreatedBy)
+                    .ThenInclude(crb => crb.Following)
+                .Include(p => p.CreatedBy)
+                    .ThenInclude(crb => crb.Followers)
+                .Include(p => p.CreatedBy)
+                    .ThenInclude(crb => crb.Friends)
+                .Include(p => p.CreatedBy)
+                    .ThenInclude(crb => crb.BlockedUsers)
+                .Include(p => p.CreatedBy)
+                    .ThenInclude(crb => crb.SavedPosts)
+                .AsQueryable().Select(p => p.ToModel(UserPostMappingsContext.Post));
         }
 
         public async Task<PostServiceModel> GetByIdAsync(string id)
