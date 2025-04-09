@@ -53,7 +53,7 @@ namespace SocialMedia.Controllers
             }
 
             var roles = await _userManager.GetRolesAsync(user);
-            bool isAdmin = roles.Contains("Admin");
+            bool isAdmin = roles.Contains("Administrator");
 
             this.ViewData["Reactions"] = this._reactionService.GetAll().ToList();
 

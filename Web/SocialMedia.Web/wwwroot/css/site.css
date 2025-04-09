@@ -144,6 +144,12 @@ body {
     margin-right: 10px;
     object-fit: cover;
 }
+#profile-picture-admin {
+    margin-right: 21px;
+    border: 0.5px #ed2828;
+    width: 27px;
+    height: 27px;
+}
 
 .post-info {
     display: flex;

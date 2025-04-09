@@ -16,6 +16,8 @@ namespace SocialMedia.Data
         public DbSet<SocialMediaReaction> Reactions { get; set; }
         public DbSet<SocialMediaRole> SocialMediaRoles { get; set; }
         public DbSet<SocialMediaTag> Tags { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
         public bool AcceptedTerms { get; set; }
 
 
@@ -137,6 +139,18 @@ namespace SocialMedia.Data
                 .WithMany()
                 .HasForeignKey(fr => fr.DeletedById)
                 .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ChatMessage>()
+           .HasOne(m => m.Sender)
+           .WithMany(u => u.MessagesSent)
+           .HasForeignKey(m => m.SenderId)
+           .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ChatMessage>()
+                .HasOne(m => m.Receiver)
+                .WithMany(u => u.MessagesReceived)
+                .HasForeignKey(m => m.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<SocialMediaUser>().HasQueryFilter(u => !u.IsDeleted);

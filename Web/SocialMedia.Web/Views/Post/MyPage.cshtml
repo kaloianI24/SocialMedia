@@ -3,6 +3,7 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
+    var isAdmin = ViewData["IsAdmin"] != null && (bool)ViewData["IsTargetUserAdmin"];
 }
 @model SocialMediaUserServiceModel
 
@@ -45,7 +46,11 @@
         border-radius: 50%;
         background-color: #ddd;
         margin-right: 20px;
-        border: solid #ddd 1px;
+        border: solid #ddd 4px;
+        }
+
+        #admin{
+        border: solid red;
         }
 
         .profile-header .profile-info {
@@ -193,12 +198,35 @@
         width: 100px;
         margin-bottom: 30px;
         }
+
+        .btn-chat {
+            background-color: cornflowerblue;
+            font-size: 15px;
+            border-radius: 20px;
+            margin-left: 20px;
+            height: 35px;
+            width: 100px;
+            margin-bottom: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            cursor: pointer;
+            color:black;
+        }
     </style>
 </head>
 <body>
     <div class="profile-page-user-information">
-        <div class="profile-header">            
-            <img class="profile-pic" src="@Model.ProfilePicture.CloudUrl"></img>
+        <div class="profile-header">
+            @if(isAdmin)
+            {
+                <img class="profile-pic" id="admin" src="@Model.ProfilePicture.CloudUrl"></img>
+            }
+            else
+            {
+                <img class="profile-pic" src="@Model.ProfilePicture.CloudUrl"></img>
+            }
             <div class="profile-info">
                 <h1>@Model.UserName</h1>
                 <div class="stats">
@@ -278,6 +306,16 @@
                 {
                     <button class="btn-unblock" id="@Model.Id">Unblock</button>
                 }
+                @if(Model.IsPrivate && (bool)ViewData["AreFriends"] || !Model.IsPrivate)
+                {
+                    <a class="btn-chat" asp-controller="Chat"
+                       asp-action="Conversation"
+                       asp-route-userId="@Model.Id"
+                       asp-route-type="userId">
+                       <span> Chat</span> 
+                    </a>
+                }
+               
             }
            
             <div class="tabs">

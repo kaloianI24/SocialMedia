@@ -11,12 +11,13 @@
     <link rel="stylesheet" href="~/SocialMedia.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     @RenderSection("Styles", required: false)
-  @*   <link rel="stylesheet" href="Views/Shared/_Layout.cshtml/_Layout.cshtml.css" asp-append-version="true" /> *@
+    @*   <link rel="stylesheet" href="Views/Shared/_Layout.cshtml/_Layout.cshtml.css" asp-append-version="true" /> *@
 
 </head>
 
 @{
     var hideLayout = ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("Account") == true;
+    var isAdmin = ViewData["IsAdmin"] != null && (bool)ViewData["IsAdmin"];
 }
 
 
@@ -47,10 +48,20 @@
                 <a class="btn-sidebar sidebar-links" asp-area="Identity" asp-page="/Account/Manage/Index">
                     <img class="sidebar-images" src="~/images/settings.svg">Settings
                 </a>
-                <a class="btn-sidebar sidebar-links" asp-area="" asp-controller="Post" asp-action="MyPage">
-                    <img class="profile-pic" id="profile-picture" src="@ViewData["ProfilePictureUrl"]">Profile
-                </a>
+              
+                @if (isAdmin)
+                {
+                    <a class="btn-sidebar sidebar-links" asp-area="" asp-controller="Post" asp-action="MyPage">
+                        <img class="profile-pic" id="profile-picture-admin" src="@ViewData["ProfilePictureUrl"]">Profile
+                    </a>
+                }
+                else
+                {
+                    <a class="btn-sidebar sidebar-links" asp-area="" asp-controller="Post" asp-action="MyPage">
+                        <img class="profile-pic" id="profile-picture" src="@ViewData["ProfilePictureUrl"]">Profile
+                    </a>
 
+                }
                 <a class="btn-sidebar sidebar-links" id = "logout-button" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
                     <img class="sidebar-images" width="24px" src="~/images/logout.svg" />Log out
                 </a>

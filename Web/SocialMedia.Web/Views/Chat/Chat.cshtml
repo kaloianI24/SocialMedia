@@ -1,0 +1,206 @@
+﻿@using SocialMedia.Web.Models.Chat
+@model ChatViewModel
+
+<style>
+    body {
+        background-color: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0 0 0 250px;
+    }
+
+    .chat-content {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-header {
+        padding: 15px 20px;
+        font-size: 20px;
+        font-weight: bold;
+        border-bottom: 1px solid #eee;
+        background-color: white;
+    }
+
+    #messageHistory {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background-color: white;
+    }
+
+    .message-row {
+        display: flex;
+        margin-bottom: 8px;
+    }
+
+    .received {
+        justify-content: flex-start;
+    }
+
+    .sent {
+        justify-content: flex-end;
+    }
+
+    .message-bubble {
+        max-width: 60%;
+        padding: 8px 12px;
+        border-radius: 18px;
+        position: relative;
+        word-wrap: break-word;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .received .message-bubble {
+        background-color: #f0f0f0;
+        color: #333;
+    }
+
+    .sent .message-bubble {
+        background-color: #0084ff;
+        color: white;
+    }
+
+    .message-time {
+        font-size: 11px;
+        color: #999;
+        margin-top: 2px;
+        text-align: right;
+    }
+
+    .message-input-area {
+        padding: 10px 15px;
+        background-color: white;
+        border-top: 1px solid #eee;
+    }
+
+    #messageInput {
+        width: calc(100% - 80px);
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        outline: none;
+        font-size: 14px;
+    }
+
+    .send-btn {
+        background-color: #0084ff;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        margin-left: 8px;
+        cursor: pointer;
+        float: right;
+    }
+</style>
+
+<div class="chat-content">
+    <div class="chat-header">
+        @Model.ReceiverUserName
+    </div>
+
+    <div id="messageHistory">
+        @foreach (var message in Model.Messages)
+        {
+            <div class="message-row @(message.SenderId == Model.CurrentUserId ? "sent" : "received")">
+                <div class="message-bubble">
+                    <div class="message-text">@message.PlainText</div>
+                    <div class="message-time">@message.SentAt.ToLocalTime().ToString("HH:mm")</div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="message-input-area">
+        <input type="text" id="messageInput" placeholder="Type a message..." />
+        <button class="send-btn" onclick="sendMessage()">
+            <img width="20" height="20" src="~/images/send.png">
+        </button>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        const receiverId = "@Model.ReceiverId";
+        const currentUserId = "@Model.CurrentUserId";
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chathub")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        async function startConnection() {
+            try {
+                await connection.start();
+                console.log("SignalR Connected.");
+            } catch (err) {
+                console.log(err);
+                setTimeout(startConnection, 5000);
+            }
+        }
+
+        startConnection();
+
+        connection.on("ReceiveMessage", (senderId, message, timestamp) => {
+            addMessageToChat(senderId, message, timestamp);
+        });
+
+        function addMessageToChat(senderId, message, timestamp) {
+            const isCurrentUser = senderId === currentUserId;
+            const timeString = new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+            const messageRow = document.createElement('div');
+            messageRow.className = `message-row ${isCurrentUser ? 'sent' : 'received'}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+
+            const text = document.createElement('div');
+            text.className = 'message-text';
+            text.textContent = message;
+
+            const time = document.createElement('div');
+            time.className = 'message-time';
+            time.textContent = timeString;
+
+            bubble.appendChild(text);
+            bubble.appendChild(time);
+            messageRow.appendChild(bubble);
+
+            document.getElementById('messageHistory').appendChild(messageRow);
+            scrollToBottom();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            if (message) {
+                try {
+                    await connection.invoke('SendMessage', receiverId, message);
+                    input.value = '';
+                } catch (err) {
+                    console.error('Error sending message:', err);
+                }
+            }
+        }
+
+        function scrollToBottom() {
+            const chatHistory = document.getElementById('messageHistory');
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        window.addEventListener('load', scrollToBottom);
+    </script>
+}

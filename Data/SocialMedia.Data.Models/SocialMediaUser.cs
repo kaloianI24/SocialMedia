@@ -36,6 +36,9 @@ public class SocialMediaUser : IdentityUser
     public List<FriendRequest>? ReceivedFriendRequests { get; set; } = new List<FriendRequest>();
 
     public List<SocialMediaUser>? BlockedUsers { get; set; } = new List<SocialMediaUser>();
+    public List<ChatMessage> MessagesSent { get; set; }
+    public List<ChatMessage> MessagesReceived { get; set; }
+    public List<Notification> Notifications { get; set; }
     public bool AcceptedTerms { get; set; }
     [NotMapped]
     public string FullName => $"{FirstName} {LastName}";

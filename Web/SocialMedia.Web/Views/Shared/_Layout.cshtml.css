@@ -86,7 +86,14 @@ button.accept-policy {
 
 #profile-picture {
     margin-right: 21px;
-    border: 0.5px solid #9a9a9a;
+    border: 2px solid #9a9a9a;
+    width: 27px;
+    height: 27px;
+}
+
+#profile-picture-admin {
+    margin-right: 21px;
+    border: 2px solid #ed2828;
     width: 27px;
     height: 27px;
 }

@@ -15,6 +15,7 @@ using SocialMedia.Web.Models.User;
 using SocialMedia.Service.SocialMediaPost;
 using SocialMedia.Data.Models;
 using Microsoft.Extensions.Hosting;
+using System.Data;
 
 namespace SocialMedia.Controllers
 {
@@ -49,6 +50,8 @@ namespace SocialMedia.Controllers
             })
             .ToList();
             ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
+            var role = await _userManager.GetRolesAsync(currentUser);
+            ViewData["IsAdmin"] = role.Contains("Administrator");
             ViewData["IsAccountPrivate"] = currentUser.IsPrivate;
             return View();
         }
@@ -80,7 +83,6 @@ namespace SocialMedia.Controllers
                 TaggedUsersId = taggedUsersIds,
                 Visibility = createPostModel.Visibility ?? "friends"
             });
-
             return Redirect("MyPage");
         }
 
@@ -90,8 +92,15 @@ namespace SocialMedia.Controllers
             var currentUserId = currentUser.Id;
             var targetUserId = userId ?? currentUserId;
             var targetUser = await GetUserById(targetUserId);
-
+            if(targetUser is null || currentUser is null)
+            {
+                throw new NullReferenceException();
+            }
             ViewData["IsOwner"] = (currentUserId == targetUserId);
+            var roleTargetUser = await _userManager.GetRolesAsync(targetUser);
+            ViewData["IsTargetUserAdmin"] = roleTargetUser.Contains("Administrator");
+            var role = await _userManager.GetRolesAsync(currentUser);
+            ViewData["IsAdmin"] = role.Contains("Administrator");
             var isCurrentUserBlocked = targetUser.BlockedUsers.Select(bu => bu.Id).Contains(currentUser.Id);
             ViewData["IsCurrentUserBlocked"] = isCurrentUserBlocked;
             var currentUserHaveBlockedTargetUser = currentUser.BlockedUsers.Select(bu => bu.Id).Contains(targetUserId);
@@ -123,7 +132,7 @@ namespace SocialMedia.Controllers
                 case "MyPosts":
                     ViewData["IsOwner"] = (currentUserId == targetUserId);
                     var roles = await _userManager.GetRolesAsync(currentUser);
-                    bool isAdmin = roles.Contains("Admin");
+                    bool isAdmin = roles.Contains("Administrator");
                     ViewData["IsAccountPrivate"] = targetUser.IsPrivate;
                     ViewData["IsAdmin"] = isAdmin;
                     ViewData["AreFriends"] = areFriends;
@@ -247,6 +256,8 @@ namespace SocialMedia.Controllers
             var currentUser = await GetUser();
             ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
             ViewData["IsAccountPrivate"] = currentUser.IsPrivate;
+            var role = await _userManager.GetRolesAsync(currentUser);
+            ViewData["IsAdmin"] = role.Contains("Administrator");
             ViewData["Users"] = _userManager.Users.Include(u => u.ProfilePicture).Where(u => u.Id != currentUser.Id).Select(u => new UserWebModel
             {
                 Id = u.Id,
@@ -359,6 +370,8 @@ namespace SocialMedia.Controllers
                     return BadRequest("Invalid connection type");
             }
             ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
+            var role = await _userManager.GetRolesAsync(currentUser);
+            ViewData["IsAdmin"] = role.Contains("Administrator");
             ViewBag.Title = title;
             return View(model);
         }

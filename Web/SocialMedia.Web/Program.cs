@@ -13,6 +13,9 @@ using Microsoft.Extensions.DependencyInjection;
 using SocialMedia.Service.Reaction;
 using SocialMedia.Service.Friends;
 using SocialMedia.Service.Comment;
+using SocialMedia.Service.Encryption;
+using SocialMedia.Service.Hub;
+using Microsoft.AspNetCore.SignalR;
 
 namespace SocialMedia
 {
@@ -26,7 +29,6 @@ namespace SocialMedia
             var connectionString = builder.Configuration.GetConnectionString("SocialMediaDbContextConnection")
                 ?? throw new InvalidOperationException("Connection string 'SocialMediaDbContextConnection' not found.");
 
-            // Register DbContext for MySQL - REMOVE the SQL Server registration
             builder.Services.AddDbContext<SocialMediaDbContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
@@ -47,12 +49,27 @@ namespace SocialMedia
             builder.Services.AddTransient<ReactionRepository>();
             builder.Services.AddTransient<FriendRequestRepository>();
             builder.Services.AddTransient<CommentRepository>();
+            builder.Services.AddTransient<ChatMessageRepository>();
 
             builder.Services.AddTransient<ICloudinaryService, CloudinaryService>();
             builder.Services.AddTransient<IReactionService, ReactionService>();
             builder.Services.AddTransient<ISocialMediaPostService, SocialMediaPostService>();
             builder.Services.AddTransient<IFriendRequestService, FriendRequestService>();
             builder.Services.AddTransient<ICommentService, CommentService>();
+            builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+
+            builder.Services.AddSingleton<IEncryptionService, EncryptionService>(provider =>
+            {
+                var encryptionKey = builder.Configuration["EncryptionKey"] ??
+                    throw new InvalidOperationException("EncryptionKey not configured");
+                return new EncryptionService(encryptionKey);
+            });
+
+            builder.Services.AddSignalR()
+                .AddHubOptions<ChatHub>(options =>
+                {
+                    options.EnableDetailedErrors = true;
+                });
 
             // Add services to the container
             builder.Services.AddControllersWithViews();
@@ -87,7 +104,7 @@ namespace SocialMedia
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Post}/{action=MyPage}/{userId?}");
-
+            app.MapHub<ChatHub>("/chathub");
             app.MapRazorPages();
             app.Run();
         }
