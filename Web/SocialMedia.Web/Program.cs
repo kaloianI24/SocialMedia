@@ -50,6 +50,7 @@ namespace SocialMedia
             builder.Services.AddTransient<FriendRequestRepository>();
             builder.Services.AddTransient<CommentRepository>();
             builder.Services.AddTransient<ChatMessageRepository>();
+            builder.Services.AddTransient<NotificationRepository>();
 
             builder.Services.AddTransient<ICloudinaryService, CloudinaryService>();
             builder.Services.AddTransient<IReactionService, ReactionService>();
@@ -69,7 +70,8 @@ namespace SocialMedia
                 .AddHubOptions<ChatHub>(options =>
                 {
                     options.EnableDetailedErrors = true;
-                });
+                })
+            .AddHubOptions<NotificationHub>(options => options.EnableDetailedErrors = true);
 
             // Add services to the container
             builder.Services.AddControllersWithViews();
@@ -105,6 +107,7 @@ namespace SocialMedia
                 name: "default",
                 pattern: "{controller=Post}/{action=MyPage}/{userId?}");
             app.MapHub<ChatHub>("/chathub");
+            app.MapHub<NotificationHub>("/notificationHub");
             app.MapRazorPages();
             app.Run();
         }
