@@ -15,6 +15,7 @@ using System.Linq;
 using SocialMedia.Data;
 using System.Collections.Generic;
 using SocialMedia.Service.SocialMediaPost;
+using SocialMedia.Data;
 
 namespace SocialMedia.Controllers
 {
@@ -27,6 +28,7 @@ namespace SocialMedia.Controllers
         private readonly IFriendRequestService _friendRequestsService;
         private readonly IReactionService _reactionService;
         private readonly ISocialMediaPostService _postService;
+        private readonly SocialMediaDbContext _context;
 
         public HomeController(
             ILogger<HomeController> logger,
@@ -34,7 +36,8 @@ namespace SocialMedia.Controllers
             IEmailSender emailSender,
             IFriendRequestService friendRequestsService,
             IReactionService reactionService,
-            ISocialMediaPostService postService)
+            ISocialMediaPostService postService,
+            SocialMediaDbContext context)
         {
             _logger = logger;
             _userManager = userManager;
@@ -42,6 +45,7 @@ namespace SocialMedia.Controllers
             _friendRequestsService = friendRequestsService;
             _reactionService = reactionService;
             _postService = postService;
+            _context = context;
         }
 
         public async Task<IActionResult> Index()
@@ -191,9 +195,11 @@ namespace SocialMedia.Controllers
         [Consumes("application/json")]
         public async Task<IActionResult> AcceptFriendRequest([FromQuery] string requestId)
         {
+            _logger.LogInformation($"Controller: Accepting friend request with ID: {requestId}");
             await _friendRequestsService.AcceptFriendRequest(requestId);
             return NoContent();
         }
+
 
         [HttpPost]
         [Consumes("application/json")]
@@ -324,44 +330,107 @@ namespace SocialMedia.Controllers
 
         public async Task<IActionResult> Search(string query)
         {
-            var user = await GetUser();
+            var currentUser = await GetUser();
+
             if (string.IsNullOrWhiteSpace(query))
             {
-               
                 return RedirectToAction("Index");
             }
 
-            var results = _postService.GetAll().ToList()
-                .Where(p => p.Description.Contains(query) || p.CreatedBy.UserName.Contains(query))
-                .Where(
-                        p => p.DeletedOn == null && !p.CreatedBy.BlockedUsers.Select(bu => bu.Id).Contains(user.Id) &&
-                        p.Visibility.Equals("all") && !p.CreatedBy.IsPrivate ||
-                        p.Visibility.Equals("friends") && p.CreatedBy.Friends.Select(f => f.Id).ToList().Contains(user.Id) ||
-                        p.Visibility.Equals("followers") && p.CreatedBy.Followers.Select(f => f.Id).ToList().Contains(user.Id) || p.CreatedBy.Friends.Select(f => f.Id).ToList().Contains(user.Id) ||
-                        p.CreatedBy.IsPrivate && p.CreatedBy.Friends.Select(f => f.Id).ToList().Contains(user.Id) ||
-                        p.CreatedBy.Id == user.Id)
-                .ToList()
-                .Select(p => new SearchedPostsWebModel
-                {
-                    Id = p.Id,
-                    Description = p.Description,
-                    AttachmentUrls = p.Attachments.Select(a => a.CloudUrl).ToList(),
-                    Tags = p.Tags.Select(t => t.Name).ToList(),
-                    UserName = p.CreatedBy.UserName,
-                    ProfilePictureUrl = p.CreatedBy.ProfilePicture != null ? p.CreatedBy.ProfilePicture.CloudUrl : null,
-                    CreatedOn = p.CreatedOn,
-                    CreatedById = p.CreatedBy.Id,
-                    TaggedUsersId = p.TaggedUsersId.ToList(),
-                    TaggedUsersUserNames = p.TaggedUsersUserName.ToList(),
-                    IsUserDeleted = p.CreatedBy.IsDeleted
-                })
+            query = query.ToLower();
+
+          
+            var blockedUserIds = currentUser.BlockedUsers?.Select(bu => bu.Id).ToList() ?? new List<string>();
+
+           
+            var rawUsers = await _userManager.Users
+                .Where(u => !u.IsDeleted && u.Id != currentUser.Id)
+                .Include(u => u.ProfilePicture)
+                .ToListAsync();
+
+            var users = rawUsers
+                .Where(u => !blockedUserIds.Contains(u.Id))
+                .Where(u => (u.UserName != null && u.UserName.ToLower().Contains(query)) ||
+                            (u.Email != null && u.Email.ToLower().Contains(query)))
                 .ToList();
 
-            ViewData["ProfilePictureUrl"] = user.ProfilePicture?.CloudUrl;
-            ViewData["FriendRequests"] = user.ReceivedFriendRequests.ToList();
+            var orderedUsers = users
+                .OrderByDescending(u => u.UserName != null && u.UserName.ToLower() == query)
+                .ThenBy(u => u.UserName)
+                .ToList();
 
-            return View("SearchPosts", results);
+           
+            var allPosts = await _context.Posts
+                .Include(p => p.CreatedBy)  
+                    .ThenInclude(u => u.ProfilePicture)
+                .Include(p => p.Tags)
+                .Include(p => p.Reactions)
+                .Include(p => p.Comments)
+                .Include(p => p.TaggedUsers)
+                .Include(p => p.Attachments)
+                .Where(p =>
+                    p.DeletedOn == null &&
+                    !p.CreatedBy.BlockedUsers.Select(bu => bu.Id).Contains(currentUser.Id) &&
+                    (
+                        p.Visibility.Equals("all") ||
+                        (p.Visibility.Equals("friends") && p.CreatedBy.Friends.Any(f => f.Id == currentUser.Id)) ||
+                        (p.Visibility.Equals("followers") && p.CreatedBy.Followers.Any(f => f.Id == currentUser.Id)) ||
+                        (p.CreatedBy.IsPrivate && p.CreatedBy.Friends.Any(f => f.Id == currentUser.Id)) ||
+                        (p.CreatedBy.Id == currentUser.Id)
+                    ))
+                .ToListAsync();
+
+           
+            var posts = allPosts
+                .Where(p => (p.Description != null && p.Description.ToLower().Contains(query)) ||
+                            (p.Tags != null && p.Tags.Any(t => t.Name != null && t.Name.ToLower().Contains(query))))
+                .OrderByDescending(p => p.Tags != null && p.Tags.Any(t => t.Name != null && t.Name.ToLower() == query))
+                .ThenByDescending(p => p.Description != null && p.Description.ToLower().Contains(query))
+                .ThenByDescending(p => p.CreatedOn)
+                .ToList();
+
+            var userViewModels = orderedUsers.Select(u => new SearchUserViewModel
+            {
+                Id = u.Id,
+                UserName = u.UserName,
+                ProfilePictureUrl = u.ProfilePicture?.CloudUrl,
+                IsFriend = currentUser.Friends != null && currentUser.Friends.Any(f => f.Id == u.Id),
+                IsFriendRequestSent = u.ReceivedFriendRequests != null && u.ReceivedFriendRequests.Any(r => r.CreatedById == currentUser.Id),
+                IsFriendRequestReceived = currentUser.ReceivedFriendRequests != null && currentUser.ReceivedFriendRequests.Any(r => r.CreatedById == u.Id),
+                IsFollowing = currentUser.Following != null && currentUser.Following.Any(f => f.Id == u.Id)
+            }).ToList();
+
+            var postViewModels = posts.Select(p => new SearchedPostsWebModel
+            {
+                Id = p.Id,
+                Description = p.Description,
+                AttachmentUrls = p.Attachments?.Select(a => a.CloudUrl).ToList() ?? new List<string>(),
+                Tags = p.Tags?.Select(t => t.Name).ToList() ?? new List<string>(),
+                UserName = p.CreatedBy.UserName,
+                ProfilePictureUrl = p.CreatedBy.ProfilePicture?.CloudUrl,
+                CreatedOn = p.CreatedOn,
+                CreatedById = p.CreatedBy.Id,
+                TaggedUsersId = p.TaggedUsers?.Select(u => u.Id).ToList() ?? new List<string>(),
+                TaggedUsersUserNames = p.TaggedUsers?.Select(u => u.UserName).ToList() ?? new List<string>(),
+                IsUserDeleted = p.CreatedBy.IsDeleted
+            }).ToList();
+
+            ViewData["Query"] = query;
+            ViewData["ProfilePictureUrl"] = currentUser.ProfilePicture?.CloudUrl;
+            ViewData["FriendRequests"] = currentUser.ReceivedFriendRequests?.ToList();
+            ViewData["SavedPosts"] = currentUser.SavedPosts?.Select(p => p.Id).ToList() ?? new List<string>();
+
+            var searchResultsViewModel = new SearchResultsViewModel
+            {
+                Query = query,
+                Users = userViewModels,
+                Posts = postViewModels
+            };
+
+            return View("SearchResults", searchResultsViewModel);
         }
+
+
 
     }
 }

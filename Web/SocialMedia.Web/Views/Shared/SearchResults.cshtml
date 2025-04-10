@@ -1,0 +1,239 @@
+﻿@model SearchResultsViewModel
+@using SocialMedia.Areas.Identity.Data
+@using SocialMedia.Web.Models
+@using SocialMedia.Web.Models.Post
+
+@{
+    ViewData["Title"] = "Search Results";
+    var savedPosts = (List<string>)this.ViewData["SavedPosts"] ?? new List<string>();
+}
+
+<div class="container search-results-container">
+    <div class="search-content">
+        <div class="search-header">
+            <h2>Search Results for "@Model.Query"</h2>
+            <form asp-action="Search" asp-controller="Home" method="get" class="search-form">
+                <div class="input-group">
+                    <input type="text" name="query" class="form-control" value="@Model.Query" placeholder="Search for users, posts, or tags...">
+                    <button type="submit" class="search-btn">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+       
+        <div class="search-section">
+            <h3>Users</h3>
+            @if (Model.Users.Any())
+            {
+                <div class="users-row">
+                    @foreach (var user in Model.Users)
+                    {
+                        <div class="user-card @(user.IsFriend ? "friend" : "")">
+                            <div class="user-avatar">
+                                <a href="/Post/MyPage?userId=@user.Id">
+                                    <img src="@(string.IsNullOrEmpty(user.ProfilePictureUrl) ? "/images/default-avatar.png" : user.ProfilePictureUrl.Replace("http://", "https://"))"
+                                         alt="@user.UserName's profile picture" class="profile-pic">
+                                </a>
+                            </div>
+                            <div class="user-info">
+                                <h4 class="username">@user.UserName</h4>
+                                <div class="user-actions">
+                                    @if (user.IsFollowing)
+                                    {
+                                        <span class="status-text following-status">Following</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-text not-following-status">Not Following</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="no-results">No users found matching '@Model.Query'</p>
+            }
+        </div>
+
+     
+        <div class="search-section">
+            <h3>Posts</h3>
+            @if (Model.Posts.Any())
+            {
+                <div class="posts-container">
+                    @foreach (var post in Model.Posts)
+                    {
+                        <div class="post">
+                            <div class="post-header">
+                                @if (post.IsUserDeleted)
+                                {
+                                    <img src="@(string.IsNullOrEmpty(post.ProfilePictureUrl) ? "/images/default-avatar.png" : post.ProfilePictureUrl.Replace("http://", "https://"))"
+                                         alt="Profile Picture" class="profile-pic">
+                                    <div class="post-info">
+                                        <span class="username">Anonymous</span>
+                                        <span class="time-stamp">@post.CreatedOn.ToString("MM/dd/yyyy")</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <a href="/Post/MyPage?userId=@post.CreatedById">
+                                        <img src="@(string.IsNullOrEmpty(post.ProfilePictureUrl) ? "/images/default-avatar.png" : post.ProfilePictureUrl.Replace("http://", "https://"))"
+                                             alt="Profile Picture" class="profile-pic">
+                                    </a>
+                                    <div class="post-info">
+                                        <span class="username">@post.UserName</span>
+                                        <span class="time-stamp">@post.CreatedOn.ToString("MM/dd/yyyy")</span>
+                                    </div>
+                                }
+                                @if (savedPosts is not null && savedPosts.Contains(post.Id))
+                                {
+                                    <span class="save-icon saved" data-post-id="@post.Id">
+                                        <i class="fas fa-bookmark"></i>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="save-icon" data-post-id="@post.Id">
+                                        <i class="far fa-bookmark"></i>
+                                    </span>
+                                }
+                            </div>
+
+                            @if (post.AttachmentUrls.Any())
+                            {
+                                <div class="post-image-container">
+                                    <div class="carousel-images">
+                                        @foreach (var attachmentUrl in post.AttachmentUrls)
+                                        {
+                                            <img src="@attachmentUrl.Replace("http://", "https://")" alt="Post Image" class="post-image">
+                                        }
+                                    </div>
+                                    @if (post.AttachmentUrls.Count > 1)
+                                    {
+                                        <span class="carousel-nav prev"><i class="fas fa-chevron-left"></i></span>
+                                        <span class="carousel-nav next"><i class="fas fa-chevron-right"></i></span>
+                                        <div class="carousel-dots">
+                                            <span class="dot active"></span>
+                                            @for (int i = 0; i < post.AttachmentUrls.Count - 1; i++)
+                                            {
+                                                <span class="dot"></span>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            <div class="post-actions">
+                                <div class="action-icons">
+                                    <span class="like-icon" data-post-id="@post.Id">
+                                        <i class="far fa-heart"></i>
+                                    </span>
+                                    <span class="comment-icon" data-post-id="@post.Id">
+                                        <i class="far fa-comment"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="post-caption">
+                                @if (post.IsUserDeleted)
+                                {
+                                    <span class="username">Anonymous</span>
+                                }
+                                else
+                                {
+                                    <span class="username">@post.UserName</span>
+                                }
+                                <p class="post-description">
+                                    @string.Join(" ", @post.Description.Split(" ").Take(10))
+                                    @if (post.Description.Split(" ").Length > 10)
+                                    {
+                                        <span class="post-description-hidden-text">
+                                            @string.Join(" ", @post.Description.Split(" ").Skip(10))
+                                        </span>
+                                        <span class="toggle-btn">more</span>
+                                    }
+                                </p>
+                                <div class="tags">
+                                    @foreach (var tag in @post.Tags)
+                                    {
+                                        <a href="@Url.Action("Search", "Home", new { query = tag })" class="tag-link">
+                                            <span>#@tag</span>
+                                        </a>
+                                    }
+                                </div>
+                                <div class="tagged-users">
+                                    @for (int i = 0; i < post.TaggedUsersId.Count; i++)
+                                    {
+                                        <a class="user-tag" href="/Post/MyPage?userId=@post.TaggedUsersId.ElementAt(i)">
+                                            <span>@('@')@post.TaggedUsersUserNames.ElementAt(i)</span>
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="comment-area">
+                                <input type="text" class="comment-input" placeholder="Add a comment..." data-post-id="@post.Id">
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="no-results">No posts found matching '@Model.Query'</p>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .search-results-container {
+        display: flex;
+        justify-content: center;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .search-content {
+        width: 100%;
+    }
+
+    .users-row {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 15px;
+        padding: 10px 0;
+    }
+
+    .user-card {
+        min-width: 150px;
+        flex: 0 0 auto;
+        background: #fff;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .user-actions {
+        margin-top: 8px;
+    }
+
+    .status-text {
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .following-status {
+        color: #42b72a;
+    }
+
+    .not-following-status {
+        color: #f00;
+    }
+</style>
