@@ -11,6 +11,9 @@ using SocialMedia.Service.Mappings;
 using Microsoft.EntityFrameworkCore;
 using Azure.Core;
 using System.Reflection;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
+using SocialMedia.Service.Hub;
 
 namespace SocialMedia.Service.Friends
 {
@@ -18,11 +21,17 @@ namespace SocialMedia.Service.Friends
     {
         private readonly FriendRequestRepository friendRequestRepository;
         private readonly SocialMediaUserRepository socialMediaUserRepository;
+        private readonly NotificationRepository notificationRepository;
+        private readonly IServiceProvider serviceProvider;
         public FriendRequestService(FriendRequestRepository friendRequestRepository,
-            SocialMediaUserRepository socialMediaUserRepository)
+            SocialMediaUserRepository socialMediaUserRepository,
+            NotificationRepository notificationRepository,
+            IServiceProvider serviceProvider)
         {
             this.friendRequestRepository = friendRequestRepository;
             this.socialMediaUserRepository = socialMediaUserRepository;
+            this.notificationRepository = notificationRepository;
+            this.serviceProvider = serviceProvider;
         }
 
         public async Task<FriendRequestServiceModel> CreateFriendRequest(SocialMediaUser receiver, SocialMediaUser sender)
@@ -53,6 +62,16 @@ namespace SocialMedia.Service.Friends
             else if (!ifRequestExists && isRequestValid)
             {
                 var request = await friendRequestRepository.CreateAsync(new FriendRequest { Receiver = receiver, Status = "Pending" });
+                var notification = new Notification
+                {
+                    UserId = request.ReceiverId,
+                    Message = $"{request.CreatedBy.UserName} sent you a friend request",
+                    CreatedAt = DateTime.UtcNow
+                };
+                await notificationRepository.AddNotificationAsync(notification);
+
+                var hubContext = serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+                await hubContext.Clients.User(request.CreatedById).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
                 return request.ToModel();
             }
 
@@ -114,6 +133,17 @@ namespace SocialMedia.Service.Friends
             await socialMediaUserRepository.UpdateAsync(request.CreatedBy);
             await socialMediaUserRepository.UpdateAsync(request.Receiver);
             await friendRequestRepository.UpdateAsync(request);
+            var notification = new Notification
+            {
+                UserId = request.ReceiverId,
+                Message = $"{request.CreatedBy.UserName} accepted your friend request",
+                CreatedAt = DateTime.UtcNow
+            };
+            await notificationRepository.AddNotificationAsync(notification);
+
+            var hubContext = serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+            await hubContext.Clients.User(request.CreatedById).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
+
             return request.ToModel();
         }
 
@@ -129,6 +159,16 @@ namespace SocialMedia.Service.Friends
             request.Status = "Declined";
 
             await friendRequestRepository.UpdateAsync(request);
+            var notification = new Notification
+            {
+                UserId = request.ReceiverId,
+                Message = $"{request.CreatedBy.UserName} denied your friend request",
+                CreatedAt = DateTime.UtcNow
+            };
+            await notificationRepository.AddNotificationAsync(notification);
+
+            var hubContext = serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+            await hubContext.Clients.User(request.CreatedById).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
             return request.ToModel();
         }
 
@@ -189,6 +229,17 @@ namespace SocialMedia.Service.Friends
                 following.Followers.Add(user);
                 await socialMediaUserRepository.UpdateAsync(user);
                 await socialMediaUserRepository.UpdateAsync(following);
+                var notification = new Notification
+                {
+                    UserId = following.Id,
+                    Message = $"{user.UserName} started following you",
+                    CreatedAt = DateTime.UtcNow
+                };
+                await notificationRepository.AddNotificationAsync(notification);
+
+                var hubContext = serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+                await hubContext.Clients.User(following.Id).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
+
                 return true;
             }
         }

@@ -1,0 +1,147 @@
+﻿@using SocialMedia.Web.Models.Notifications
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model List<NotificationViewModel>
+@{
+    ViewData["Title"] = "My Notifications";
+}
+
+<style>
+    .notifications-container {
+        margin: 2rem auto;
+        max-width: 800px;
+        padding: 0 15px;
+    }
+
+    .notifications-header {
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #dee2e6;
+        padding-bottom: 1rem;
+    }
+
+    .notification-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .notification-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .notification-icon {
+        font-size: 1.5rem;
+    }
+
+    .notification-text {
+        font-size: 1rem;
+        color: #343a40;
+    }
+
+    .notification-time {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-left: auto;
+    }
+
+    .back-button {
+        margin-top: 2rem;
+        padding: 0.5rem 1.5rem;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+        .back-button:hover {
+            background: #e9ecef;
+        }
+</style>
+
+<div class="notifications-container">
+    <div class="notifications-header">
+        <h2>@ViewData["Title"]</h2>
+    </div>
+
+    <div id="notificationList" class="notification-list">
+        @if (Model?.Any() == true)
+        {
+            @foreach (var noti in Model)
+            {
+                <div class="notification-item">
+                    <span class="notification-text">@noti.Message</span>
+                    <span class="notification-time">@noti.CreatedAt.ToString("g")</span>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-info">
+                No notifications found.
+            </div>
+        }
+    </div>
+
+    <button class="back-button" onclick="window.history.back()">Back to Previous Page</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/notificationHub")
+        .build();
+
+    connection.on("ReceiveNotification", function (message, createdAt) {
+        const list = document.getElementById("notificationList");
+        if (!list) return;
+
+           function showToast(message) {
+        const container = document.getElementById("toastContainer");
+
+        const toast = document.createElement("div");
+        toast.classList.add("toast");
+        toast.textContent = message;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 5000);
+    }
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "notification-item";
+
+        const text = document.createElement("span");
+        text.className = "notification-text";
+        text.textContent = message;
+
+        const time = document.createElement("span");
+        time.className = "notification-time";
+        time.textContent = new Date(createdAt).toLocaleString();
+
+        wrapper.appendChild(icon);
+        wrapper.appendChild(text);
+        wrapper.appendChild(time);
+
+        list.insertBefore(wrapper, list.firstChild);
+    });
+        connection.on("ReceiveNotification", function (message, createdAt) {
+        showToast(message);
+    });
+
+
+    connection.start().catch(function (err) {
+        return console.error(err.toString());
+    });
+</script>

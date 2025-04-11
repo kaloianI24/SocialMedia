@@ -1,9 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using SocialMedia.Areas.Identity.Data;
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Repositories;
 using SocialMedia.Service.Cloud;
+using SocialMedia.Service.Hub;
 using SocialMedia.Service.Mappings;
 using SocialMedia.Service.Models;
 using SocialMedia.Web.Models.Post;
@@ -18,18 +22,24 @@ namespace SocialMedia.Service.SocialMediaPost
         private readonly TagRepository tagRepository;
         private readonly SocialMediaUserRepository userRepository;
         private readonly ICloudinaryService cloudinaryService;
+        private readonly NotificationRepository notificationRepository;
+        private readonly IServiceProvider serviceProvider;
 
         public SocialMediaPostService(PostRepository postRepository,
             CloudResourceRepository cloudResourceRepository,
             TagRepository tagRepository,
             SocialMediaUserRepository userRepository,
-            ICloudinaryService cloudinaryService)
+            ICloudinaryService cloudinaryService,
+            NotificationRepository notificationRepository,
+            IServiceProvider serviceProvider)
         {
             this.postRepository = postRepository;
             this.cloudResourceRepository = cloudResourceRepository;
             this.tagRepository = tagRepository;
             this.userRepository = userRepository;
             this.cloudinaryService = cloudinaryService;
+            this.notificationRepository = notificationRepository;
+            this.serviceProvider = serviceProvider;
         }
 
         public async Task<PostServiceModel> CreateAsync(PostServiceModel model)
@@ -68,6 +78,20 @@ namespace SocialMedia.Service.SocialMediaPost
             if(model.TaggedUsersId != null)
             {
                 post.TaggedUsers = await userRepository.GetUsersByIdsAsync(model.TaggedUsersId);
+                foreach(var taggedUser in post.TaggedUsers)
+                {
+                    var notification = new Notification
+                    {
+                        UserId = taggedUser.Id,
+                        Message = $"{post.CreatedBy.UserName} tagged you in a post",
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    await notificationRepository.AddNotificationAsync(notification);
+
+                    var hubContext = serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+                    await hubContext.Clients.User(taggedUser.Id).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
+
+                }
             }
 
             post.Visibility = model.Visibility;
@@ -245,7 +269,22 @@ namespace SocialMedia.Service.SocialMediaPost
                 var usersIds = model.TaggedUsersId.First().Split(",");
                 var tasks = usersIds.Select(async id => await userRepository.GetUserById(id)).ToList();
                 var taggedUsers = await Task.WhenAll(tasks);
+                var newTaggedUsers = taggedUsers.Except(targetPost.TaggedUsers).ToList();
+                foreach(var newTaggedUser in newTaggedUsers)
+                {
+                    var notification = new Notification
+                    {
+                        UserId = newTaggedUser.Id,
+                        Message = $"{targetPost.CreatedBy.UserName} tagged you in a post",
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    await notificationRepository.AddNotificationAsync(notification);
+
+                    var hubContext = serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+                    await hubContext.Clients.User(newTaggedUser.Id).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
+                }
                 targetPost.TaggedUsers = taggedUsers.ToList();
+                
             }
             else
             {
@@ -274,6 +313,18 @@ namespace SocialMedia.Service.SocialMediaPost
                 user.SavedPosts.Add(post);
                 await userRepository.UpdateAsync(user);
                 await postRepository.UpdateAsync(post);
+
+                var notification = new Notification
+                {
+                    UserId = post.CreatedById,
+                    Message = $"{user.UserName} saved one of your posts",
+                    CreatedAt = DateTime.UtcNow
+                };
+                await notificationRepository.AddNotificationAsync(notification);
+
+                var hubContext = serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+                await hubContext.Clients.User(post.CreatedById).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
+
                 return post.ToModel(UserPostMappingsContext.Post);
             }
         }

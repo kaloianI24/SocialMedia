@@ -9,6 +9,7 @@ namespace SocialMedia.Service.Hub
 {
     using Microsoft.AspNetCore.SignalR;
     using Microsoft.Extensions.DependencyInjection;
+    using SocialMedia.Data.Models;
     using SocialMedia.Data.Repositories;
     using SocialMedia.Service.Encryption;
     using System.Collections.Concurrent;
@@ -17,12 +18,16 @@ namespace SocialMedia.Service.Hub
     {
         private readonly ChatMessageRepository _chatRepository;
         private readonly IServiceProvider _serviceProvider;
+        private readonly NotificationRepository _notificationRepository;
+        private readonly SocialMediaUserRepository _userRepository;
         private static ConcurrentDictionary<string, string> ConnectedUsers = new();
 
-        public ChatHub(ChatMessageRepository chatRepository, IServiceProvider serviceProvider)
+        public ChatHub(ChatMessageRepository chatRepository, IServiceProvider serviceProvider, NotificationRepository notificationRepository, SocialMediaUserRepository userRepository)
         {
             _chatRepository = chatRepository;
             _serviceProvider = serviceProvider;
+            _notificationRepository = notificationRepository;
+            _userRepository = userRepository;
         }
 
         public override Task OnConnectedAsync()
@@ -58,6 +63,17 @@ namespace SocialMedia.Service.Hub
             }
 
             await Clients.Caller.SendAsync("ReceiveMessage", fromUserId, plainText, DateTime.UtcNow.ToString("o"));
+
+            var sender = await _userRepository.GetUserById(fromUserId);
+            var notification = new Notification
+            {
+                UserId = toUserId,
+                Message = $"{sender.UserName} sent you a message",
+                CreatedAt = DateTime.UtcNow
+            };
+            await _notificationRepository.AddNotificationAsync(notification);
+            var hubContext = _serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+            await hubContext.Clients.User(toUserId).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt.ToString("o"));
         }
     }
 }
