@@ -339,10 +339,8 @@ namespace SocialMedia.Controllers
 
             query = query.ToLower();
 
-          
             var blockedUserIds = currentUser.BlockedUsers?.Select(bu => bu.Id).ToList() ?? new List<string>();
 
-           
             var rawUsers = await _userManager.Users
                 .Where(u => !u.IsDeleted && u.Id != currentUser.Id)
                 .Include(u => u.ProfilePicture)
@@ -359,9 +357,8 @@ namespace SocialMedia.Controllers
                 .ThenBy(u => u.UserName)
                 .ToList();
 
-           
             var allPosts = await _context.Posts
-                .Include(p => p.CreatedBy)  
+                .Include(p => p.CreatedBy)
                     .ThenInclude(u => u.ProfilePicture)
                 .Include(p => p.Tags)
                 .Include(p => p.Reactions)
@@ -380,11 +377,13 @@ namespace SocialMedia.Controllers
                     ))
                 .ToListAsync();
 
-           
+            // Updated posts query with username condition
             var posts = allPosts
                 .Where(p => (p.Description != null && p.Description.ToLower().Contains(query)) ||
-                            (p.Tags != null && p.Tags.Any(t => t.Name != null && t.Name.ToLower().Contains(query))))
-                .OrderByDescending(p => p.Tags != null && p.Tags.Any(t => t.Name != null && t.Name.ToLower() == query))
+                            (p.Tags != null && p.Tags.Any(t => t.Name != null && t.Name.ToLower().Contains(query))) ||
+                            (p.CreatedBy.UserName != null && p.CreatedBy.UserName.ToLower().Contains(query)))
+                .OrderByDescending(p => p.CreatedBy.UserName != null && p.CreatedBy.UserName.ToLower() == query)
+                .ThenByDescending(p => p.Tags != null && p.Tags.Any(t => t.Name != null && t.Name.ToLower() == query))
                 .ThenByDescending(p => p.Description != null && p.Description.ToLower().Contains(query))
                 .ThenByDescending(p => p.CreatedOn)
                 .ToList();

@@ -968,3 +968,19 @@ textarea, input[type="text"] {
 .comment-button-holder {
     margin-left: 10px;
 }
+
+@media (max-width: 992px) {
+    .posts-masonry {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .search-bar-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    @media (max-width: 768px) {
+        .container;
+
