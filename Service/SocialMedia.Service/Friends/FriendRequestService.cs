@@ -71,7 +71,7 @@ namespace SocialMedia.Service.Friends
                 await notificationRepository.AddNotificationAsync(notification);
 
                 var hubContext = serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
-                await hubContext.Clients.User(request.CreatedById).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
+                await hubContext.Clients.User(request.ReceiverId).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
                 return request.ToModel();
             }
 
@@ -135,8 +135,8 @@ namespace SocialMedia.Service.Friends
             await friendRequestRepository.UpdateAsync(request);
             var notification = new Notification
             {
-                UserId = request.ReceiverId,
-                Message = $"{request.CreatedBy.UserName} accepted your friend request",
+                UserId = request.CreatedById,
+                Message = $"{request.Receiver.UserName} accepted your friend request",
                 CreatedAt = DateTime.UtcNow
             };
             await notificationRepository.AddNotificationAsync(notification);
@@ -161,8 +161,8 @@ namespace SocialMedia.Service.Friends
             await friendRequestRepository.UpdateAsync(request);
             var notification = new Notification
             {
-                UserId = request.ReceiverId,
-                Message = $"{request.CreatedBy.UserName} denied your friend request",
+                UserId = request.CreatedById,
+                Message = $"{request.Receiver.UserName} denied your friend request",
                 CreatedAt = DateTime.UtcNow
             };
             await notificationRepository.AddNotificationAsync(notification);

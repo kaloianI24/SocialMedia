@@ -73,7 +73,9 @@
                         <div class="tags">
                             @foreach (var tag in @post.Tags)
                             {
-                                <span>#@tag</span>
+                                <a class="links" href="/Home/Search?query=@tag">
+                                    <span class="taggedUsers-text">@('#')@tag</span>
+                                </a>
                             }
                         </div>
                         <div class="taggedUsers">

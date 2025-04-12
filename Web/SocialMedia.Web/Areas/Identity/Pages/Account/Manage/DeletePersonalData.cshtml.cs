@@ -28,6 +28,8 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
         private readonly ISocialMediaPostService socialMediaPostService;
         private readonly SocialMediaUserRepository socialMediaUserRepository;
         private readonly FriendRequestRepository friendRequestRepository;
+        private readonly ChatMessageRepository chatMessageRepository;
+        private readonly NotificationRepository notificationRepository;
 
         public DeletePersonalDataModel(
             UserManager<SocialMediaUser> userManager,
@@ -36,7 +38,9 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
             PostRepository postRepository,
             ISocialMediaPostService socialMediaPostService,
             SocialMediaUserRepository socialMediaUserRepository,
-            FriendRequestRepository friendRequestRepository)
+            FriendRequestRepository friendRequestRepository,
+            ChatMessageRepository chatMessageRepository,
+            NotificationRepository notificationRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -45,6 +49,8 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
             this.socialMediaPostService = socialMediaPostService;
             this.socialMediaUserRepository = socialMediaUserRepository;
             this.friendRequestRepository = friendRequestRepository;
+            this.chatMessageRepository = chatMessageRepository;
+            this.notificationRepository = notificationRepository;
         }
 
         /// <summary>
@@ -165,6 +171,11 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
                 following.Followers.Remove(userDb);
                 await socialMediaUserRepository.UpdateAsync(following);
             }
+
+            var messages = await chatMessageRepository.AllMessageById(user.Id);
+            await chatMessageRepository.DeleteAllMessages(messages);
+            var notifications = notificationRepository.GetAllForUser(user.Id);
+            await notificationRepository.DeleteAllNotifications(notifications);
             await socialMediaUserRepository.UpdateAsync(userDb);
             var userId = await _userManager.GetUserIdAsync(user);
 
@@ -186,8 +197,6 @@ namespace SocialMedia.Areas.Identity.Pages.Account.Manage
                     throw new InvalidOperationException($"Unexpected error occurred deleting user.");
                 }
             }
-                
-
             await _signInManager.SignOutAsync();
 
             _logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);

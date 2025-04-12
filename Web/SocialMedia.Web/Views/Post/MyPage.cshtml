@@ -306,7 +306,7 @@
                 {
                     <button class="btn-unblock" id="@Model.Id">Unblock</button>
                 }
-                @if(Model.IsPrivate && (bool)ViewData["AreFriends"] || !Model.IsPrivate)
+                @if (Model.IsPrivate && (bool)ViewData["AreFriends"] || !Model.IsPrivate && !(bool)ViewData["IsCurrentUserHaveBlockedTargetUser"])
                 {
                     <a class="btn-chat" asp-controller="Chat"
                        asp-action="Conversation"
@@ -333,7 +333,7 @@
         }
         else
         {
-            <h3>You cannot see this account</h3>
+            <h3 style="text-align: center">You cannot see this account</h3>
         }
     </div>
     </body>

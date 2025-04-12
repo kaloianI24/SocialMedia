@@ -77,29 +77,33 @@ namespace SocialMedia.Service.SocialMediaPost
 
             if(model.TaggedUsersId != null)
             {
-                post.TaggedUsers = await userRepository.GetUsersByIdsAsync(model.TaggedUsersId);
-                foreach(var taggedUser in post.TaggedUsers)
-                {
-                    var notification = new Notification
-                    {
-                        UserId = taggedUser.Id,
-                        Message = $"{post.CreatedBy.UserName} tagged you in a post",
-                        CreatedAt = DateTime.UtcNow
-                    };
-                    await notificationRepository.AddNotificationAsync(notification);
-
-                    var hubContext = serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
-                    await hubContext.Clients.User(taggedUser.Id).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
-
-                }
+                post.TaggedUsers = await userRepository.GetUsersByIdsAsync(model.TaggedUsersId);               
             }
 
             post.Visibility = model.Visibility;
             await postRepository.CreateAsync(post);
 
+            await NotifyTaggedUsers(post.TaggedUsers, post.Id);
             return post.ToModel(UserPostMappingsContext.Post);
         }
 
+        private async Task NotifyTaggedUsers(List<SocialMediaUser> taggedUsers, string postId)
+        {
+            var post = postRepository.GetAll().FirstOrDefault(p => p.Id == postId);
+            foreach (var taggedUser in post.TaggedUsers)
+            {
+                var notification = new Notification
+                {
+                    UserId = taggedUser.Id,
+                    Message = $"{post.CreatedBy.UserName} tagged you in a post",
+                    CreatedAt = DateTime.UtcNow
+                };
+                await notificationRepository.AddNotificationAsync(notification);
+
+                var hubContext = serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+                await hubContext.Clients.User(taggedUser.Id).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
+            }
+        }
         //public IQueryable<PostServiceModel> GetAllTaggedPosts(SocialMediaUser user, bool isOwner, SocialMediaUser currenUser)
         //{
         //    if(isOwner)
@@ -157,7 +161,7 @@ namespace SocialMedia.Service.SocialMediaPost
 
         public async Task<PostServiceModel> RemoveTaggedUser(string userId, string postId)
         {
-            var targetPost = await postRepository.GetAll()
+            var targetPost = await postRepository.GetAll().IgnoreQueryFilters()
                 .Include(p => p.TaggedUsers)
                 .ThenInclude(u => u.ProfilePicture)
                 .Include(p => p.Tags)
@@ -270,19 +274,7 @@ namespace SocialMedia.Service.SocialMediaPost
                 var tasks = usersIds.Select(async id => await userRepository.GetUserById(id)).ToList();
                 var taggedUsers = await Task.WhenAll(tasks);
                 var newTaggedUsers = taggedUsers.Except(targetPost.TaggedUsers).ToList();
-                foreach(var newTaggedUser in newTaggedUsers)
-                {
-                    var notification = new Notification
-                    {
-                        UserId = newTaggedUser.Id,
-                        Message = $"{targetPost.CreatedBy.UserName} tagged you in a post",
-                        CreatedAt = DateTime.UtcNow
-                    };
-                    await notificationRepository.AddNotificationAsync(notification);
-
-                    var hubContext = serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
-                    await hubContext.Clients.User(newTaggedUser.Id).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
-                }
+                await NotifyTaggedUsers(newTaggedUsers, model.Id);
                 targetPost.TaggedUsers = taggedUsers.ToList();
                 
             }

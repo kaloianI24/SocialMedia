@@ -24,25 +24,62 @@ namespace SocialMedia.Controllers
 
         public async Task<IActionResult> Conversation(string userId)
         {
-            var currentUser = await _userManager.Users.Include(u => u.ProfilePicture).FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
-            var messages = _chatRepository.GetMessageHistory(currentUser.Id, userId);
+            var currentUser = await _userManager.Users
+                .Include(u => u.ProfilePicture)
+                .Include(u => u.Friends)
+                .Include(u => u.BlockedUsers)
+                .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
 
-            var history = new ChatViewModel
+            var targetUser = await _userManager.Users
+            .Include(u => u.ProfilePicture)
+            .Include(u => u.Friends)
+            .Include(u => u.Following)
+            .Include(u => u.BlockedUsers)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+        
+
+            if(targetUser.IsPrivate && targetUser.Friends.Contains(currentUser) || targetUser.Following.Contains(currentUser) || !targetUser.IsPrivate && !targetUser.BlockedUsers.Contains(currentUser))
             {
-                ReceiverId = userId,
-                CurrentUserId = currentUser.Id,
-                ReceiverUserName = (await _userManager.FindByIdAsync(userId)).UserName,
-                Messages = messages.Select(m => new ChatMessageBasic
+
+                var messages = _chatRepository.GetMessageHistory(currentUser.Id, userId);
+                var unreadMessages = messages
+                    .Where(m => m.ReceiverId == currentUser.Id && !m.IsRead)
+                    .ToList();
+
+                await _chatRepository.UpdateStatus(unreadMessages);
+                var history = new ChatViewModel
                 {
-                    SenderId = m.SenderId,
-                    SentAt = m.SentAt,
-                    PlainText = _encryptionService.Decrypt(m.EncryptedText, m.IV)
-                }).ToList()
-            };
+                    ReceiverId = userId,
+                    CurrentUserId = currentUser.Id,
+                    ReceiverUserName = (await _userManager.FindByIdAsync(userId)).UserName,
+                    Messages = messages.Select(m => new ChatMessageBasic
+                    {
+                        SenderId = m.SenderId,
+                        SentAt = m.SentAt,
+                        PlainText = _encryptionService.Decrypt(m.EncryptedText, m.IV)
+                    }).ToList()
+                };
+                var role = await _userManager.GetRolesAsync(currentUser);
+                ViewData["IsAdmin"] = role.Contains("Administrator");
+                ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
+                return View("Chat", history);
+            }
+
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        public async Task<IActionResult> AllConversations()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var allConversations = await _chatRepository.GetUserConversationsAsync(currentUser.Id);
             var role = await _userManager.GetRolesAsync(currentUser);
             ViewData["IsAdmin"] = role.Contains("Administrator");
             ViewData["ProfilePictureUrl"] = currentUser?.ProfilePicture?.CloudUrl;
-            return View("Chat", history);
+            return View(allConversations);
+
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using SocialMedia.Data.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using SocialMedia.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,15 @@ namespace SocialMedia.Data.Repositories
                 .Where(n => n.UserId == userId)
                 .OrderByDescending(n => n.CreatedAt)
                 .ToList();
+        }
+
+        public async Task DeleteAllNotifications(List<Notification> notifications)
+        {
+            if (notifications.Any())
+            {
+                _context.Notifications.RemoveRange(notifications);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

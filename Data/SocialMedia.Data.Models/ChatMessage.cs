@@ -16,5 +16,6 @@ namespace SocialMedia.Data.Models
         public string EncryptedText { get; set; }
         public string IV { get; set; }
         public DateTime SentAt { get; set; }
+        public bool IsRead { get; set; } = false;
     }
 }

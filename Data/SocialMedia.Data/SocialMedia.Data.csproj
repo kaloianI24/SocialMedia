@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Web\SocialMedia.Web.Models\SocialMedia.Web.Models.csproj" />
     <ProjectReference Include="..\SocialMedia.Data.Models\SocialMedia.Data.Models.csproj" />
   </ItemGroup>
 
