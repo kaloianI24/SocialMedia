@@ -1,6 +1,9 @@
 ﻿@using SocialMedia.Areas.Identity.Data
+@using SocialMedia.Data.Models
 @{
     List<string> savedPostsIds = (List<string>)ViewData["SavedPostsId"];
+    List<UserPostReaction> reactions = (List<UserPostReaction>)ViewData["PostsReactions"];
+    SocialMediaUser currentUser = (SocialMediaUser)ViewData["CurrentUser"];
 }
 @model List<SocialMedia.Web.Models.Post.SearchedPostsWebModel>
 <div class="main-content2">
@@ -60,12 +63,27 @@
                 <div class="post-actions">
                     <div class="post-likes">
                         <div class="likes-count">
-                            <img src="@Url.Content("~/images/heart.svg")"
-                                 class="reaction-heart"
-                                 data-liked="false"
-                                 data-post-id="@post.Id" />
+                            @{
+                                int likes = reactions.Count(reaction => reaction.Post.Id == post.Id);
+                                bool isLikedByCurrentUser = reactions.Any(reaction => reaction.Post.Id == post.Id && reaction.User.Id == currentUser.Id);
+                            }
+                            @if (isLikedByCurrentUser)
+                            {
+                                <img src="@Url.Content("~/images/heart.png")"
+                                     class="reaction-heart"
+                                     data-liked="true"
+                                     data-post-id="@post.Id" />
+                            }
+                            else
+                            {
+                                <img src="@Url.Content("~/images/heart.svg")"
+                                     class="reaction-heart"
+                                     data-liked="false"
+                                     data-post-id="@post.Id" />
+                            }
+                            <div class="count-likes-number">@likes</div>
 
-                            <div class="count-likes-number">0</div>
+
                             <img src="@Url.Content("~/images/comment.svg")" class="comment-image">
                             <div class="count-comment-number">0</div>
 
@@ -135,38 +153,48 @@
     }
 </div>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
         document.addEventListener("click", function (event) {
-            if (event.target.classList.contains("reaction-heart")) {
-                let image = event.target;
-                let liked = image.getAttribute("data-liked") === "true";
-                let counter = image.parentElement.querySelector(".count-likes-number");
-                let postId = image.getAttribute("data-post-id");
+        if (event.target.classList.contains("reaction-heart")) {
+            let image = event.target;
+            let liked = image.getAttribute("data-liked") === "true";
+            let counter = image.parentElement.querySelector(".count-likes-number");
+            let postId = image.getAttribute("data-post-id");
 
-                // Toggle like status
-                if (liked) {
-                    image.src = "@Url.Content("~/images/heart.svg")";
-                    counter.textContent = Math.max(0, parseInt(counter.textContent) - 1);
-                    image.setAttribute("data-liked", "false");
-                    updateLike(postId, false);
-                } else {
-                    image.src = "@Url.Content("~/images/heart.png")";
-                    counter.textContent = parseInt(counter.textContent) + 1;
-                    image.setAttribute("data-liked", "true");
-                    updateLike(postId, true);
-                }
+            if (liked) {
+                fetch('/Post/Unlike?postId=' + postId, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then((res) => {
+                    if (res.ok) {
+                        image.src = "/images/heart.svg";
+                        counter.textContent = parseInt(counter.textContent) - 1;
+                        image.setAttribute("data-liked", "false");
+                    } else {
+                        alert('Failed to unlike the post.');
+                    }
+                })
+                .catch((error) => console.error(error));
+            } else {
+                fetch('/Post/Like?postId=' + postId, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then((res) => {
+                    if (res.ok) {
+                        image.src = "/images/heart.png";
+                        counter.textContent = Math.max(0, parseInt(counter.textContent) + 1);
+                        image.setAttribute("data-liked", "true");
+                    } else {
+                        alert('Failed to like the post.');
+                    }
+                })
+                .catch((error) => console.error(error));
             }
-        });
-
-        function updateLike(postId, isLiking) {
-            fetch(`/Post/LikePost?postId=${postId}&like=${isLiking}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" }
-            }).then(res => {
-                if (!res.ok) {
-                    alert("Error updating like count.");
-                }
-            }).catch(error => console.error(error));
         }
     });
 </script>

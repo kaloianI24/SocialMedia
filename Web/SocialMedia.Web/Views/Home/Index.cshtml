@@ -101,16 +101,47 @@
                         <div class="post-likes">
                             <div class="likes-count" id="image-container">
                                 <img id="toggleImage" src="~/images/heart.svg" alt="SVG Image" class="reaction-heart" data-liked="false">
+
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function () {
+                                        const images = document.querySelectorAll(".reaction-heart");
+                                        const img1 = "/images/heart.svg";
+                                        const img2 = "/images/heart.png";
+
+                                        images.forEach(image => {
+                                            image.addEventListener("click", function() {
+                                                let liked = this.getAttribute("data-liked") === "true";
+                                                let counter = this.parentElement.querySelector(".count-likes-number");
+
+                                                if (liked) {
+                                                    this.src = img1;
+                                                    counter.textContent = Math.max(0, parseInt(counter.textContent) - 1);
+                                                    this.setAttribute("data-liked", "false");
+                                                } else {
+                                                    this.src = img2;
+                                                    counter.textContent = parseInt(counter.textContent) + 1;
+                                                    this.setAttribute("data-liked", "true");
+                                                }
+                                            });
+                                        });
+                                    });
+                                </script>
+
+
                                 <div class="count-likes-number">0</div>
+
+
                                 <img src="~/images/comment.svg" class="comment-image">
-                                <div class="count-comment-number">0</div>
+                                <div class="count-comment-number" data-post-id="@post.Id">0</div>
+                                <div class="details-posted-comment" data-post-id="@post.Id"></div>
                                 <div class="comment-input-field">
-                                    <textarea class="form-control" me-1 rows="1" placeholder="Add a comment..."></textarea>
+                                    <textarea class="form-control" rows="1" placeholder="Add a comment..." data-post-id="@post.Id"></textarea>
                                 </div>
                                 <div class="comment-button-holder d-none d-flex justify-content-end">
-                                    <button class="btn btn-primary fw-bold comment-submit-button">Post</button>
+                                    <button class="btn btn-primary fw-bold comment-submit-button" data-post-id="@post.Id">Post</button>
                                 </div>
-                                <div class="details-posted-comment"></div>
+
+
                                 @if (savedPosts is not null && savedPosts.Contains(post.Id))
                                 {
                                     <button type="button" class="btn-unsave-post saved" data-post-id="@post.Id">
@@ -278,5 +309,32 @@
             .catch((error) => console.error(error));
         }));
     </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const posts = document.querySelectorAll('.post');
+
+                posts.forEach(post => {
+                    const postId = post.querySelector('.comment-submit-button').getAttribute('data-post-id');
+                    const postCommentCount = post.querySelector('.count-comment-number');
+                    const commentTextarea = post.querySelector('textarea');
+                    const postCommentButton = post.querySelector('.comment-submit-button');
+                    const commentSection = post.querySelector('.details-posted-comment');
+                    postCommentButton.addEventListener('click', function () {
+                        if (commentTextarea.value.trim() !== '') {
+                            let currentCount = parseInt(postCommentCount.innerText);
+                            currentCount++;
+                            postCommentCount.innerText = currentCount;
+                            const newComment = document.createElement('div');
+                            newComment.classList.add('posted-comment');
+                            newComment.textContent = commentTextarea.value;
+                            commentSection.appendChild(newComment);
+                            commentTextarea.value = '';
+                        } else {
+                            alert('Please write a comment before posting.');
+                        }
+                    });
+                });
+            });
+        </script>
     }
 }

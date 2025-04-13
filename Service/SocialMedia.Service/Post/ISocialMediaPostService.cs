@@ -22,6 +22,9 @@ namespace SocialMedia.Service.SocialMediaPost
         public Task<PostServiceModel> UpdateAsync(UpdatePostWebModel model);
         public Task<PostServiceModel> SavePost(string postId, SocialMediaUser user);
         public Task<PostServiceModel> UnsavePost(string postId, SocialMediaUser user);
+
+        public Task<PostServiceModel> Like(string postId, SocialMediaUser user);
+        public Task<PostServiceModel> Unlike(string postId, SocialMediaUser user);
     }
 
 }

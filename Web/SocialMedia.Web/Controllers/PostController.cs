@@ -16,22 +16,29 @@ using SocialMedia.Service.SocialMediaPost;
 using SocialMedia.Data.Models;
 using Microsoft.Extensions.Hosting;
 using System.Data;
+using SocialMedia.Service.Reaction;
+using SocialMedia.Data.Repositories;
 
 namespace SocialMedia.Controllers
 {
     public class PostController : Controller
     {
+
         private readonly ISocialMediaPostService _socialMediaPostService;
         private readonly ICloudinaryService _cloudinaryService;
         private readonly UserManager<SocialMediaUser> _userManager;
+        private readonly PostRepository _postRepository;
 
         public PostController(ISocialMediaPostService socialMediaPostService,
             ICloudinaryService cloudinaryService,
-            UserManager<SocialMediaUser> userManager)
+            UserManager<SocialMediaUser> userManager,
+            PostRepository postRepository
+            )
         {
             _socialMediaPostService = socialMediaPostService;
             _cloudinaryService = cloudinaryService;
             _userManager = userManager;
+            _postRepository = postRepository;
         }
         public IActionResult Index()
         {
@@ -138,6 +145,8 @@ namespace SocialMedia.Controllers
                     ViewData["AreFriends"] = areFriends;
                     ViewData["IsFollowing"] = isFollowing;
                     ViewData["SavedPostsId"] = currentUser.SavedPosts.Select(p => p.Id).ToList();
+                    ViewData["PostsReactions"] = _postRepository.GetAll().Include(post => post.Reactions).SelectMany(post => post.Reactions).ToList();
+                    ViewData["CurrentUser"] = currentUser;
                     
                     if(currentUserId == targetUserId || areFriends)
                     {
@@ -160,6 +169,8 @@ namespace SocialMedia.Controllers
                     ViewData["AreFriends"] = areFriends;
                     ViewData["IsAccountPrivate"] = targetUser.IsPrivate;
                     ViewData["SavedPostsId"] = currentUser.SavedPosts.Select(p => p.Id).ToList();
+                    ViewData["PostsReactions"] = _postRepository.GetAll().Include(post => post.Reactions).SelectMany(post => post.Reactions).ToList();
+                    ViewData["CurrentUser"] = currentUser;
                     List<SearchedPostsWebModel> allPosts;
                     if (currentUserId == targetUserId)
                     {
@@ -554,6 +565,20 @@ namespace SocialMedia.Controllers
                 TaggedUsersUserNames = p.TaggedUsers.Select(u => u.UserName).ToList(),
                 IsUserDeleted = p.CreatedBy.IsDeleted
             }).ToList();
+        }
+
+        public async Task<IActionResult> Like(string postId)
+        {
+            var currentUser = await GetUser();
+            await _socialMediaPostService.Like(postId, currentUser);
+            return NoContent();
+        }
+
+        public async Task<IActionResult> Unlike(string postId)
+        {
+            var currentUser = await GetUser();
+            await _socialMediaPostService.Unlike(postId, currentUser);
+            return NoContent();
         }
     }
 }

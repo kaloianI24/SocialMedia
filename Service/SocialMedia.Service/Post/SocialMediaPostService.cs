@@ -24,6 +24,7 @@ namespace SocialMedia.Service.SocialMediaPost
         private readonly ICloudinaryService cloudinaryService;
         private readonly NotificationRepository notificationRepository;
         private readonly IServiceProvider serviceProvider;
+        private readonly ReactionRepository reactionRepository;
 
         public SocialMediaPostService(PostRepository postRepository,
             CloudResourceRepository cloudResourceRepository,
@@ -31,7 +32,8 @@ namespace SocialMedia.Service.SocialMediaPost
             SocialMediaUserRepository userRepository,
             ICloudinaryService cloudinaryService,
             NotificationRepository notificationRepository,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            ReactionRepository reactionRepository)
         {
             this.postRepository = postRepository;
             this.cloudResourceRepository = cloudResourceRepository;
@@ -40,6 +42,7 @@ namespace SocialMedia.Service.SocialMediaPost
             this.cloudinaryService = cloudinaryService;
             this.notificationRepository = notificationRepository;
             this.serviceProvider = serviceProvider;
+            this.reactionRepository = reactionRepository;
         }
 
         public async Task<PostServiceModel> CreateAsync(PostServiceModel model)
@@ -299,26 +302,23 @@ namespace SocialMedia.Service.SocialMediaPost
                 throw new Exception("You have already saved the post!");
             }
 
-            else
+            var post = postRepository.GetAll().Include(p => p.Attachments).FirstOrDefault(p => p.Id == postId);
+            user.SavedPosts.Add(post);
+            await userRepository.UpdateAsync(user);
+            await postRepository.UpdateAsync(post);
+
+            var notification = new Notification
             {
-                var post = postRepository.GetAll().Include(p => p.Attachments).FirstOrDefault(p => p.Id == postId);
-                user.SavedPosts.Add(post);
-                await userRepository.UpdateAsync(user);
-                await postRepository.UpdateAsync(post);
+                UserId = post.CreatedById,
+                Message = $"{user.UserName} saved one of your posts",
+                CreatedAt = DateTime.UtcNow
+            };
+            await notificationRepository.AddNotificationAsync(notification);
 
-                var notification = new Notification
-                {
-                    UserId = post.CreatedById,
-                    Message = $"{user.UserName} saved one of your posts",
-                    CreatedAt = DateTime.UtcNow
-                };
-                await notificationRepository.AddNotificationAsync(notification);
+            var hubContext = serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+            await hubContext.Clients.User(post.CreatedById).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
 
-                var hubContext = serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
-                await hubContext.Clients.User(post.CreatedById).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
-
-                return post.ToModel(UserPostMappingsContext.Post);
-            }
+            return post.ToModel(UserPostMappingsContext.Post);
         }
 
         public async Task<PostServiceModel> UnsavePost(string postId, SocialMediaUser user)
@@ -338,6 +338,71 @@ namespace SocialMedia.Service.SocialMediaPost
                 throw new Exception("You did not save the post!");
             }
         }
+        public async Task<PostServiceModel> Like(string postId, SocialMediaUser user)
+        {
+            var post = await postRepository.GetAll()
+                .Include(p => p.Reactions)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null)
+            {
+                throw new Exception("Post not found.");
+            }
+
+            bool userHasAlreadyLikedPost = post.Reactions.Any(r => r.User.Id == user.Id);
+            if (userHasAlreadyLikedPost)
+            {
+                throw new Exception("You have already liked the post!");
+            }
+
+            SocialMediaReaction defaultReaction = await reactionRepository.GetAll().FirstOrDefaultAsync();
+            var reaction = new UserPostReaction
+            {
+                User = user,
+                Post = post,
+                Reaction = defaultReaction,
+            };
+
+            post.Reactions.Add(reaction);
+            await postRepository.UpdateAsync(post);
+
+            var notification = new Notification
+            {
+                UserId = post.CreatedById,
+                Message = $"{user.UserName} liked your post",
+                CreatedAt = DateTime.UtcNow
+            };
+            await notificationRepository.AddNotificationAsync(notification);
+
+            var hubContext = serviceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+            await hubContext.Clients.User(post.CreatedById).SendAsync("ReceiveNotification", notification.Message, notification.CreatedAt);
+
+            return post.ToModel(UserPostMappingsContext.Post);
+        }
+
+        public async Task<PostServiceModel> Unlike(string postId, SocialMediaUser user)
+        {
+            var post = await postRepository.GetAll()
+                .Include(p => p.Reactions)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null)
+            {
+                throw new Exception("Post not found.");
+            }
+
+            UserPostReaction reaction = post.Reactions.Find(r => r.User.Id == user.Id);
+            if (reaction == null)
+            {
+                throw new Exception("You have not liked the post!");
+            }
+
+            post.Reactions.Remove(reaction);
+            await postRepository.UpdateAsync(post);
+
+            return post.ToModel(UserPostMappingsContext.Post);
+        }
+
         public Task<PostServiceModel> InternalCreateAsync(PostServiceModel model)
         {
             throw new NotImplementedException();

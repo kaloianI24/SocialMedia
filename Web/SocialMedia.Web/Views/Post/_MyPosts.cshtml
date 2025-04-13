@@ -1,9 +1,14 @@
 ﻿@using SocialMedia.Areas.Identity.Data
+@using SocialMedia.Data.Models
+@using Microsoft.AspNetCore.Identity
+@using SocialMedia.Service.Models
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
     List<string> savedPostsIds = (List<string>)ViewData["SavedPostsId"];
+    List<UserPostReaction> reactions = (List<UserPostReaction>)ViewData["PostsReactions"];
+    SocialMediaUser currentUser = (SocialMediaUser)ViewData["CurrentUser"];
 }
 
 @model List<SocialMedia.Web.Models.Post.TaggedPostWebModel>
@@ -64,21 +69,38 @@
                         <div class="post-actions">
                             <div class="post-likes">
                                 <div class="likes-count">
-                                    <img src="@Url.Content("~/images/heart.svg")"
-                                    class="reaction-heart"
-                                    data-liked="false"
-                                    data-post-id="@post.Id" />
+                                    @{
+                                        int likes = reactions.Count(reaction => reaction.Post.Id == post.Id);
+										bool isLikedByCurrentUser = reactions.Any(reaction => reaction.Post.Id == post.Id && reaction.User.Id == currentUser.Id);
+                                    }
+									@if (isLikedByCurrentUser)
+									{
+										<img src="@Url.Content("~/images/heart.png")"
+											 class="reaction-heart"
+											 data-liked="true"
+											 data-post-id="@post.Id" />
+									}
+									else
+									{
+                                        <img src="@Url.Content("~/images/heart.svg")"
+                                        class="reaction-heart"
+                                        data-liked="false"
+                                        data-post-id="@post.Id" />
+                                    }
+                                    <div class="count-likes-number">@likes</div>
 
-                                    <div class="count-likes-number">0</div>
                                     <img src="@Url.Content("~/images/comment.svg")" class="comment-image">
-                                    <div class="count-comment-number">0</div>
 
+                                    <div class="count-comment-number" data-post-id="@post.Id">0</div>
+                                    <div class="details-posted-comment" data-post-id="@post.Id"></div>
                                     <div class="comment-input-field">
-                                        <textarea class="form-control" me-1 rows="1" placeholder="Add a comment..."></textarea>
+                                        <textarea class="form-control" rows="1" placeholder="Add a comment..." data-post-id="@post.Id"></textarea>
                                     </div>
                                     <div class="comment-button-holder d-none d-flex justify-content-end">
-                                        <button class="btn btn-primary fw-bold comment-submit-button">Post</button>
+                                        <button class="btn btn-primary fw-bold comment-submit-button" data-post-id="@post.Id">Post</button>
                                     </div>
+
+
                                     @if (savedPostsIds is not null && savedPostsIds.Contains(post.Id))
                                     {
                                         <button type="button" class="btn-unsave-post saved" data-post-id="@post.Id">
@@ -130,24 +152,80 @@
         }
     }
 </div>
+
+@section Scripts {
+    <script src="~/js/imagesFunctions.js"></script>
+
 <script>
+
 		document.addEventListener("click", function (event) {
 		if (event.target.classList.contains("reaction-heart")) {
 			let image = event.target;
 			let liked = image.getAttribute("data-liked") === "true";
 			let counter = image.parentElement.querySelector(".count-likes-number");
+			let postId = image.getAttribute("data-post-id");
 
 			if (liked) {
-				image.src = "/images/heart.svg";
-				counter.textContent = Math.max(0, parseInt(counter.textContent) - 1);
-				image.setAttribute("data-liked", "false");
+                fetch('/Post/Unlike?postId=' + postId, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then((res) => {
+                    if (res.ok) {
+                        image.src = "/images/heart.svg";
+                        counter.textContent = parseInt(counter.textContent) - 1;
+                        image.setAttribute("data-liked", "false");
+                    } else {
+                        alert('Failed to unlike the post.');
+                    }
+                })
+                .catch((error) => console.error(error));
 			} else {
-				image.src = "/images/heart.png";
-				counter.textContent = parseInt(counter.textContent) + 1;
-				image.setAttribute("data-liked", "true");
+                fetch('/Post/Like?postId=' + postId, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then((res) => {
+                    if (res.ok) {
+                        image.src = "/images/heart.png";
+                        counter.textContent = Math.max(0, parseInt(counter.textContent) + 1);
+                        image.setAttribute("data-liked", "true");
+                    } else {
+                        alert('Failed to like the post.');
+                    }
+                })
+                .catch((error) => console.error(error));
 			}
 		}
 	});
+</script>
+
+<script>
+      <script>
+    function postComment() {
+      const input = document.getElementById("comment-input");
+      const text = input.value.trim();
+      if (text === "") return;
+
+      const commentBox = document.createElement("div");
+      commentBox.className = "comment";
+
+      const username = "User";
+      const time = new Date().toLocaleString();
+
+      commentBox.innerHTML = `
+        <div class="username">${username}</div>
+        <div class="timestamp">${time}</div>
+        <div class="text">${text}</div>
+      `;
+
+      document.getElementById("comments-container").prepend(commentBox);
+      input.value = "";
+    }
 </script>
 
 <script>
@@ -174,6 +252,40 @@
 
 </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const posts = document.querySelectorAll('.post');
+
+            posts.forEach(post => {
+                const postId = post.querySelector('.comment-submit-button').getAttribute('data-post-id');
+                const postCommentCount = post.querySelector('.count-comment-number');
+                const commentTextarea = post.querySelector('textarea');
+                const postCommentButton = post.querySelector('.comment-submit-button');
+                const commentSection = post.querySelector('.details-posted-comment');
+
+                postCommentButton.addEventListener('click', function () {
+                    if (commentTextarea.value.trim() !== '') {
+                        // Increment the comment count
+                        let currentCount = parseInt(postCommentCount.innerText);
+                        currentCount++;
+                        postCommentCount.innerText = currentCount;
+
+                        // Create a new comment element and append it to the comment section
+                        const newComment = document.createElement('div');
+                        newComment.classList.add('posted-comment');
+                        newComment.textContent = commentTextarea.value;
+                        commentSection.appendChild(newComment);
+
+                        // Clear the textarea
+                        commentTextarea.value = '';
+                    } else {
+                        alert('Please write a comment before posting.');
+                    }
+                });
+            });
+        });
+    </script>
+
 <script>
     document.querySelectorAll('.btn-delete-post').forEach(b => b.addEventListener('click', (e) => {
         const postId = e.target.closest('.post').dataset.postId;
@@ -195,6 +307,7 @@
         .catch((error) => console.error(error));
     }));
 </script>
+
 <script>
     document.querySelectorAll('.btn-save-post').forEach(b => b.addEventListener('click', (e) => {
         const button = e.target.closest('.btn-save-post');
@@ -247,3 +360,5 @@
         .catch((error) => console.error(error));
     }));
 </script>
+
+}
